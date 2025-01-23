@@ -140,4 +140,7 @@ public class Student {
     @JsonProperty("critical_thinking_id")
     private CriticalThinking criticalThinking;
 
+    @Column(name = "profile_picture_url")
+    @JsonProperty("profile_picture_url")
+    private String profilePictureUrl;
 }

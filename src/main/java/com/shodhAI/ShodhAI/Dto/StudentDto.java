@@ -66,4 +66,6 @@ public class StudentDto {
     @JsonProperty("academic_degree_id")
     private Long academicDegreeId;
 
+    @JsonProperty("profile_picture_url")
+    private String profilePictureUrl;
 }

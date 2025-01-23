@@ -75,6 +75,9 @@ public class StudentWrapper {
     @JsonProperty("critical_thinking")
     private CriticalThinking criticalThinking;
 
+    @JsonProperty("profile_picture_url")
+    private String profilePictureUrl;
+
     public void wrapDetails(Student student) {
 
         this.id = student.getId();
@@ -106,6 +109,7 @@ public class StudentWrapper {
         }
         this.accuracy = student.getAccuracy();
         this.criticalThinking = student.getCriticalThinking();
+        this.profilePictureUrl = student.getProfilePictureUrl();
     }
 
 }

@@ -131,6 +131,7 @@ public class StudentService {
             student.setGender(gender);
             student.setRole(role);
             student.setAcademicDegree(academicDegree);
+            student.setProfilePictureUrl(studentDto.getProfilePictureUrl());
 
             CriticalThinking criticalThinking = criticalThinkingService.saveCriticalThinking(new CriticalThinkingDto());
             Accuracy accuracy = accuracyService.saveAccuracy(new AccuracyDto());
