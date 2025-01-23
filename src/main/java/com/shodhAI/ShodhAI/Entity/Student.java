@@ -128,19 +128,32 @@ public class Student {
     @JsonProperty("total_marks")
     private Double totalMarks = 0.0;
 
+    @Column(name = "marks_improvement")
+    @JsonProperty("marks_improvement")
+    @Min(value = 0, message = "Marks Improvement must be at least 0.0")
+    @Max(value = 100, message = "Marks Improvement must not exceed 100.0")
+    private Double marksImprovement = 0.0;
+
     @OneToOne
     @NotNull
     @JoinColumn(name = "accuracy_id")
-    @JsonProperty("accuracy_id")
+    @JsonProperty("accuracy")
     private Accuracy accuracy;
 
     @OneToOne
     @NotNull
     @JoinColumn(name = "critical_thinking_id")
-    @JsonProperty("critical_thinking_id")
+    @JsonProperty("critical_thinking")
     private CriticalThinking criticalThinking;
 
     @Column(name = "profile_picture_url")
     @JsonProperty("profile_picture_url")
     private String profilePictureUrl;
+
+    @OneToOne
+    @NotNull
+    @JoinColumn(name="time_spent_id")
+    @JsonProperty("time_spent")
+    private TimeSpent timeSpent;
+
 }

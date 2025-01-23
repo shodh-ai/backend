@@ -7,6 +7,7 @@ import com.shodhAI.ShodhAI.Entity.CriticalThinking;
 import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.Student;
+import com.shodhAI.ShodhAI.Entity.TimeSpent;
 
 import java.util.Date;
 
@@ -78,6 +79,9 @@ public class StudentWrapper {
     @JsonProperty("profile_picture_url")
     private String profilePictureUrl;
 
+    @JsonProperty("time_spent")
+    private TimeSpent timeSpent;
+
     public void wrapDetails(Student student) {
 
         this.id = student.getId();
@@ -109,6 +113,7 @@ public class StudentWrapper {
         }
         this.accuracy = student.getAccuracy();
         this.criticalThinking = student.getCriticalThinking();
+        this.timeSpent = student.getTimeSpent();
         this.profilePictureUrl = student.getProfilePictureUrl();
     }
 

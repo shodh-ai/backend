@@ -4,12 +4,14 @@ import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.AccuracyDto;
 import com.shodhAI.ShodhAI.Dto.CriticalThinkingDto;
 import com.shodhAI.ShodhAI.Dto.StudentDto;
+import com.shodhAI.ShodhAI.Dto.TimeSpentDto;
 import com.shodhAI.ShodhAI.Entity.AcademicDegree;
 import com.shodhAI.ShodhAI.Entity.Accuracy;
 import com.shodhAI.ShodhAI.Entity.CriticalThinking;
 import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.Student;
+import com.shodhAI.ShodhAI.Entity.TimeSpent;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
@@ -20,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Time;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -47,6 +50,9 @@ public class StudentService {
 
     @Autowired
     CriticalThinkingService criticalThinkingService;
+
+    @Autowired
+    TimeSpentService timeSpentService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -135,9 +141,11 @@ public class StudentService {
 
             CriticalThinking criticalThinking = criticalThinkingService.saveCriticalThinking(new CriticalThinkingDto());
             Accuracy accuracy = accuracyService.saveAccuracy(new AccuracyDto());
+            TimeSpent timeSpent = timeSpentService.saveTimeSpent(new TimeSpentDto());
 
             student.setCriticalThinking(criticalThinking);
             student.setAccuracy(accuracy);
+            student.setTimeSpent(timeSpent);
 
             return entityManager.merge(student);
 
