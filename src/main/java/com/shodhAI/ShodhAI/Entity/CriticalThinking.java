@@ -26,7 +26,7 @@ public class CriticalThinking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "critical_thinking_id")
-    @JsonProperty("accuracy_thinking_id")
+    @JsonProperty("critical_thinking_id")
     private Long id;
 
     @Column(name = "critical_thinking")

@@ -27,7 +27,7 @@ public class TimeSpent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "time_spent_id")
     @JsonProperty("time_spent_id")
-    private int id;
+    private Long id;
 
     @Column(name = "time_spent")
     @JsonProperty("time_spent")
