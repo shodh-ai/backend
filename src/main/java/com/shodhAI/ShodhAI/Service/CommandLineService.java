@@ -1,5 +1,6 @@
 package com.shodhAI.ShodhAI.Service;
 
+import com.shodhAI.ShodhAI.Entity.FileType;
 import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.Role;
 import jakarta.persistence.EntityManager;
@@ -34,6 +35,17 @@ public class CommandLineService implements CommandLineRunner {
             entityManager.merge(new Role(2L, currentDate, "ADMIN", currentDate));
             entityManager.merge(new Role(3L, currentDate, "FACULTY", currentDate));
             entityManager.merge(new Role(4L, currentDate, "STUDENT", currentDate));
+        }
+
+        if(entityManager.createQuery("SELECT COUNT(o) FROM FileType o",Long.class).getSingleResult()==0)
+        {
+            entityManager.merge(new FileType(1L,"PNG"));
+            entityManager.merge(new FileType(2L, "JPG"));
+            entityManager.merge(new FileType(3L, "PDF"));
+            entityManager.merge(new FileType(4L,"JPEG"));
+            entityManager.merge(new FileType(5L,"VIDEO"));
+            entityManager.merge(new FileType(6L,"ARTICLE"));
+            entityManager.merge(new FileType(7L, "PDF"));
         }
 
     }

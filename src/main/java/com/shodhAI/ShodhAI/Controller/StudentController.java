@@ -66,7 +66,6 @@ public class StudentController {
             studentService.validateStudent(studentDto);
             Student student = studentService.saveStudent(studentDto);
 
-
             return ResponseService.generateSuccessResponse("Student Created Successfully", student, HttpStatus.OK);
 
         } catch (DataIntegrityViolationException dataIntegrityViolationException) {

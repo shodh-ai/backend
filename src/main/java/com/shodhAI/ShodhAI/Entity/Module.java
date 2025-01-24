@@ -16,13 +16,11 @@ import lombok.Setter;
 
 import java.util.Date;
 
-//@Entity
-//@Table(name="module")
+@Entity
+@Table(name="module")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 public class Module {
 
     @Id
