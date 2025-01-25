@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Entity
-@Table(name = "document")
+@Table(name = "document_type")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -30,7 +30,7 @@ public class DocumentType {
 
     @Column(name = "document_type_name")
     @JsonProperty("document_type_name")
-    private String documentTypeName;
+    private String documentName;
 
     @Column(name = "description")
     @JsonProperty("description")
@@ -51,7 +51,7 @@ public class DocumentType {
             inverseJoinColumns = @JoinColumn(name = "file_type_id")
     )
     @JsonProperty("document_file_types")
-    private List<FileType> required_document_types;
+    private List<FileType> requiredDocumentTypes;
 
     @Column(name = "max_document_size")
     @JsonProperty("max_document_size")

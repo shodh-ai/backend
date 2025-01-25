@@ -7,7 +7,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -17,19 +20,23 @@ import lombok.Setter;
 
 import java.util.Date;
 
-//@Entity
-//@Table(name="topic")
+@Entity
+@Table(name="topic")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 public class Topic {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="topic_id")
     private int topicId;
+
+    @ManyToOne
+    @NotNull
+    @JoinColumn(name = "module_id")
+    @JsonProperty("module_id")
+    private Module module;
 
     @Column(name = "title")
     @JsonProperty("title")
@@ -56,7 +63,9 @@ public class Topic {
     @JsonProperty("creator_user_id")
     private Long creatorUserId;
 
-    @Column(name = "creator_role_id")
+    @ManyToOne
+    @NotNull
+    @JoinColumn(name = "creator_role_id")
     @JsonProperty("creator_role_id")
     private Role creatorRole;
 
@@ -64,7 +73,9 @@ public class Topic {
     @JsonProperty("modifier_user_id")
     private Long modifierUserId;
 
-    @Column(name = "modifier_role_id")
+    @ManyToOne
+    @NotNull
+    @JoinColumn(name = "modifier_role_id")
     @JsonProperty("modifier_role_id")
     private Role modifierRole;
 
