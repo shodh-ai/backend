@@ -33,12 +33,15 @@ public class Question {
     @JsonProperty("question_id")
     private Long id;
 
+    @Column(name = "question")
     @JsonProperty("question")
     private String question;
 
+    @Column(name = "answer")
     @JsonProperty("answer")
     private String answer;
 
+    @Column(name = "cognitive_domain")
     @JsonProperty("cognitive_domain")
     private String cognitiveDomain;
 

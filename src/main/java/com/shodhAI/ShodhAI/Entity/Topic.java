@@ -63,7 +63,9 @@ public class Topic {
     @JsonProperty("creator_user_id")
     private Long creatorUserId;
 
-    @Column(name = "creator_role_id")
+    @ManyToOne
+    @NotNull
+    @JoinColumn(name = "creator_role_id")
     @JsonProperty("creator_role_id")
     private Role creatorRole;
 
@@ -71,7 +73,9 @@ public class Topic {
     @JsonProperty("modifier_user_id")
     private Long modifierUserId;
 
-    @Column(name = "modifier_role_id")
+    @ManyToOne
+    @NotNull
+    @JoinColumn(name = "modifier_role_id")
     @JsonProperty("modifier_role_id")
     private Role modifierRole;
 

@@ -1,7 +1,6 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
-import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.Topic;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;

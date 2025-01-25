@@ -6,13 +6,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.Setter;
 
 import java.util.Date;
 
@@ -41,10 +42,6 @@ public class Module {
     @JsonProperty("archived")
     private Character archived = 'N';
 
-    @Column(name = "description")
-    @JsonProperty("description")
-    private String description;
-
     @Column(name = "created_date")
     @JsonProperty("created_date")
     private Date createdDate;
@@ -57,7 +54,9 @@ public class Module {
     @JsonProperty("creator_user_id")
     private Long creatorUserId;
 
-    @Column(name = "creator_role_id")
+    @ManyToOne
+    @NotNull
+    @JoinColumn(name = "creator_role_id")
     @JsonProperty("creator_role_id")
     private Role creatorRole;
 
@@ -65,7 +64,9 @@ public class Module {
     @JsonProperty("modifier_user_id")
     private Long modifierUserId;
 
-    @Column(name = "modifier_role_id")
+    @ManyToOne
+    @NotNull
+    @JoinColumn(name = "modifier_role_id")
     @JsonProperty("modifier_role_id")
     private Role modifierRole;
 
