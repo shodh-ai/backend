@@ -31,7 +31,7 @@ public class FileType
     @JsonProperty("role_type_id")
     private Long fileTypeId;
 
-    @Column(name = "file_type_name")
+    @Column(name = "file_type_name", unique = true)
     @JsonProperty("role_type_name")
     private String fileTypeName;
 

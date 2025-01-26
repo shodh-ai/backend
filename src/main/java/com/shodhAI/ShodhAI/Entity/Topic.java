@@ -1,6 +1,7 @@
 package com.shodhAI.ShodhAI.Entity;
 
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,10 +14,8 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.Setter;
 
 import java.util.Date;
 
@@ -30,13 +29,20 @@ public class Topic {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="topic_id")
-    private int topicId;
+    private Long topicId;
 
     @ManyToOne
     @NotNull
     @JoinColumn(name = "module_id")
     @JsonProperty("module_id")
     private Module module;
+
+    @ManyToOne
+    @NotNull
+    @JoinColumn(name = "course_id")
+    @JsonProperty("course_id")
+    @JsonBackReference
+    private Course course;
 
     @Column(name = "title")
     @JsonProperty("title")
@@ -52,21 +58,22 @@ public class Topic {
     private Character archived = 'N';
 
     @Column(name = "created_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     @JsonProperty("created_date")
     private Date createdDate;
 
     @Column(name = "modified_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     @JsonProperty("modified_date")
-    private Date modifiedDate;
+    private Date updatedDate;
 
     @Column(name = "creator_user_id")
     @JsonProperty("creator_user_id")
     private Long creatorUserId;
 
     @ManyToOne
-    @NotNull
     @JoinColumn(name = "creator_role_id")
-    @JsonProperty("creator_role_id")
+    @JsonProperty("creator_role")
     private Role creatorRole;
 
     @Column(name = "modifier_user_id")
@@ -74,21 +81,12 @@ public class Topic {
     private Long modifierUserId;
 
     @ManyToOne
-    @NotNull
     @JoinColumn(name = "modifier_role_id")
-    @JsonProperty("modifier_role_id")
+    @JsonProperty("modifier_role")
     private Role modifierRole;
 
-    @Column(name = "course_duration")
-    @JsonProperty("course_duration")
-    private String courseDuration;
-
-    @Column(name = "start_date")
-    @JsonProperty("start_date")
-    private Date startDate;
-
-    @Column(name = "end_date")
-    @JsonProperty("end_date")
-    private Date endDate;
+    @Column(name = "topic_duration")
+    @JsonProperty("topic_duration")
+    private String topicDuration;
 
 }

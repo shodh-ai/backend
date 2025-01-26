@@ -2,11 +2,7 @@ package com.shodhAI.ShodhAI.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,49 +10,34 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
-import java.util.List;
 
 @Entity
-@Table(name = "question")
+@Table(name = "content")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Question {
+public class Content {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "question_id")
-    @JsonProperty("question_id")
-    private Long id;
+    @Column(name="content_id")
+    private Long contentId;
 
-    @Column(name = "question")
-    @JsonProperty("question")
-    private String question;
+    @ManyToOne
+    @NotNull
+    @JoinColumn(name = "file_type_id")
+    @JsonProperty("file_type")
+    private FileType fileType;
 
-    @Column(name = "answer")
-    @JsonProperty("answer")
-    private String answer;
-
-    @Column(name = "cognitive_domain")
-    @JsonProperty("cognitive_domain")
-    private String cognitiveDomain;
-
-    @ElementCollection
-    @CollectionTable(
-            name = "question_hints",
-            joinColumns = @JoinColumn(name = "question_id") // Foreign key to `question` table
-    )
-    @AttributeOverrides({
-            @AttributeOverride(name = "level", column = @Column(name = "hint_level")),
-            @AttributeOverride(name = "text", column = @Column(name = "hint_text"))
-    })
-    @JsonProperty("hints")
-    private List<Hint> hints;
+    @Column(name = "url")
+    @JsonProperty("url")
+    private String url;
 
     @ManyToOne
     @JoinColumn(name = "topic_id")

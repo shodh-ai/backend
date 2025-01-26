@@ -1,18 +1,22 @@
 package com.shodhAI.ShodhAI.Service;
 
+import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.QuestionMaterialDto;
 import com.shodhAI.ShodhAI.Dto.QuestionRequestDto;
 import com.shodhAI.ShodhAI.Dto.QuestionResponseDto;
+import com.shodhAI.ShodhAI.Entity.Content;
 import com.shodhAI.ShodhAI.Entity.Module;
 import com.shodhAI.ShodhAI.Entity.Question;
 import com.shodhAI.ShodhAI.Entity.Topic;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
+import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class QuestionService {
@@ -113,4 +117,22 @@ public class QuestionService {
             throw new Exception(exception.getMessage());
         }
     }
+
+    @Transactional
+    public List<Question> getQuestionByTopic(Topic topic) throws Exception {
+        try {
+
+            TypedQuery<Question> query = entityManager.createQuery(Constant.GET_QUESTION_BY_TOPIC, Question.class);
+            query.setParameter("topic", topic);
+            return query.getResultList();
+
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            throw new IndexOutOfBoundsException("Question not found with given Id");
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception);
+        }
+    }
+
 }

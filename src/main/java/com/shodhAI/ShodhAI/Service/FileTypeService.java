@@ -45,4 +45,20 @@ public class FileTypeService {
             throw new Exception(exception);
         }
     }
+
+    public FileType getFileTypeByType(String fileType) throws Exception {
+        try {
+
+            TypedQuery<FileType> query = entityManager.createQuery(Constant.GET_FILE_TYPE_BY_TYPE, FileType.class);
+            query.setParameter("fileType", fileType);
+            return query.getResultList().get(0);
+
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            throw new IndexOutOfBoundsException(indexOutOfBoundsException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception);
+        }
+    }
 }

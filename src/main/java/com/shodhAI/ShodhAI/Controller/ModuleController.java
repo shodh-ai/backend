@@ -1,14 +1,15 @@
 package com.shodhAI.ShodhAI.Controller;
 
-import com.shodhAI.ShodhAI.Dto.AcademicDegreeDto;
-import com.shodhAI.ShodhAI.Entity.AcademicDegree;
-import com.shodhAI.ShodhAI.Service.AcademicDegreeService;
+import com.shodhAI.ShodhAI.Dto.ModuleDto;
+import com.shodhAI.ShodhAI.Entity.Module;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
+import com.shodhAI.ShodhAI.Service.ModuleService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,27 +23,30 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/academic-degree", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-public class AcademicDegreeController {
+@RequestMapping(value = "/module", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+public class ModuleController {
 
     @Autowired
     EntityManager entityManager;
 
     @Autowired
-    AcademicDegreeService academicDegreeService;
-
-    @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
-    @PostMapping("/add")
-    public ResponseEntity<?> addAcademicDegree(@RequestBody AcademicDegreeDto academicDegreeDto) {
+    @Autowired
+    ModuleService moduleService;
+
+    @PostMapping(value = "/add")
+    public ResponseEntity<?> addModule(@RequestBody ModuleDto moduleDto) {
         try {
 
-            academicDegreeService.validateAcademicDegree(academicDegreeDto);
-            AcademicDegree academicDegree = academicDegreeService.saveAcademicDegree(academicDegreeDto);
+            moduleService.validateModule(moduleDto);
+            Module module = moduleService.saveModule(moduleDto);
 
-            return ResponseService.generateSuccessResponse("Academic Degree Created Successfully", academicDegree, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Module Created Successfully", module, HttpStatus.OK);
 
+        } catch (DataIntegrityViolationException dataIntegrityViolationException) {
+            exceptionHandlingService.handleException(dataIntegrityViolationException);
+            throw new IndexOutOfBoundsException("Data Integrity Exception caught: " + dataIntegrityViolationException.getMessage());
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
             return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
@@ -58,38 +62,18 @@ public class AcademicDegreeController {
         }
     }
 
-    @GetMapping("/get-all")
-    public ResponseEntity<?> retrieveAllAcademicDegree(HttpServletRequest request) {
+    // TODO We have to make this filter api for module in future. (based on title, course etc).
+
+    @GetMapping("/get-module-by-id/{moduleIdString}")
+    public ResponseEntity<?> retrieveModuleById(HttpServletRequest request, @PathVariable String moduleIdString) {
         try {
 
-            List<AcademicDegree> academicDegreeList = academicDegreeService.getAllAcademicDegree();
-            if (academicDegreeList.isEmpty()) {
+            Long moduleId = Long.parseLong(moduleIdString);
+            Module module = moduleService.getModuleById(moduleId);
+            if (module == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            return ResponseService.generateSuccessResponse("Academic Degree Retrieved Successfully", academicDegreeList, HttpStatus.OK);
-
-        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
-            exceptionHandlingService.handleException(indexOutOfBoundsException);
-            return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (IllegalArgumentException illegalArgumentException) {
-            exceptionHandlingService.handleException(illegalArgumentException);
-            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (Exception exception) {
-            exceptionHandlingService.handleException(exception);
-            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @GetMapping("/get-academic-degree-by-id/{academicDegreeIdString}")
-    public ResponseEntity<?> retrieveAcademicDegreeById(HttpServletRequest request, @PathVariable String academicDegreeIdString) {
-        try {
-
-            Long academicDegreeId = Long.parseLong(academicDegreeIdString);
-            AcademicDegree academicDegree = academicDegreeService.getAcademicDegreeById(academicDegreeId);
-            if (academicDegree == null) {
-                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
-            }
-            return ResponseService.generateSuccessResponse("Academic Degree Retrieved Successfully", academicDegree, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Module Retrieved Successfully", module, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);

@@ -68,4 +68,5 @@ public class StudentDto {
 
     @JsonProperty("profile_picture_url")
     private String profilePictureUrl;
+
 }

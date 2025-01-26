@@ -36,9 +36,6 @@ import java.util.Map;
 public class StudentController {
 
     @Autowired
-    EntityManager entityManager;
-
-    @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
     @Autowired
