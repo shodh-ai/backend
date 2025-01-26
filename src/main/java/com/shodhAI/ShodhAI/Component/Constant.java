@@ -25,4 +25,8 @@ public class Constant {
 
     public static String GET_ALL_COURSES = "SELECT c FROM Course c WHERE c.archived = 'N'";
     public static String GET_COURSE_BY_ID = "SELECT c FROM Course c WHERE c.courseId = :courseId";
+
+    public static String GET_CONTENT_BY_TOPIC = "SELECT c FROM Content c WHERE c.topic = :topic";
+
+    public static String GET_QUESTION_BY_TOPIC = "SELECT q FROM Question q WHERE q.topic = :topic";
 }
