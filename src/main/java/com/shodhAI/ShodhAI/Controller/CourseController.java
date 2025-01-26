@@ -1,50 +1,61 @@
 package com.shodhAI.ShodhAI.Controller;
 
-import com.shodhAI.ShodhAI.Dto.AcademicDegreeDto;
+import com.cloudinary.utils.ObjectUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shodhAI.ShodhAI.Dto.CourseDto;
+import com.shodhAI.ShodhAI.Dto.StudentDto;
 import com.shodhAI.ShodhAI.Entity.AcademicDegree;
-import com.shodhAI.ShodhAI.Entity.Role;
-import com.shodhAI.ShodhAI.Service.AcademicDegreeService;
+import com.shodhAI.ShodhAI.Entity.Course;
+import com.shodhAI.ShodhAI.Entity.Student;
+import com.shodhAI.ShodhAI.Service.CourseService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/academic-degree", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-public class AcademicDegreeController {
+@RequestMapping(value = "/course", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+public class CourseController {
 
     @Autowired
     EntityManager entityManager;
 
     @Autowired
-    AcademicDegreeService academicDegreeService;
-
-    @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
-    @PostMapping("/add")
-    public ResponseEntity<?> addAcademicDegree(@RequestBody AcademicDegreeDto academicDegreeDto) {
+    @Autowired
+    CourseService courseService;
+
+    @PostMapping(value = "/add")
+    public ResponseEntity<?> addStudent(@RequestBody CourseDto courseDto) {
         try {
 
-            academicDegreeService.validateAcademicDegree(academicDegreeDto);
-            AcademicDegree academicDegree = academicDegreeService.saveAcademicDegree(academicDegreeDto);
+            courseService.validateCourse(courseDto);
+            Course course = courseService.saveCourse(courseDto);
 
-            return ResponseService.generateSuccessResponse("Academic Degree Created Successfully", academicDegree, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Course Created Successfully", course, HttpStatus.OK);
 
+        } catch (DataIntegrityViolationException dataIntegrityViolationException) {
+            exceptionHandlingService.handleException(dataIntegrityViolationException);
+            throw new IndexOutOfBoundsException("Data Integrity Exception caught: " + dataIntegrityViolationException.getMessage());
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
             return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
@@ -61,14 +72,14 @@ public class AcademicDegreeController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<?> retrieveAllAcademicDegree(HttpServletRequest request) {
+    public ResponseEntity<?> retrieveAllCourse(HttpServletRequest request) {
         try {
 
-            List<AcademicDegree> academicDegreeList = academicDegreeService.getAllAcademicDegree();
-            if (academicDegreeList.isEmpty()) {
+            List<Course> courseList = courseService.getAllCourse();
+            if (courseList.isEmpty()) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            return ResponseService.generateSuccessResponse("Academic Degree Retrieved Successfully", academicDegreeList, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Course Retrieved Successfully", courseList, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
@@ -82,16 +93,16 @@ public class AcademicDegreeController {
         }
     }
 
-    @GetMapping("/get-academic-degree-by-id/{academicDegreeIdString}")
-    public ResponseEntity<?> retrieveAcademicDegreeById(HttpServletRequest request, @PathVariable String academicDegreeIdString) {
+    @GetMapping("/get-course-by-id/{courseIdString}")
+    public ResponseEntity<?> retrieveCourseById(HttpServletRequest request, @PathVariable String courseIdString) {
         try {
 
-            Long academicDegreeId = Long.parseLong(academicDegreeIdString);
-            AcademicDegree academicDegree = academicDegreeService.getAcademicDegreeById(academicDegreeId);
-            if (academicDegree == null) {
+            Long courseId = Long.parseLong(courseIdString);
+            Course course = courseService.getCourseById(courseId);
+            if (course == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            return ResponseService.generateSuccessResponse("Academic Degree Retrieved Successfully", academicDegree, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Course Retrieved Successfully", course, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
@@ -104,5 +115,5 @@ public class AcademicDegreeController {
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+    
 }

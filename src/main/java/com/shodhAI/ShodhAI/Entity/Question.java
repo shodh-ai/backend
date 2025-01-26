@@ -12,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -56,6 +57,11 @@ public class Question {
     })
     @JsonProperty("hints")
     private List<Hint> hints;
+
+    @ManyToOne
+    @JoinColumn(name = "topic_id")
+    @JsonProperty("topic")
+    private Topic topic;
 
     @Column(name = "created_date")
     @JsonProperty("created_date")

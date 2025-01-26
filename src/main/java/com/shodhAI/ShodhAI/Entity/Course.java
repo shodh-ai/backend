@@ -1,12 +1,16 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -16,8 +20,8 @@ import lombok.Setter;
 
 import java.util.Date;
 
-//@Entity
-//@Table(name="course")
+@Entity
+@Table(name="course")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,7 +33,7 @@ public class Course {
     @Column(name="course_id")
     private int courseId;
 
-    @Column(name = "title")
+    @Column(name = "title", unique = true)
     @JsonProperty("title")
     private String courseTitle;
 
@@ -44,26 +48,30 @@ public class Course {
 
     @Column(name = "created_date")
     @JsonProperty("created_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     private Date createdDate;
 
     @Column(name = "modified_date")
     @JsonProperty("modified_date")
-    private Date modifiedDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
+    private Date updatedDate;
 
     @Column(name = "creator_user_id")
     @JsonProperty("creator_user_id")
     private Long creatorUserId;
 
-    @Column(name = "creator_role_id")
-    @JsonProperty("creator_role_id")
+    @ManyToOne
+    @JoinColumn(name = "creator_role_id")
+    @JsonProperty("creator_role")
     private Role creatorRole;
 
     @Column(name = "modifier_user_id")
     @JsonProperty("modifier_user_id")
     private Long modifierUserId;
 
-    @Column(name = "modifier_role_id")
-    @JsonProperty("modifier_role_id")
+    @ManyToOne
+    @JoinColumn(name = "modifier_role_id")
+    @JsonProperty("modifier_role")
     private Role modifierRole;
 
     @Column(name = "course_duration")
@@ -72,10 +80,12 @@ public class Course {
 
     @Column(name = "start_date")
     @JsonProperty("start_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     private Date startDate;
 
     @Column(name = "end_date")
     @JsonProperty("end_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     private Date endDate;
 
 }

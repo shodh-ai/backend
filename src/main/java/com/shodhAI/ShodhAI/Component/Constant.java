@@ -21,4 +21,7 @@ public class Constant {
     public static String GET_MODULE_BY_ID = "SELECT m FROM Module m WHERE m.archived = 'N' AND m.moduleId = :moduleId";
 
     public static String GET_TOPIC_BY_ID = "SELECT t FROM Topic t WHERE t.archived = 'N' AND t.topicId = :topicId";
+
+    public static String GET_ALL_COURSES = "SELECT c FROM Course c WHERE c.archived = 'N'";
+    public static String GET_COURSE_BY_ID = "SELECT c FROM Course c WHERE c.courseId = :courseId";
 }
