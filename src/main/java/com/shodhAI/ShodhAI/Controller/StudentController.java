@@ -83,6 +83,46 @@ public class StudentController {
         }
     }
 
+    @PostMapping(value = "/upload-profile-picture/{studentIdString}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadProfilePicture(HttpServletRequest request, @PathVariable String studentIdString,
+                                        @RequestParam("profilePicture") MultipartFile profilePicture) {
+        try {
+
+            Long studentId = Long.parseLong(studentIdString);
+            Student student = studentService.getStudentById(studentId);
+            if (student == null) {
+                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
+            }
+
+            // Upload profile picture to Cloudinary
+            Map<String, Object> uploadResult = cloudinary.uploader().upload(profilePicture.getBytes(), ObjectUtils.emptyMap());
+
+            // Set the profile picture URL in the student DTO
+            String profilePictureUrl = uploadResult.get("url").toString();
+            student.setProfilePictureUrl(profilePictureUrl);
+
+            student = studentService.uploadProfilePicture(student);
+
+            return ResponseService.generateSuccessResponse("Student Created Successfully", student, HttpStatus.OK);
+
+        } catch (DataIntegrityViolationException dataIntegrityViolationException) {
+            exceptionHandlingService.handleException(dataIntegrityViolationException);
+            throw new IndexOutOfBoundsException("Data Integrity Exception caught [college_email, username, mobileNumber must be unique]: " + dataIntegrityViolationException.getMessage());
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (PersistenceException persistenceException) {
+            exceptionHandlingService.handleException(persistenceException);
+            return ResponseService.generateErrorResponse("Persistence Exception Caught: " + persistenceException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping("/get-all")
     public ResponseEntity<?> retrieveAllStudent(HttpServletRequest request) {
         try {
