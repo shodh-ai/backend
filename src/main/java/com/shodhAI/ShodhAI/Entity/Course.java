@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -28,6 +27,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class Course {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="course_id")

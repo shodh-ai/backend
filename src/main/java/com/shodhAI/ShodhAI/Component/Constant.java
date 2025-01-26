@@ -10,6 +10,7 @@ public class Constant {
 
     public static String GET_ALL_FILE_TYPES = "SELECT f FROM FileType f";
     public static String GET_FILE_TYPE_BY_ID = "SELECT f FROM FileType f WHERE f.fileTypeId = :fileTypeId";
+    public static String GET_FILE_TYPE_BY_TYPE = "SELECT f FROM FileType f WHERE LOWER(f.fileTypeName) = LOWER(:fileType)";
 
     public static String GET_ALL_ACADEMIC_DEGREES = "SELECT a FROM AcademicDegree a WHERE a.archived = 'N'";
     public static String GET_ACADEMIC_DEGREE_BY_ID = "SELECT a FROM AcademicDegree a WHERE a.degreeId = :degreeId";
