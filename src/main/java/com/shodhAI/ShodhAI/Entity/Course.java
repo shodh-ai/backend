@@ -31,7 +31,7 @@ public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="course_id")
-    private int courseId;
+    private Long courseId;
 
     @Column(name = "title", unique = true)
     @JsonProperty("title")
