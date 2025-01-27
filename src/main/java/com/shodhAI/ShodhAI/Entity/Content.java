@@ -7,9 +7,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,31 +18,31 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name="criticalThinking")
+@Table(name = "content")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CriticalThinking {
+public class Content {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "critical_thinking_id")
-    @JsonProperty("critical_thinking_id")
-    private Long id;
+    @Column(name="content_id")
+    private Long contentId;
 
-    @Column(name = "critical_thinking")
-    @JsonProperty("critical_thinking")
-    @Min(value = 0, message = "Critical Thinking must be at least 0.0")
-    @Max(value = 100, message = "Critical Thinking must not exceed 100.0")
-    private Double criticalThinking = 100.0;
+    @ManyToOne
+    @NotNull
+    @JoinColumn(name = "file_type_id")
+    @JsonProperty("file_type")
+    private FileType fileType;
 
-    @Column(name = "critical_thinking_improvement_flag")
-    @JsonProperty("critical_thinking_improvement_flag")
-    private Boolean criticalThinkingImprovementFlag;
+    @Column(name = "url")
+    @JsonProperty("url")
+    private String url;
 
-    @Column(name = "critical_thinking_improvement")
-    @JsonProperty("critical_thinking_improvement")
-    private Double criticalThinkingImprovement = 0.0;
+    @ManyToOne
+    @JoinColumn(name = "topic_id")
+    @JsonProperty("topic")
+    private Topic topic;
 
     @Column(name = "created_date")
     @JsonProperty("created_date")

@@ -27,7 +27,7 @@ public class Accuracy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "accuracy_id")
     @JsonProperty("accuracy_id")
-    private int id;
+    private Long id;
 
     @Column(name = "accuracy")
     @JsonProperty("accuracy")

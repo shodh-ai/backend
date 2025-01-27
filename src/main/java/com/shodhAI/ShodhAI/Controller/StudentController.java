@@ -1,5 +1,8 @@
 package com.shodhAI.ShodhAI.Controller;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shodhAI.ShodhAI.Dto.StudentDto;
 import com.shodhAI.ShodhAI.Dto.StudentWrapper;
 import com.shodhAI.ShodhAI.Entity.Student;
@@ -19,17 +22,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/student", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 public class StudentController {
-
-    @Autowired
-    EntityManager entityManager;
 
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
@@ -37,9 +41,24 @@ public class StudentController {
     @Autowired
     StudentService studentService;
 
-    @PostMapping("/add")
-    public ResponseEntity<?> addStudent(HttpServletRequest request, @RequestBody StudentDto studentDto) {
+    @Autowired
+    private Cloudinary cloudinary;
+
+    @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> addStudent(HttpServletRequest request, @RequestParam("student") String studentData,
+                                        @RequestParam("profilePicture") MultipartFile profilePicture) {
         try {
+
+            // Parse the JSON data into a DTO (or the relevant object)
+            ObjectMapper objectMapper = new ObjectMapper();
+            StudentDto studentDto = objectMapper.readValue(studentData, StudentDto.class);
+
+            // Upload profile picture to Cloudinary
+            Map<String, Object> uploadResult = cloudinary.uploader().upload(profilePicture.getBytes(), ObjectUtils.emptyMap());
+
+            // Set the profile picture URL in the student DTO
+            String profilePictureUrl = uploadResult.get("url").toString();
+            studentDto.setProfilePictureUrl(profilePictureUrl);
 
             studentService.validateStudent(studentDto);
             Student student = studentService.saveStudent(studentDto);

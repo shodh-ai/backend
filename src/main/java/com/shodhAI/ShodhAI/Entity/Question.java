@@ -2,46 +2,66 @@ package com.shodhAI.ShodhAI.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
-@Table(name="criticalThinking")
+@Table(name = "question")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CriticalThinking {
+public class Question {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "critical_thinking_id")
-    @JsonProperty("critical_thinking_id")
+    @Column(name = "question_id")
+    @JsonProperty("question_id")
     private Long id;
 
-    @Column(name = "critical_thinking")
-    @JsonProperty("critical_thinking")
-    @Min(value = 0, message = "Critical Thinking must be at least 0.0")
-    @Max(value = 100, message = "Critical Thinking must not exceed 100.0")
-    private Double criticalThinking = 100.0;
+    @Column(name = "question")
+    @JsonProperty("question")
+    private String question;
 
-    @Column(name = "critical_thinking_improvement_flag")
-    @JsonProperty("critical_thinking_improvement_flag")
-    private Boolean criticalThinkingImprovementFlag;
+    @Column(name = "answer")
+    @JsonProperty("answer")
+    private String answer;
 
-    @Column(name = "critical_thinking_improvement")
-    @JsonProperty("critical_thinking_improvement")
-    private Double criticalThinkingImprovement = 0.0;
+    @Column(name = "cognitive_domain")
+    @JsonProperty("cognitive_domain")
+    private String cognitiveDomain;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "question_hints",
+            joinColumns = @JoinColumn(name = "question_id") // Foreign key to `question` table
+    )
+    @AttributeOverrides({
+            @AttributeOverride(name = "level", column = @Column(name = "hint_level")),
+            @AttributeOverride(name = "text", column = @Column(name = "hint_text"))
+    })
+    @JsonProperty("hints")
+    private List<Hint> hints;
+
+    @ManyToOne
+    @JoinColumn(name = "topic_id")
+    @JsonProperty("topic")
+    private Topic topic;
 
     @Column(name = "created_date")
     @JsonProperty("created_date")

@@ -17,31 +17,27 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name="criticalThinking")
+@Table(name="time_spent")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CriticalThinking {
+public class TimeSpent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "critical_thinking_id")
-    @JsonProperty("critical_thinking_id")
+    @Column(name = "time_spent_id")
+    @JsonProperty("time_spent_id")
     private Long id;
 
-    @Column(name = "critical_thinking")
-    @JsonProperty("critical_thinking")
-    @Min(value = 0, message = "Critical Thinking must be at least 0.0")
-    @Max(value = 100, message = "Critical Thinking must not exceed 100.0")
-    private Double criticalThinking = 100.0;
+    @Column(name = "time_spent")
+    @JsonProperty("time_spent")
+    @Min(value = 0, message = "Accuracy must be at least 0.0")
+    @Max(value = 100, message = "Accuracy must not exceed 100.0")
+    private Double accuracy = 0.0;
 
-    @Column(name = "critical_thinking_improvement_flag")
-    @JsonProperty("critical_thinking_improvement_flag")
-    private Boolean criticalThinkingImprovementFlag;
-
-    @Column(name = "critical_thinking_improvement")
-    @JsonProperty("critical_thinking_improvement")
-    private Double criticalThinkingImprovement = 0.0;
+    @Column(name = "time_spent_increased")
+    @JsonProperty("time_spent_increased")
+    private Double accuracyImprovement = 0.0;
 
     @Column(name = "created_date")
     @JsonProperty("created_date")

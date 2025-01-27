@@ -13,7 +13,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import java.time.Instant;
 import java.util.Date;
 
 @Entity
@@ -26,6 +25,7 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "role_id")
+    @JsonProperty("role_id")
     private Long roleId;
 
     @NonNull
