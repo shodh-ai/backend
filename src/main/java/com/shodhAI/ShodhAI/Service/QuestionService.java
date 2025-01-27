@@ -41,7 +41,9 @@ public class QuestionService {
             /*if(questionRequestDto.getQuestionMaterial().isEmpty() || questionRequestDto.getQuestionMaterial() == null) {
                 throw new IllegalArgumentException("Question Material Dto cannot be null or empty");
             }*/
-
+            if(questionRequestDto.getQuestionMaterial() == null) {
+                return;
+            }
             for (QuestionMaterialDto questionMaterialDto: questionRequestDto.getQuestionMaterial()) {
                 fileTypeService.getFileTypeById(questionMaterialDto.getFileTypeId());
 

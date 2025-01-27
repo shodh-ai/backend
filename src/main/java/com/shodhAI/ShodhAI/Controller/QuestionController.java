@@ -3,10 +3,12 @@ package com.shodhAI.ShodhAI.Controller;
 import com.shodhAI.ShodhAI.Dto.QuestionRequestDto;
 import com.shodhAI.ShodhAI.Dto.QuestionResponseDto;
 import com.shodhAI.ShodhAI.Dto.QuestionResponseWrapper;
+import com.shodhAI.ShodhAI.Entity.Content;
 import com.shodhAI.ShodhAI.Entity.Hint;
 import com.shodhAI.ShodhAI.Entity.Module;
 import com.shodhAI.ShodhAI.Entity.Question;
 import com.shodhAI.ShodhAI.Entity.Topic;
+import com.shodhAI.ShodhAI.Service.ContentService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.QuestionService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
@@ -21,7 +23,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/question", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -33,16 +37,29 @@ public class QuestionController {
     @Autowired
     QuestionService questionService;
 
-    @PostMapping("/generate_questions")
+    @Autowired
+    ContentService contentService;
+
+    @PostMapping("/generate-questions")
     public ResponseEntity<?> generateQuestions(@Valid @RequestBody QuestionRequestDto questionRequestDto) {
         try {
 
             questionService.validateQuestion(questionRequestDto);
             Module module = questionService.validateModule(questionRequestDto);
             Topic topic = questionService.validateTopic(questionRequestDto);
+            List<Content> content = contentService.getContentByTopic(topic);
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("module", module);
+            map.put("topic", topic);
+            map.put("question_material", content);
+
+            return ResponseService.generateSuccessResponse("Question Created Successfully", map, HttpStatus.OK);
+
+
             // Now its time to call the api from ml/ai and get response
 
-            List<QuestionResponseDto> questionResponseDtoList = new ArrayList<>();
+            /*List<QuestionResponseDto> questionResponseDtoList = new ArrayList<>();
 
             List<Question> questionList = new ArrayList<>();
 
@@ -62,7 +79,7 @@ public class QuestionController {
             questionResponseWrapper.wrapDetails(questionResponseDtoList, questionRequestDto.getQuestionMaterial(), topic, module);
 
             return ResponseService.generateSuccessResponse("Question Created Successfully", questionResponseWrapper, HttpStatus.OK);
-
+*/
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
