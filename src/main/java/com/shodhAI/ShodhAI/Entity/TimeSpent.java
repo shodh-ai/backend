@@ -33,11 +33,11 @@ public class TimeSpent {
     @JsonProperty("time_spent")
     @Min(value = 0, message = "Accuracy must be at least 0.0")
     @Max(value = 100, message = "Accuracy must not exceed 100.0")
-    private Double accuracy = 0.0;
+    private Double timeSpent = 0.0;
 
     @Column(name = "time_spent_increased")
     @JsonProperty("time_spent_increased")
-    private Double accuracyImprovement = 0.0;
+    private Double timeSpentIncresed = 0.0;
 
     @Column(name = "created_date")
     @JsonProperty("created_date")
