@@ -164,6 +164,27 @@ public class StudentService {
         }
     }
 
+    @Transactional
+    public Student uploadProfilePicture(Student student) throws Exception {
+        try {
+
+            return entityManager.merge(student);
+
+        } catch (DataIntegrityViolationException dataIntegrityViolationException) {
+            exceptionHandlingService.handleException(dataIntegrityViolationException);
+            throw new IndexOutOfBoundsException(dataIntegrityViolationException.getMessage());
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            throw new IndexOutOfBoundsException(indexOutOfBoundsException.getMessage());
+        } catch (PersistenceException persistenceException) {
+            exceptionHandlingService.handleException(persistenceException);
+            throw new PersistenceException(persistenceException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
+
     public List<Student> getAllStudent() throws Exception {
         try {
 
