@@ -1,0 +1,12 @@
+version: 0.0
+os: linux
+files:
+  - source: target
+    destination: /app/shodhai-backend/
+hooks:
+  BeforeInstall:
+    - location: scripts/BeforeInstall.sh
+      runas: root
+  AfterInstall:
+    - location: scripts/AfterInstall.sh
+      runas: root
