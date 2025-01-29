@@ -1,33 +1,71 @@
-name: deploy to lambda
-on: [push]
+name: Deploy Application
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  BUILD_NUMBER: ${{ github.run_number }}
+
 jobs:
-  deploy_source:
-    name: build and deploy lambda
-    strategy:
-      matrix:
-        node-version: [12.x]
-    runs-on: ubuntu-latest
+
+  get-environment:
+    name: Get Environment
+    runs-on: ubuntu-22.04
+    outputs:
+      environment-name: ${{ steps.environment-name.outputs.environment }}
     steps:
-      - uses: actions/checkout@v1
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: npm install and build
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get Branch Name
         run: |
-          npm ci
-          npm run build --if-present
-        env:
-          CI: true
-      - name: zip
-        uses: montudor/action-zip@v0.1.0
+          BRANCH=${GITHUB_REF##*/}
+          echo "BRANCH=$BRANCH" >> $GITHUB_ENV
+
+      - name: Create Environment File
+        id: environment-name
+        run: |
+          set -e
+          if [ $BRANCH = release ]; then
+            echo "Staging Configuration"
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          elif [ $BRANCH = main ]; then
+            echo "Production Configuration"
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "Wrong Branch"
+            exit 0
+          fi
+
+  build:
+    needs: [get-environment]
+    name: Build ${{ needs.get-environment.outputs.environment-name }} Environment
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout the Code
+        uses: actions/checkout@v4
+
+      - name: Set Up Java
+        uses: actions/setup-java@v4
         with:
-          args: zip -qq -r ./bundle.zip ./
-      - name: default deploy
-        uses: appleboy/lambda-action@master
+          distribution: 'adopt'
+          java-version: '17'
+
+      - name: Build API APP - JAR
+        run: |
+          ./mvnw clean package
+
+      - name: Create Deployment Bundle
+        run: |
+          mkdir -p deployment/target
+          cp -r codedeploy/* deployment/
+          cp target/my-java-app-1.0-SNAPSHOT.jar deployment/target/
+          zip -r deployment-$BUILD_NUMBER.zip deployment
+
+      - name: Publish Deployment Artifact
+        uses: actions/upload-artifact@v4
         with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_region: ${{ secrets.AWS_REGION }}
-          function_name: backend-lambda
-          zip_file: bundle.zip
+          name: deployment-artifact
+          path: ${{github.workspace}}/deployment-${{ github.run_number }}.zip
