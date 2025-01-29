@@ -1,4 +1,4 @@
-name: Deploy Java-Maven Application
+name: Deploy Java-Maven Application to Amazon EC2
 
 on:
   push:
