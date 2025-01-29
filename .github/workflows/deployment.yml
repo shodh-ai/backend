@@ -56,8 +56,8 @@ jobs:
       - name: Create Deployment Bundle
         run: |
           mkdir -p deployment/target
-          cp -r codedeploy/* deployment/
-          cp target/ShodhAI-0.0.1-SNAPSHOT.jar deployment/target/
+          sudo cp -r codedeploy/* deployment/
+          sudo cp target/ShodhAI-0.0.1-SNAPSHOT.jar deployment/target/
           zip -r deployment-$BUILD_NUMBER.zip deployment
 
       - name: Publish Deployment Artifact
