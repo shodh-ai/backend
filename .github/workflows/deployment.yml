@@ -53,10 +53,6 @@ jobs:
           distribution: 'adopt'
           java-version: '17'
 
-      - name: Build API APP - JAR
-        run: |
-          ./mvnw clean package
-
       - name: Create Deployment Bundle
         run: |
           mkdir -p deployment/target
