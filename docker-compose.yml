@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     image: shodhai-app:latest
     ports:
-      - "8083:8083"
+      - "8098:8098"
     networks:
       - app-network
     environment:
