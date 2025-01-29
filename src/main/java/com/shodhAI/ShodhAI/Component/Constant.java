@@ -8,7 +8,7 @@ public class Constant {
     public static String GET_ALL_GENDERS = "SELECT g FROM Gender g";
     public static String GET_GENDER_BY_ID = "SELECT g FROM Gender g WHERE g.genderId = :genderId";
 
-    public static String GET_ALL_FILE_TYPES = "SELECT f FROM FileType f";
+    public static String GET_ALL_FILE_TYPES = "SELECT f FROM FileType f WHERE f.archived = 'N'";
     public static String GET_FILE_TYPE_BY_ID = "SELECT f FROM FileType f WHERE f.fileTypeId = :fileTypeId";
     public static String GET_FILE_TYPE_BY_TYPE = "SELECT f FROM FileType f WHERE LOWER(f.fileTypeName) = LOWER(:fileType)";
 
@@ -27,6 +27,7 @@ public class Constant {
     public static String GET_COURSE_BY_ID = "SELECT c FROM Course c WHERE c.courseId = :courseId";
 
     public static String GET_CONTENT_BY_TOPIC = "SELECT c FROM Content c WHERE c.topic = :topic";
+    public static String GET_CONTENT_BY_ID = "SELECT c FROM Content c WHERE c.contentId = :contentId";
 
     public static String GET_QUESTION_BY_TOPIC = "SELECT q FROM Question q WHERE q.topic = :topic";
 }

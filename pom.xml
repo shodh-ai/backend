@@ -135,11 +135,10 @@
 <!--			<version>4.9.1</version>  &lt;!&ndash; Or any available version &ndash;&gt;-->
 <!--		</dependency>-->
 
-<!--		<dependency>-->
-<!--			<groupId>com.fasterxml.jackson.core</groupId>-->
-<!--			<artifactId>jackson-databind</artifactId>-->
-<!--			<version>2.12.3</version> &lt;!&ndash; Or latest version &ndash;&gt;-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>com.cloudinary</groupId>
