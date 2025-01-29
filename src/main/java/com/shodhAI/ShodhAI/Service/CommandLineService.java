@@ -41,8 +41,8 @@ public class CommandLineService implements CommandLineRunner {
             entityManager.merge(new FileType(2L, "JPG"));
             entityManager.merge(new FileType(3L, "PDF"));
             entityManager.merge(new FileType(4L, "JPEG"));
-            entityManager.merge(new FileType(5L, "VIDEO"));
-            entityManager.merge(new FileType(6L, "ARTICLE"));
+            entityManager.merge(new FileType(5L, "MP4"));
+            entityManager.merge(new FileType(6L, "TXT"));
         }
 
     }

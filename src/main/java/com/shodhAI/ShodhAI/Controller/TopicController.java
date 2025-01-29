@@ -1,7 +1,6 @@
 package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Dto.TopicDto;
-import com.shodhAI.ShodhAI.Entity.Module;
 import com.shodhAI.ShodhAI.Entity.Topic;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;

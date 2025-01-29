@@ -23,19 +23,32 @@ public class SecurityConfig {
         return http.build();
     }*/
 
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http.csrf(csrf -> csrf.disable()) // Disable CSRF for all endpoints
+//                .authorizeHttpRequests(auth -> auth
+//                        .anyRequest().permitAll() // Allow access to all endpoints without authentication
+//                );
+//        return http.build();
+//    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()) // Disable CSRF for all endpoints
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() // Allow access to all endpoints without authentication
-                );
+                )
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()));  // Apply global CORS config
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.addAllowedOrigin("*"); // Allow all origins, or specify domains like http://localhost:3000
+        // Instead of "*", specify the exact origins you want to allow
+        corsConfiguration.addAllowedOrigin("http://localhost:3000"); // Add your client URL here
+        corsConfiguration.addAllowedOrigin("http://example.com"); // If needed for another origin
+
         corsConfiguration.addAllowedMethod("*"); // Allow all methods (GET, POST, etc.)
         corsConfiguration.addAllowedHeader("*"); // Allow all headers
         corsConfiguration.setAllowCredentials(true); // Allow cookies/credentials if necessary
@@ -45,6 +58,20 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", corsConfiguration); // Apply CORS configuration globally
         return source;
     }
+
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration corsConfiguration = new CorsConfiguration();
+//        corsConfiguration.addAllowedOrigin("*"); // Allow all origins, or specify domains like http://localhost:3000
+//        corsConfiguration.addAllowedMethod("*"); // Allow all methods (GET, POST, etc.)
+//        corsConfiguration.addAllowedHeader("*"); // Allow all headers
+//        corsConfiguration.setAllowCredentials(true); // Allow cookies/credentials if necessary
+//        corsConfiguration.setMaxAge(3600L); // Cache preflight response for 1 hour
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", corsConfiguration); // Apply CORS configuration globally
+//        return source;
+//    }
 
 //    @Bean
 //    public InMemoryUserDetailsManager userDetailsService() {

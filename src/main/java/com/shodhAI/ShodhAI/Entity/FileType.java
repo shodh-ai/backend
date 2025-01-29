@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.util.List;
 
@@ -28,12 +29,17 @@ public class FileType
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "file_type_id")
-    @JsonProperty("role_type_id")
+    @JsonProperty("file_type_id")
     private Long fileTypeId;
 
     @Column(name = "file_type_name", unique = true)
-    @JsonProperty("role_type_name")
+    @JsonProperty("file_type_name")
     private String fileTypeName;
+
+    @NonNull
+    @Column(name = "archived")
+    @JsonProperty("archived")
+    private Character archived = 'N';
 
     public FileType(Long fileTypeId, String fileTypeName) {
         this.fileTypeId = fileTypeId;
