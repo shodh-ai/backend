@@ -3,6 +3,7 @@ package com.shodhAI.ShodhAI.Service;
 import com.shodhAI.ShodhAI.Entity.FileType;
 import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.Role;
+import com.shodhAI.ShodhAI.Entity.TopicType;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -43,6 +44,16 @@ public class CommandLineService implements CommandLineRunner {
             entityManager.merge(new FileType(4L, "JPEG"));
             entityManager.merge(new FileType(5L, "MP4"));
             entityManager.merge(new FileType(6L, "TXT"));
+        }
+
+        if (entityManager.createQuery("SELECT COUNT(t) FROM TopicType t", Long.class).getSingleResult() == 0) {
+
+            Date currentDate = new Date();
+
+            entityManager.merge(new TopicType(1L, "TEACHING", 'N', currentDate, currentDate));
+            entityManager.merge(new TopicType(2L, "ASSIGNMENT", 'N', currentDate, currentDate));
+            entityManager.merge(new TopicType(3L, "ASSESSMENT", 'N', currentDate, currentDate));
+            entityManager.merge(new TopicType(4L, "SIMULATION", 'N', currentDate, currentDate));
         }
 
     }

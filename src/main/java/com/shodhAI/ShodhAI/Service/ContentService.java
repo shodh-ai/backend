@@ -2,9 +2,7 @@ package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Entity.Content;
-import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.FileType;
-import com.shodhAI.ShodhAI.Entity.Student;
 import com.shodhAI.ShodhAI.Entity.Topic;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;

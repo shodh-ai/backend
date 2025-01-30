@@ -44,6 +44,11 @@ public class Topic {
     @JsonBackReference
     private Course course;
 
+    @ManyToOne
+    @JoinColumn(name = "topic_type_id")
+    @JsonProperty("topic_type_id")
+    private TopicType topicType;
+
     @Column(name = "title")
     @JsonProperty("title")
     private String topicTitle;

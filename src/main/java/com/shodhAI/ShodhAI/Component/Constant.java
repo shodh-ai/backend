@@ -2,6 +2,8 @@ package com.shodhAI.ShodhAI.Component;
 
 public class Constant {
 
+    public static String GET_TOPIC_TYPE_ASSIGNMENT = "ASSIGNMENT";
+    public static String GET_TOPIC_TYPE_TEACHING = "TEACHING";
     public static String GET_ALL_ROLES = "SELECT r FROM Role r";
     public static String GET_ROLE_BY_ID = "SELECT r FROM Role r WHERE r.roleId = : roleId";
 
@@ -23,6 +25,12 @@ public class Constant {
 
     public static String GET_TOPIC_BY_ID = "SELECT t FROM Topic t WHERE t.archived = 'N' AND t.topicId = :topicId";
 
+    public static String GET_ALL_TOPIC_TYPE = "SELECT t FROM TopicType t WHERE t.archived = 'N'";
+    public static String GET_TOPIC_TYPE_BY_ID = "SELECT t FROM TopicType t WHERE t.archived = 'N' AND t.topicTypeId = :topicTypeId";
+
+    public static String GET_ALL_CONTENT_TYPE = "SELECT c FROM ContentType c WHERE c.archived = 'N'";
+    public static String GET_CONTENT_TYPE_BY_ID = "SELECT c FROM ContentType c WHERE c.archived = 'N' AND t.contentTypeId = :contentTypeId";
+
     public static String GET_ALL_COURSES = "SELECT c FROM Course c WHERE c.archived = 'N'";
     public static String GET_COURSE_BY_ID = "SELECT c FROM Course c WHERE c.courseId = :courseId";
 
@@ -30,4 +38,5 @@ public class Constant {
     public static String GET_CONTENT_BY_ID = "SELECT c FROM Content c WHERE c.contentId = :contentId";
 
     public static String GET_QUESTION_BY_TOPIC = "SELECT q FROM Question q WHERE q.topic = :topic";
+
 }

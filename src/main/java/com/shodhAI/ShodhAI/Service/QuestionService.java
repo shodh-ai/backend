@@ -8,6 +8,7 @@ import com.shodhAI.ShodhAI.Entity.Content;
 import com.shodhAI.ShodhAI.Entity.Module;
 import com.shodhAI.ShodhAI.Entity.Question;
 import com.shodhAI.ShodhAI.Entity.Topic;
+import com.shodhAI.ShodhAI.Entity.TopicType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
@@ -128,6 +129,47 @@ public class QuestionService {
             query.setParameter("topic", topic);
             return query.getResultList();
 
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            throw new IndexOutOfBoundsException("Question not found with given Id");
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception);
+        }
+    }
+
+
+    public void validateAssignmentQuestionByTopic(Topic topic) throws Exception {
+        try {
+            TopicType topicType = topic.getTopicType();
+
+            if(!topicType.getTopicTypeName().equalsIgnoreCase(Constant.GET_TOPIC_TYPE_ASSIGNMENT)) {
+                throw new IllegalArgumentException("The topic type is not ASSIGNMENT");
+            }
+
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            throw new IndexOutOfBoundsException("Question not found with given Id");
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception);
+        }
+    }
+
+    public void validatePracticeQuestionByTopic(Topic topic) throws Exception {
+        try {
+            TopicType topicType = topic.getTopicType();
+
+            if(!topicType.getTopicTypeName().equalsIgnoreCase(Constant.GET_TOPIC_TYPE_TEACHING)) {
+                throw new IllegalArgumentException("The topic type is not TEACHING to get Practice Question");
+            }
+
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
             throw new IndexOutOfBoundsException("Question not found with given Id");
