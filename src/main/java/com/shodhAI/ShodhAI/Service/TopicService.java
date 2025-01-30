@@ -59,6 +59,9 @@ public class TopicService {
             if(topicDto.getModuleId() == null || topicDto.getModuleId() <= 0) {
                 throw new IllegalArgumentException(("Module Id cannot be null or <= 0"));
             }
+            if(topicDto.getTopicTypeId() == null || topicDto.getTopicTypeId() <= 0) {
+                throw new IllegalArgumentException(("Topic Type Id cannot be null or <= 0"));
+            }
 
         } catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
