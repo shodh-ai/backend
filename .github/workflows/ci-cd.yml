@@ -62,7 +62,7 @@ jobs:
     - name: Connect SSH and Restart Services
       run: |
         ssh -o StrictHostKeyChecking=no -i $HOME/key.pem ubuntu@ec2-3-110-56-209.ap-south-1.compute.amazonaws.com '
-          java -jar target/*.jar
+          sudo java -jar /home/ubuntu/deployment/target/*.jar
           sudo systemctl restart shodhaibackend &&
           sudo systemctl restart nginx
         '
