@@ -63,7 +63,7 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i $HOME/key.pem ubuntu@ec2-3-110-56-209.ap-south-1.compute.amazonaws.com '
           sudo fuser -k 8098/tcp
-          nohup java -jar /home/ubuntu/deployment/target/ShodhAI-0.0.1-SNAPSHOT.jar --server.port=8098 > app.log 2>&1 &
+          nohup java -jar /home/ubuntu/deployment/target/ShodhAI-0.0.1-SNAPSHOT.jar --server.port=8098
           sudo systemctl restart shodhaibackend &&
           sudo systemctl restart nginx
         '
