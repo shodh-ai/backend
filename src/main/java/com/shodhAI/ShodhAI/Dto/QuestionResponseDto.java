@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -16,6 +15,9 @@ public class QuestionResponseDto {
     @JsonProperty("question")
     private String question;
 
+    @JsonProperty("question_type")
+    private String questionType;
+
     @JsonProperty("answer")
     private String answer;
 
@@ -24,11 +26,5 @@ public class QuestionResponseDto {
 
     @JsonProperty("hints")
     private List<String> hints;
-
-    @JsonProperty("created_date")
-    private Date createdDate;
-
-    @JsonProperty("modified_date")
-    private Date updatedDate;
 
 }

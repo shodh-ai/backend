@@ -4,7 +4,7 @@ import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.QuestionMaterialDto;
 import com.shodhAI.ShodhAI.Dto.QuestionRequestDto;
 import com.shodhAI.ShodhAI.Dto.QuestionResponseDto;
-import com.shodhAI.ShodhAI.Entity.Content;
+import com.shodhAI.ShodhAI.Entity.Hint;
 import com.shodhAI.ShodhAI.Entity.Module;
 import com.shodhAI.ShodhAI.Entity.Question;
 import com.shodhAI.ShodhAI.Entity.Topic;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -42,13 +43,13 @@ public class QuestionService {
             /*if(questionRequestDto.getQuestionMaterial().isEmpty() || questionRequestDto.getQuestionMaterial() == null) {
                 throw new IllegalArgumentException("Question Material Dto cannot be null or empty");
             }*/
-            if(questionRequestDto.getQuestionMaterial() == null) {
+            if (questionRequestDto.getQuestionMaterial() == null) {
                 return;
             }
-            for (QuestionMaterialDto questionMaterialDto: questionRequestDto.getQuestionMaterial()) {
+            for (QuestionMaterialDto questionMaterialDto : questionRequestDto.getQuestionMaterial()) {
                 fileTypeService.getFileTypeById(questionMaterialDto.getFileTypeId());
 
-                if(questionMaterialDto.getUrl() == null || questionMaterialDto.getUrl().trim().isEmpty()) {
+                if (questionMaterialDto.getUrl() == null || questionMaterialDto.getUrl().trim().isEmpty()) {
                     throw new IllegalArgumentException("url cannot be cannot be null or empty");
                 }
                 questionMaterialDto.setUrl(questionMaterialDto.getUrl().trim());
@@ -80,7 +81,7 @@ public class QuestionService {
 
     public Topic validateTopic(QuestionRequestDto questionRequestDto) throws Exception {
         try {
-            if(questionRequestDto.getTopicId() == null) {
+            if (questionRequestDto.getTopicId() == null) {
                 throw new IllegalArgumentException("Topic id cannot be null");
             }
             return topicService.getTopicById(questionRequestDto.getTopicId());
@@ -143,7 +144,7 @@ public class QuestionService {
         try {
             TopicType topicType = topic.getTopicType();
 
-            if(!topicType.getTopicTypeName().equalsIgnoreCase(Constant.GET_TOPIC_TYPE_ASSIGNMENT)) {
+            if (!topicType.getTopicTypeName().equalsIgnoreCase(Constant.GET_TOPIC_TYPE_ASSIGNMENT)) {
                 throw new IllegalArgumentException("The topic type is not ASSIGNMENT");
             }
 
@@ -163,7 +164,7 @@ public class QuestionService {
         try {
             TopicType topicType = topic.getTopicType();
 
-            if(!topicType.getTopicTypeName().equalsIgnoreCase(Constant.GET_TOPIC_TYPE_TEACHING)) {
+            if (!topicType.getTopicTypeName().equalsIgnoreCase(Constant.GET_TOPIC_TYPE_TEACHING)) {
                 throw new IllegalArgumentException("The topic type is not TEACHING to get Practice Question");
             }
 
@@ -176,6 +177,50 @@ public class QuestionService {
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             throw new Exception(exception);
+        }
+    }
+
+    @Transactional
+    public List<Question> saveQuestionList(List<QuestionResponseDto> questionResponseDtoList) throws Exception {
+        try {
+
+            List<Question> questionList = new ArrayList<>();
+            Date currentDate = new Date();
+            for (QuestionResponseDto questionResponseDto : questionResponseDtoList) {
+                // Create a new Question object to save
+                Question question = new Question();
+                question.setQuestion(questionResponseDto.getQuestion());
+                question.setAnswer(questionResponseDto.getAnswer());
+                question.setCognitiveDomain(questionResponseDto.getCognitiveDomain());
+
+                // Process hints and add to the question
+                List<Hint> hints = new ArrayList<>();
+                for (String hintText : questionResponseDto.getHints()) {
+                    Hint hint = new Hint();
+                    hint.setLevel("basic");  // You can further improve by categorizing hints (basic, advanced, etc.)
+                    hint.setText(hintText);
+                    hints.add(hint);
+                }
+                question.setHints(hints);
+//
+//                 Save the question object in the database (assuming saveQuestion is a method that stores it)
+                question.setCreatedDate(currentDate);
+                question.setUpdatedDate(currentDate);
+                entityManager.merge(question);
+                questionList.add(question);
+            }
+            System.out.println(questionList.size() + "ISS");
+            return questionList;
+
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            throw new IndexOutOfBoundsException(indexOutOfBoundsException.getMessage());
+        } catch (PersistenceException persistenceException) {
+            exceptionHandlingService.handleException(persistenceException);
+            throw new PersistenceException(persistenceException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
         }
     }
 
