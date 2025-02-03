@@ -2,12 +2,15 @@ package com.shodhAI.ShodhAI.Controller;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.shodhAI.ShodhAI.Component.Constant;
+import com.shodhAI.ShodhAI.Dto.FlowListWrapper;
 import com.shodhAI.ShodhAI.Dto.FlowRequestDto;
+import com.shodhAI.ShodhAI.Dto.QuestionResponseDto;
 import com.shodhAI.ShodhAI.Entity.Content;
 import com.shodhAI.ShodhAI.Entity.ContentType;
 import com.shodhAI.ShodhAI.Entity.Question;
 import com.shodhAI.ShodhAI.Entity.Topic;
-import com.shodhAI.ShodhAI.Entity.TopicType;
+import com.shodhAI.ShodhAI.Service.AIService;
 import com.shodhAI.ShodhAI.Service.ContentService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.QuestionService;
@@ -28,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,11 +55,14 @@ public class ContentController {
     @Autowired
     QuestionService questionService;
 
+    @Autowired
+    AIService aiService;
+
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadContent(HttpServletRequest request,
-                                        @RequestParam("file") MultipartFile file,
-                                        @RequestParam("topic_id") Long topicId,
-                                        @RequestParam("content_type_id") Long contentTypeId) {
+                                           @RequestParam("file") MultipartFile file,
+                                           @RequestParam("topic_id") Long topicId,
+                                           @RequestParam("content_type_id") Long contentTypeId) {
         try {
 
             // Upload profile picture to Cloudinary
@@ -134,15 +142,34 @@ public class ContentController {
             List<Content> contentList = contentService.getContentByTopic(topic);
             List<Question> questionList = questionService.getQuestionByTopic(topic);
 
-            FlowRequestDto flowRequestDto = new FlowRequestDto();
-            flowRequestDto.setContentList(contentList);
-            flowRequestDto.setQuestionList(questionList);
-            flowRequestDto.setModule(topic.getModule().getModuleTitle());
-            flowRequestDto.setTopic(topic.getTopicTitle());
-
             // TODO Apis integration from the ml/ai part.
 
-            return ResponseService.generateSuccessResponse("Content Flow Retrieved Successfully", flowRequestDto, HttpStatus.OK);
+
+            Map<String, Object> dataMap = new HashMap<>();
+            dataMap.put("module", topic.getModule().getModuleTitle());
+            dataMap.put("topic", topic.getTopicTitle());
+
+            List<Map<String, Object>> contentDataMapList = new ArrayList<>();
+            for (Content content : contentList) {
+                Map<String, Object> contentDataMap = new HashMap<>();
+                contentDataMap.put("type", content.getFileType().getFileTypeName().toLowerCase());
+                contentDataMap.put("url", content.getUrl());
+
+                if (content.getContentType().getContentTypeName().equals(Constant.GET_TOPIC_TYPE_TEACHING)) {
+                    contentDataMapList.add(contentDataMap);
+                }
+            }
+
+            dataMap.put("content_list", contentDataMapList);
+            List<String> questionStringList = new ArrayList<>();
+            for (Question question : questionList) {
+                questionStringList.add(question.getQuestion());
+            }
+
+            dataMap.put("question_list", questionStringList);
+
+            FlowListWrapper flowList = aiService.callAIToGetFlow(dataMap);
+            return ResponseService.generateSuccessResponse("Content Flow Retrieved Successfully", flowList, HttpStatus.OK);
 
         } catch (DataIntegrityViolationException dataIntegrityViolationException) {
             exceptionHandlingService.handleException(dataIntegrityViolationException);

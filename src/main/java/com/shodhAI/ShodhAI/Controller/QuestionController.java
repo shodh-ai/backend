@@ -101,14 +101,11 @@ public class QuestionController {
 
             List<Question> questionList = questionService.getQuestionByTopic(topic);
 
-            System.out.println("HERE 11");
             if (questionList.isEmpty() || questionList == null) {
                 // Call the AI/ML API to generate questions
                 List<QuestionResponseDto> questionResponseDtoList = aiService.callAIToGenerateQuestions(dataMap);
-                System.out.println("ISSUE YHA HAI: " + questionResponseDtoList.size());
                 questionList = questionService.saveQuestionList(questionResponseDtoList, topic);
 
-                System.out.println("HERE 11" + questionList.size());
                 if (questionList.isEmpty()) {
                     return ResponseService.generateSuccessResponse("Not able to Created Question Successfully", questionList, HttpStatus.OK);
                 }
@@ -141,7 +138,6 @@ public class QuestionController {
             } else {
 
                 // fetch the questions from the db once they get saved in the db.
-
                 return ResponseService.generateSuccessResponse("Question Fetched Successfully", questionList, HttpStatus.OK);
             }
         } catch (Exception exception) {

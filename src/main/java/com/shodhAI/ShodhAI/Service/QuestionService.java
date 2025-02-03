@@ -209,7 +209,6 @@ public class QuestionService {
                 entityManager.merge(question);
                 questionList.add(question);
             }
-            System.out.println(questionList.size() + "ISS");
             return questionList;
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
