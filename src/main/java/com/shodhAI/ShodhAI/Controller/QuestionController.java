@@ -57,12 +57,28 @@ public class QuestionController {
             dataMap.put("topic", topic.getTopicTitle());
 
             List<Map<String, Object>> contentDataMapList = new ArrayList<>();
-            for (Content content : contentList) {
-                Map<String, Object> contentDataMap = new HashMap<>();
-                contentDataMap.put("type", content.getFileType().getFileTypeName().toLowerCase());
-                contentDataMap.put("url", content.getUrl());
+            if(topic.getTopicType().equals(Constant.GET_TOPIC_TYPE_TEACHING)) {
+                for (Content content : contentList) {
+                    Map<String, Object> contentDataMap = new HashMap<>();
+                    contentDataMap.put("type", content.getFileType().getFileTypeName().toLowerCase());
+                    contentDataMap.put("url", content.getUrl());
 
-                contentDataMapList.add(contentDataMap);
+                    if(content.getContentType().equals(Constant.GET_CONTENT_TYPE_PRACTICE_QUESTION)) {
+                        contentDataMapList.add(contentDataMap);
+                    }
+                }
+            } else {
+                for (Content content : contentList) {
+                    Map<String, Object> contentDataMap = new HashMap<>();
+                    contentDataMap.put("type", content.getFileType().getFileTypeName().toLowerCase());
+                    contentDataMap.put("url", content.getUrl());
+
+                    contentDataMapList.add(contentDataMap);
+
+                    if(content.getContentType().equals(Constant.GET_CONTENT_TYPE_ASSIGNMENT)) {
+                        contentDataMapList.add(contentDataMap);
+                    }
+                }
             }
             dataMap.put("question_material", contentDataMapList);
 
@@ -90,7 +106,7 @@ public class QuestionController {
                 // Call the AI/ML API to generate questions
                 List<QuestionResponseDto> questionResponseDtoList = aiService.callAIToGenerateQuestions(dataMap);
                 System.out.println("ISSUE YHA HAI: " + questionResponseDtoList.size());
-                questionList = questionService.saveQuestionList(questionResponseDtoList);
+                questionList = questionService.saveQuestionList(questionResponseDtoList, topic);
 
                 System.out.println("HERE 11" + questionList.size());
                 if (questionList.isEmpty()) {
@@ -100,7 +116,7 @@ public class QuestionController {
             } else {
 
                 // fetch the questions from the db once they get saved in the db.
-                return ResponseService.generateSuccessResponse("Question Fetched Successfully", null, HttpStatus.OK);
+                return ResponseService.generateSuccessResponse("Question Fetched Successfully", questionList, HttpStatus.OK);
             }
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
@@ -116,7 +132,7 @@ public class QuestionController {
             if (questionList.isEmpty() || questionList == null) {
                 // Call the AI/ML API to generate questions
                 List<QuestionResponseDto> questionResponseDtoList = aiService.callAIToGenerateQuestions(dataMap);
-                questionList = questionService.saveQuestionList(questionResponseDtoList);
+                questionList = questionService.saveQuestionList(questionResponseDtoList, topic);
 
                 if (questionList.isEmpty()) {
                     return ResponseService.generateSuccessResponse("Not able to Created Question Successfully", questionList, HttpStatus.OK);
@@ -125,7 +141,8 @@ public class QuestionController {
             } else {
 
                 // fetch the questions from the db once they get saved in the db.
-                return ResponseService.generateSuccessResponse("Question Fetched Successfully", null, HttpStatus.OK);
+
+                return ResponseService.generateSuccessResponse("Question Fetched Successfully", questionList, HttpStatus.OK);
             }
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);

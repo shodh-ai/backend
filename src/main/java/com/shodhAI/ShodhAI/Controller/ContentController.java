@@ -4,8 +4,10 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.shodhAI.ShodhAI.Dto.FlowRequestDto;
 import com.shodhAI.ShodhAI.Entity.Content;
+import com.shodhAI.ShodhAI.Entity.ContentType;
 import com.shodhAI.ShodhAI.Entity.Question;
 import com.shodhAI.ShodhAI.Entity.Topic;
+import com.shodhAI.ShodhAI.Entity.TopicType;
 import com.shodhAI.ShodhAI.Service.ContentService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.QuestionService;
@@ -51,7 +53,8 @@ public class ContentController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadContent(HttpServletRequest request,
                                         @RequestParam("file") MultipartFile file,
-                                        @RequestParam("topic_id") Long topicId) {
+                                        @RequestParam("topic_id") Long topicId,
+                                        @RequestParam("content_type_id") Long contentTypeId) {
         try {
 
             // Upload profile picture to Cloudinary
@@ -64,8 +67,8 @@ public class ContentController {
 
             System.out.println("Uploaded file format: " + format);*/
 
-            contentService.validateContent(topicId);
-            Content content = contentService.saveContent(topicId, uploadResult);
+            contentService.validateContent(topicId, contentTypeId);
+            Content content = contentService.saveContent(topicId, uploadResult, contentTypeId);
 
             return ResponseService.generateSuccessResponse("File Uploaded Successfully", content, HttpStatus.OK);
 
@@ -159,4 +162,48 @@ public class ContentController {
         }
     }
 
+    @GetMapping("/get-content-type-by-id/{contentTypeIdString}")
+    public ResponseEntity<?> retrieveContentTypeById(HttpServletRequest request, @PathVariable String contentTypeIdString) {
+        try {
+
+            Long contentTypeId = Long.parseLong(contentTypeIdString);
+            ContentType contentType = contentService.getContentTypeById(contentTypeId);
+            if (contentType == null) {
+                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
+            }
+            return ResponseService.generateSuccessResponse("Content Type Retrieved Successfully", contentType, HttpStatus.OK);
+
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/get-all-content-type")
+    public ResponseEntity<?> retrieveContentTypes(HttpServletRequest request) {
+        try {
+
+            List<ContentType> contentTypeList = contentService.getAllContentTypes();
+            if (contentTypeList.isEmpty()) {
+                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
+            }
+            return ResponseService.generateSuccessResponse("Content Type Retrieved Successfully", contentTypeList, HttpStatus.OK);
+
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

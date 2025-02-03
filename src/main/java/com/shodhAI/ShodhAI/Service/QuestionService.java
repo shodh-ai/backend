@@ -181,7 +181,7 @@ public class QuestionService {
     }
 
     @Transactional
-    public List<Question> saveQuestionList(List<QuestionResponseDto> questionResponseDtoList) throws Exception {
+    public List<Question> saveQuestionList(List<QuestionResponseDto> questionResponseDtoList, Topic topic) throws Exception {
         try {
 
             List<Question> questionList = new ArrayList<>();
@@ -192,7 +192,7 @@ public class QuestionService {
                 question.setQuestion(questionResponseDto.getQuestion());
                 question.setAnswer(questionResponseDto.getAnswer());
                 question.setCognitiveDomain(questionResponseDto.getCognitiveDomain());
-
+                question.setTopic(topic);
                 // Process hints and add to the question
                 List<Hint> hints = new ArrayList<>();
                 for (String hintText : questionResponseDto.getHints()) {

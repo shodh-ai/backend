@@ -7,47 +7,35 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.util.Date;
 
 @Entity
-@Table(name = "content")
+@Table(name = "content_type")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Content {
+public class ContentType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="content_id")
-    private Long contentId;
+    @Column(name = "content_type_id")
+    @JsonProperty("content_type_id")
+    private Long contentTypeId;
 
-    @ManyToOne
-    @NotNull
-    @JoinColumn(name = "file_type_id")
-    @JsonProperty("file_type")
-    private FileType fileType;
+    @Column(name = "content_type_name", unique = true)
+    @JsonProperty("content_type_name")
+    private String contentTypeName;
 
-    @Column(name = "url")
-    @JsonProperty("url")
-    private String url;
-
-    @ManyToOne
-    @JoinColumn(name = "topic_id")
-    @JsonProperty("topic")
-    private Topic topic;
-
-    @ManyToOne
-    @JoinColumn(name = "content_type_id")
-    @JsonProperty("content_type")
-    private ContentType contentType;
+    @NonNull
+    @Column(name = "archived")
+    @JsonProperty("archived")
+    private Character archived = 'N';
 
     @Column(name = "created_date")
     @JsonProperty("created_date")
