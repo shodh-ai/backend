@@ -1,13 +1,13 @@
 package com.shodhAI.ShodhAI.Controller;
 
+import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.QuestionRequestDto;
 import com.shodhAI.ShodhAI.Dto.QuestionResponseDto;
-import com.shodhAI.ShodhAI.Dto.QuestionResponseWrapper;
 import com.shodhAI.ShodhAI.Entity.Content;
-import com.shodhAI.ShodhAI.Entity.Hint;
 import com.shodhAI.ShodhAI.Entity.Module;
 import com.shodhAI.ShodhAI.Entity.Question;
 import com.shodhAI.ShodhAI.Entity.Topic;
+import com.shodhAI.ShodhAI.Service.AIService;
 import com.shodhAI.ShodhAI.Service.ContentService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.QuestionService;
@@ -40,6 +40,9 @@ public class QuestionController {
     @Autowired
     ContentService contentService;
 
+    @Autowired
+    AIService aiService;
+
     @PostMapping("/generate-questions")
     public ResponseEntity<?> generateQuestions(@Valid @RequestBody QuestionRequestDto questionRequestDto) {
         try {
@@ -47,44 +50,100 @@ public class QuestionController {
             questionService.validateQuestion(questionRequestDto);
             Module module = questionService.validateModule(questionRequestDto);
             Topic topic = questionService.validateTopic(questionRequestDto);
-            List<Content> content = contentService.getContentByTopic(topic);
+            List<Content> contentList = contentService.getContentByTopic(topic);
 
-            Map<String, Object> map = new HashMap<>();
-            map.put("module", module);
-            map.put("topic", topic);
-            map.put("question_material", content);
+            Map<String, Object> dataMap = new HashMap<>();
+            dataMap.put("module", module.getModuleTitle());
+            dataMap.put("topic", topic.getTopicTitle());
 
-            return ResponseService.generateSuccessResponse("Question Created Successfully", map, HttpStatus.OK);
+            List<Map<String, Object>> contentDataMapList = new ArrayList<>();
+            if(topic.getTopicType().equals(Constant.GET_TOPIC_TYPE_TEACHING)) {
+                for (Content content : contentList) {
+                    Map<String, Object> contentDataMap = new HashMap<>();
+                    contentDataMap.put("type", content.getFileType().getFileTypeName().toLowerCase());
+                    contentDataMap.put("url", content.getUrl());
 
-
-            // Now its time to call the api from ml/ai and get response
-
-            /*List<QuestionResponseDto> questionResponseDtoList = new ArrayList<>();
-
-            List<Question> questionList = new ArrayList<>();
-
-            for(QuestionResponseDto questionResponseDto: questionResponseDtoList) {
-                Question question = new Question();
-                List<Hint> hints = new ArrayList<>();
-                for(String string: questionResponseDto.getHints()) {
-                    Hint hint = new Hint();
-                    hint.setLevel("basic"); // TODO can further use in case of different hint level like basic, moderate or advanced.
-                    hint.setText(hint.getText());
+                    if(content.getContentType().equals(Constant.GET_CONTENT_TYPE_PRACTICE_QUESTION)) {
+                        contentDataMapList.add(contentDataMap);
+                    }
                 }
-                question.setHints(hints);
-                questionService.saveQuestion(questionResponseDto, question);
+            } else {
+                for (Content content : contentList) {
+                    Map<String, Object> contentDataMap = new HashMap<>();
+                    contentDataMap.put("type", content.getFileType().getFileTypeName().toLowerCase());
+                    contentDataMap.put("url", content.getUrl());
+
+                    contentDataMapList.add(contentDataMap);
+
+                    if(content.getContentType().equals(Constant.GET_CONTENT_TYPE_ASSIGNMENT)) {
+                        contentDataMapList.add(contentDataMap);
+                    }
+                }
+            }
+            dataMap.put("question_material", contentDataMapList);
+
+            if (topic.getTopicType().getTopicTypeName().equals(Constant.GET_TOPIC_TYPE_ASSIGNMENT)) {
+                dataMap.put("isPractise", false);
+                return generateAssignmentQuestions(questionRequestDto, dataMap, topic);
+            } else {
+                dataMap.put("isPractise", true);
+                return generatePracticeQuestions(questionRequestDto, dataMap, topic);
             }
 
-            QuestionResponseWrapper questionResponseWrapper = new QuestionResponseWrapper();
-            questionResponseWrapper.wrapDetails(questionResponseDtoList, questionRequestDto.getQuestionMaterial(), topic, module);
-
-            return ResponseService.generateSuccessResponse("Question Created Successfully", questionResponseWrapper, HttpStatus.OK);
-*/
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    public ResponseEntity<?> generatePracticeQuestions(QuestionRequestDto questionRequestDto, Map<String, Object> dataMap, Topic topic) {
+        try {
+
+            List<Question> questionList = questionService.getQuestionByTopic(topic);
+
+            if (questionList.isEmpty() || questionList == null) {
+                // Call the AI/ML API to generate questions
+                List<QuestionResponseDto> questionResponseDtoList = aiService.callAIToGenerateQuestions(dataMap);
+                questionList = questionService.saveQuestionList(questionResponseDtoList, topic);
+
+                if (questionList.isEmpty()) {
+                    return ResponseService.generateSuccessResponse("Not able to Created Question Successfully", questionList, HttpStatus.OK);
+                }
+                return ResponseService.generateSuccessResponse("Question Created Successfully", questionList, HttpStatus.OK);
+            } else {
+
+                // fetch the questions from the db once they get saved in the db.
+                return ResponseService.generateSuccessResponse("Question Fetched Successfully", questionList, HttpStatus.OK);
+            }
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> generateAssignmentQuestions(QuestionRequestDto questionRequestDto, Map<String, Object> dataMap, Topic topic) {
+        try {
+
+            List<Question> questionList = questionService.getQuestionByTopic(topic);
+
+            if (questionList.isEmpty() || questionList == null) {
+                // Call the AI/ML API to generate questions
+                List<QuestionResponseDto> questionResponseDtoList = aiService.callAIToGenerateQuestions(dataMap);
+                questionList = questionService.saveQuestionList(questionResponseDtoList, topic);
+
+                if (questionList.isEmpty()) {
+                    return ResponseService.generateSuccessResponse("Not able to Created Question Successfully", questionList, HttpStatus.OK);
+                }
+                return ResponseService.generateSuccessResponse("Question Created Successfully", questionList, HttpStatus.OK);
+            } else {
+
+                // fetch the questions from the db once they get saved in the db.
+                return ResponseService.generateSuccessResponse("Question Fetched Successfully", questionList, HttpStatus.OK);
+            }
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }

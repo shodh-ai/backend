@@ -16,6 +16,9 @@ public class TopicDto {
     @JsonProperty("course_id")
     private Long courseId;
 
+    @JsonProperty("topic_type_id")
+    private Long topicTypeId;
+
     @JsonProperty("title")
     private String topicTitle;
 
