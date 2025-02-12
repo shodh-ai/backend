@@ -32,6 +32,9 @@ public class Constant {
     public static String GET_ALL_TOPIC_TYPE = "SELECT t FROM TopicType t WHERE t.archived = 'N'";
     public static String GET_TOPIC_TYPE_BY_ID = "SELECT t FROM TopicType t WHERE t.archived = 'N' AND t.topicTypeId = :topicTypeId";
 
+    public static String GET_ALL_PRIORITY_LEVEL = "SELECT p FROM PriorityLevel p WHERE p.archived = 'N'";
+    public static String GET_PRIORITY_LEVEL_BY_ID = "SELECT p FROM PriorityLevel p WHERE p.archived = 'N' AND p.priorityLevelId = :priorityLevelId";
+
     public static String GET_ALL_CONTENT_TYPE = "SELECT c FROM ContentType c WHERE c.archived = 'N'";
     public static String GET_CONTENT_TYPE_BY_ID = "SELECT c FROM ContentType c WHERE c.archived = 'N' AND c.contentTypeId = :contentTypeId";
 
