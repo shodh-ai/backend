@@ -53,7 +53,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth ->
                                 auth.requestMatchers("/content/get-all-content-type").authenticated()
-                                        .requestMatchers("/auth/login-with-username-password").permitAll()
+                                        .requestMatchers("/auth/login-with-username-password", "/student/add", "/faculty/add")
+                                        .permitAll()
                                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

@@ -33,6 +33,9 @@ public class Constant {
     public static String GET_ALL_ACADEMIC_DEGREES = "SELECT a FROM AcademicDegree a WHERE a.archived = 'N'";
     public static String GET_ACADEMIC_DEGREE_BY_ID = "SELECT a FROM AcademicDegree a WHERE a.degreeId = :degreeId";
 
+    public static String GET_ALL_FACULTY = "SELECT f FROM Faculty f WHERE f.archived = 'N'";
+    public static String GET_FACULTY_BY_ID = "SELECT f FROM Faculty f WHERE f.id = :facultyId";
+
     public static String GET_ALL_STUDENT = "SELECT s FROM Student s WHERE s.archived = 'N'";
     public static String GET_STUDENT_BY_ID = "SELECT s FROM Student s WHERE s.id = :studentId";
     public static String GET_STUDENT_LEADERBOARD = "SELECT s FROM Student s WHERE s.archived = 'N' ORDER BY s.marksObtained DESC";

@@ -17,10 +17,6 @@ import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,7 +28,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class StudentService implements UserDetailsService {
+public class StudentService {
 
     @Autowired
     EntityManager entityManager;
@@ -230,34 +226,7 @@ public class StudentService implements UserDetailsService {
         }
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Query to fetch user details from PostgreSQL
-        String sql = "SELECT * FROM students WHERE username = ?";
-
-        // Execute the query using JdbcTemplate
-        TypedQuery<Student> query = entityManager.createQuery("SELECT s FROM Student s WHERE s.collegeEmail = : username", Student.class);
-        query.setParameter("username", username);
-        List<Student> students = query.getResultList();
-
-        // Check if the user exists
-        if (students.isEmpty()) {
-            throw new UsernameNotFoundException("Student not found with username: " + username);
-        }
-
-        Student student = students.get(0);  // Assuming only one user with this username
-
-        // Return UserDetails instance
-        return User.builder()
-                .username(student.getCollegeEmail())
-                .password(student.getPassword())  // Ensure the password is encoded
-                .roles(student.getRole().getRoleName())  // Example of setting role (e.g., "USER", "ADMIN")
-                .build();
-    }
-
     public Student retrieveStudentByUsername(String username) {
-        // Query to fetch user details from PostgreSQL
-        String sql = "SELECT * FROM students WHERE username = ?";
 
         // Execute the query using JdbcTemplate
         TypedQuery<Student> query = entityManager.createQuery("SELECT s FROM Student s WHERE s.collegeEmail = : username", Student.class);

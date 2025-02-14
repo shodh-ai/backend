@@ -1,5 +1,6 @@
 package com.shodhAI.ShodhAI.Component;
 
+import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Student;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.RoleService;
@@ -129,9 +130,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isUnsecuredUri(String requestURI) {
-        return requestURI.startsWith("/api/v1/auth");
+        return requestURI.startsWith("/api/v1/auth")
+                | requestURI.startsWith("/api/v1/faculty/add")
+                | requestURI.startsWith("/api/v1/student/add");
     }
-
 
     private boolean authenticateUser(HttpServletRequest request, HttpServletResponse response) throws Exception {
         final String authorizationHeader = request.getHeader(AUTHORIZATION_HEADER);
@@ -173,7 +175,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         Student student = null;
-//        Faculty faculty = null;
+        Faculty faculty = null;
 //        Admin admin = null;
 
         if (id != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -191,20 +193,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     respondWithUnauthorized(response, "Invalid data provided for this student");
                     return true;
                 }
+            } else if (roleService.findRoleNameById(jwtUtil.extractRoleId(jwt)).equals(Constant.ROLE_FACULTY)) {
+                faculty = entityManager.find(Faculty.class, id);
+                if (faculty != null && jwtUtil.validateToken(jwt, ipAddress, User_Agent)) {
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            faculty.getId(), null, new ArrayList<>());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    return false;
+                } else {
+                    respondWithUnauthorized(response, "Invalid data provided for this customer");
+                    return true;
+                }
             }
-//            else if (roleService.findRoleName(jwtUtil.extractRoleId(jwt)).equals(Constant.roleServiceProvider)) {
-//                serviceProvider = entityManager.find(ServiceProviderEntity.class, id);
-//                if (serviceProvider != null && jwtUtil.validateToken(jwt, ipAdress, User_Agent)) {
-//                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-//                            serviceProvider.getService_provider_id(), null, new ArrayList<>());
-//                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//                    SecurityContextHolder.getContext().setAuthentication(authentication);
-//                    return false;
-//                } else {
-//                    respondWithUnauthorized(response, "Invalid data provided for this customer");
-//                    return true;
-//                }
-//            } else if (roleService.findRoleName(jwtUtil.extractRoleId(jwt)).equals(Constant.ADMIN) || roleService.findRoleName(jwtUtil.extractRoleId(jwt)).equals(Constant.SUPER_ADMIN) || roleService.findRoleName(jwtUtil.extractRoleId(jwt)).equals(Constant.roleAdminServiceProvider)) {
+//            else if (roleService.findRoleName(jwtUtil.extractRoleId(jwt)).equals(Constant.ADMIN) || roleService.findRoleName(jwtUtil.extractRoleId(jwt)).equals(Constant.SUPER_ADMIN) || roleService.findRoleName(jwtUtil.extractRoleId(jwt)).equals(Constant.roleAdminServiceProvider)) {
 //                customAdmin = entityManager.find(CustomAdmin.class, id);
 //                if (customAdmin != null && jwtUtil.validateToken(jwt, ipAdress, User_Agent)) {
 //                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(

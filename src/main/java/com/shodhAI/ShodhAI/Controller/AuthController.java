@@ -2,8 +2,10 @@ package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Component.ApiConstants;
 import com.shodhAI.ShodhAI.Component.Constant;
+import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Student;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
+import com.shodhAI.ShodhAI.Service.FacultyService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.RoleService;
 import com.shodhAI.ShodhAI.Service.StudentService;
@@ -33,6 +35,9 @@ public class AuthController {
 
     @Autowired
     private StudentService studentService;
+
+    @Autowired
+    private FacultyService facultyService;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -106,10 +111,11 @@ public class AuthController {
             if (username == null || password == null || roleId == null) {
                 return responseService.generateErrorResponse("Username or Password or Role cannot be empty", HttpStatus.BAD_REQUEST);
             }
+            if (studentService == null) {
+                return responseService.generateErrorResponse("Student service is not initialized.", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
             if (roleService.findRoleNameById(roleId).equals(Constant.ROLE_USER)) {
-                if (studentService == null) {
-                    return responseService.generateErrorResponse("Student service is not initialized.", HttpStatus.INTERNAL_SERVER_ERROR);
-                }
 
                 Student student = studentService.retrieveStudentByUsername(username);
                 if (student == null) {
@@ -144,7 +150,42 @@ public class AuthController {
                     }
                 } else {
                     return responseService.generateErrorResponse("Invalid password", HttpStatus.BAD_REQUEST);
+                }
+            } else if(roleService.findRoleNameById(roleId).equals(Constant.ROLE_FACULTY)) {
 
+                Faculty faculty = facultyService.retrieveFacultyByUsername(username);
+                if (faculty == null) {
+                    return responseService.generateErrorResponse(ApiConstants.NO_RECORDS_FOUND, HttpStatus.NOT_FOUND);
+                }
+
+                if (passwordEncoder.matches(password, faculty.getPassword())) {
+
+                    String tokenKey = "authToken_" + faculty.getMobileNumber();
+                    String existingToken = faculty.getToken();
+                    authHeader = authHeader + existingToken;
+                    String ipAddress = request.getRemoteAddr();
+                    String userAgent = request.getHeader("User-Agent");
+
+                    if (existingToken != null && jwtUtil.validateToken(existingToken, ipAddress, userAgent)) {
+                        Map<String, Object> userDetails = new HashMap<>();
+                        userDetails.put("username", faculty.getUserName());
+                        userDetails.put("password", faculty.getPassword());
+                        ApiResponse response = new ApiResponse(existingToken, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been signed in");
+                        return ResponseEntity.ok(response);
+
+                    } else {
+                        String token = jwtUtil.generateToken(faculty.getId(), roleId, ipAddress, userAgent);
+                        faculty.setToken(token);
+                        entityManager.persist(faculty);
+                        session.setAttribute(tokenKey, token);
+                        Map<String, Object> userDetails = new HashMap<>();
+                        userDetails.put("username", faculty.getUserName());
+                        userDetails.put("password", faculty.getPassword());
+                        ApiResponse response = new ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been signed in");
+                        return ResponseEntity.ok(response);
+                    }
+                } else {
+                    return responseService.generateErrorResponse("Invalid password", HttpStatus.BAD_REQUEST);
                 }
             } else {
                 return responseService.generateErrorResponse(ApiConstants.INVALID_ROLE, HttpStatus.BAD_REQUEST);
