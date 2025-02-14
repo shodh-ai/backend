@@ -1,6 +1,18 @@
 package com.shodhAI.ShodhAI.Component;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 public class Constant {
+
+    public static final String ROLE_USER = "STUDENT";
+    public static final String ROLE_SUPER_ADMIN = "SUPER_ADMIN";
+    public static final String ROLE_ADMIN ="ADMIN";
+    public static final String ROLE_FACULTY = "FACULTY";
+
+    public static final String BEARER = "Bearer ";
+    public static HttpServletRequest request=null;
+
+    public static final String FETCH_ROLE_NAME_BY_ID = "SELECT r.roleName FROM Role r WHERE r.roleId = :roleId";
 
     public static String GET_TOPIC_TYPE_ASSIGNMENT = "ASSIGNMENT";
     public static String GET_TOPIC_TYPE_TEACHING = "TEACHING";

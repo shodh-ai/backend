@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class RoleService {
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
+    @Transactional
     public List<Role> getAllRole() throws Exception {
         try {
 
@@ -30,6 +32,7 @@ public class RoleService {
         }
     }
 
+    @Transactional
     public Role getRoleById(Long roleId) throws Exception {
         try {
 
@@ -45,4 +48,27 @@ public class RoleService {
             throw new Exception(exception);
         }
     }
+
+    @Transactional
+    public String findRoleNameById(Long roleId) throws Exception {
+        try {
+            String response= entityManager.createQuery(Constant.FETCH_ROLE_NAME_BY_ID, String.class)
+                    .setParameter("roleId", roleId)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
+            if(response==null)
+                return "EMPTY";
+            else return response;
+
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            throw new IndexOutOfBoundsException(indexOutOfBoundsException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception);
+        }
+
+    }
+
 }
