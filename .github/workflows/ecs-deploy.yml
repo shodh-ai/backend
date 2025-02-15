@@ -14,10 +14,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Log in to Amazon ECR in the specified region (ap-south-1)
+      # Step 2: Log in to Amazon ECR (using credentials from secrets)
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
         env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ap-south-1
 
       # Step 3: Build, tag, and push the Docker image to ECR
@@ -35,16 +37,16 @@ jobs:
           docker tag backend-api:latest $IMAGE_URI
           echo "Pushing image to ECR..."
           docker push $IMAGE_URI
-          # Save the image URI to an environment variable for later use
+          # Export the image URI for later steps
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
-      # Step 4: Update ECS Task Definition and Deploy the service
+      # Step 4: Update ECS Task Definition and Deploy the Service
       - name: Update ECS Task Definition and Deploy
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ecs-task-def.json  # Path to your task definition file in your repository
           service: backend-service            # Your ECS service name
-          cluster: backend-cluster            # Your ECS cluster name
+          cluster: backend-cluster1            # Your ECS cluster name
           wait-for-service-stability: true
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
