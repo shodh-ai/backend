@@ -46,7 +46,7 @@ jobs:
         with:
           task-definition: ecs-task-def.json  # Path to your task definition file in your repository
           service: backend-service            # Your ECS service name
-          cluster: backend-cluster1            # Your ECS cluster name
+          cluster: backend-cluster            # Your ECS cluster name
           wait-for-service-stability: true
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
