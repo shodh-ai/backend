@@ -1,6 +1,18 @@
 package com.shodhAI.ShodhAI.Component;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 public class Constant {
+
+    public static final String ROLE_USER = "STUDENT";
+    public static final String ROLE_SUPER_ADMIN = "SUPER_ADMIN";
+    public static final String ROLE_ADMIN ="ADMIN";
+    public static final String ROLE_FACULTY = "FACULTY";
+
+    public static final String BEARER = "Bearer ";
+    public static HttpServletRequest request=null;
+
+    public static final String FETCH_ROLE_NAME_BY_ID = "SELECT r.roleName FROM Role r WHERE r.roleId = :roleId";
 
     public static String GET_TOPIC_TYPE_ASSIGNMENT = "ASSIGNMENT";
     public static String GET_TOPIC_TYPE_TEACHING = "TEACHING";
@@ -21,6 +33,9 @@ public class Constant {
     public static String GET_ALL_ACADEMIC_DEGREES = "SELECT a FROM AcademicDegree a WHERE a.archived = 'N'";
     public static String GET_ACADEMIC_DEGREE_BY_ID = "SELECT a FROM AcademicDegree a WHERE a.degreeId = :degreeId";
 
+    public static String GET_ALL_FACULTY = "SELECT f FROM Faculty f WHERE f.archived = 'N'";
+    public static String GET_FACULTY_BY_ID = "SELECT f FROM Faculty f WHERE f.id = :facultyId";
+
     public static String GET_ALL_STUDENT = "SELECT s FROM Student s WHERE s.archived = 'N'";
     public static String GET_STUDENT_BY_ID = "SELECT s FROM Student s WHERE s.id = :studentId";
     public static String GET_STUDENT_LEADERBOARD = "SELECT s FROM Student s WHERE s.archived = 'N' ORDER BY s.marksObtained DESC";
@@ -31,6 +46,9 @@ public class Constant {
 
     public static String GET_ALL_TOPIC_TYPE = "SELECT t FROM TopicType t WHERE t.archived = 'N'";
     public static String GET_TOPIC_TYPE_BY_ID = "SELECT t FROM TopicType t WHERE t.archived = 'N' AND t.topicTypeId = :topicTypeId";
+
+    public static String GET_ALL_PRIORITY_LEVEL = "SELECT p FROM PriorityLevel p WHERE p.archived = 'N'";
+    public static String GET_PRIORITY_LEVEL_BY_ID = "SELECT p FROM PriorityLevel p WHERE p.archived = 'N' AND p.priorityLevelId = :priorityLevelId";
 
     public static String GET_ALL_CONTENT_TYPE = "SELECT c FROM ContentType c WHERE c.archived = 'N'";
     public static String GET_CONTENT_TYPE_BY_ID = "SELECT c FROM ContentType c WHERE c.archived = 'N' AND c.contentTypeId = :contentTypeId";

@@ -3,6 +3,7 @@ package com.shodhAI.ShodhAI.Service;
 import com.shodhAI.ShodhAI.Entity.ContentType;
 import com.shodhAI.ShodhAI.Entity.FileType;
 import com.shodhAI.ShodhAI.Entity.Gender;
+import com.shodhAI.ShodhAI.Entity.PriorityLevel;
 import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.TopicType;
 import jakarta.persistence.EntityManager;
@@ -64,6 +65,15 @@ public class CommandLineService implements CommandLineRunner {
             entityManager.merge(new ContentType(1L, "TEACHING", 'N', currentDate, currentDate));
             entityManager.merge(new ContentType(2L, "PRACTICE_QUESTION", 'N', currentDate, currentDate));
             entityManager.merge(new ContentType(3L, "ASSIGNMENT_QUESTION", 'N', currentDate, currentDate));
+        }
+
+        if (entityManager.createQuery("SELECT COUNT(p) FROM PriorityLevel p", Long.class).getSingleResult() == 0) {
+
+            Date currentDate = new Date();
+
+            entityManager.merge(new PriorityLevel(1L, "HIGH", 'N', currentDate, currentDate));
+            entityManager.merge(new PriorityLevel(2L, "MEDIUM", 'N', currentDate, currentDate));
+            entityManager.merge(new PriorityLevel(3L, "LOW", 'N', currentDate, currentDate));
         }
 
     }
