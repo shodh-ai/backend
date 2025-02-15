@@ -3,7 +3,7 @@ name: Deploy to Amazon ECS
 on:
   push:
     branches:
-      - main
+      - main  # Trigger deployment on pushes to the main branch
 
 jobs:
   deploy:
@@ -17,8 +17,8 @@ jobs:
       # Step 2: Log in to Amazon ECR in the specified region (ap-south-1)
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
-        with:
-          aws-region: ap-south-1
+        env:
+          AWS_REGION: ap-south-1
 
       # Step 3: Build, tag, and push the Docker image to ECR
       - name: Build, Tag, and Push Docker Image
