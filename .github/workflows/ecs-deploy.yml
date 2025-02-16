@@ -3,21 +3,26 @@ name: Deploy to Amazon ECS
 on:
   push:
     branches:
-      - main
+      - main  # Trigger deployment on pushes to the main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout your repository code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 1: Build the application to generate the JAR file
+      # New Step: Set execute permission for mvnw
+      - name: Set Maven Wrapper Permissions
+        run: chmod +x mvnw
+
+      # Step 2: Build the application to generate the JAR file
       - name: Build Application with Maven
         run: ./mvnw package
 
-      # Step 2: Log in to Amazon ECR
+      # Step 3: Log in to Amazon ECR
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
         env:
@@ -25,7 +30,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ap-south-1
 
-      # Step 3: Build, tag, and push the Docker image to ECR
+      # Step 4: Build, tag, and push the Docker image to ECR
       - name: Build, Tag, and Push Docker Image
         env:
           AWS_ACCOUNT_ID: 302263050318
@@ -41,7 +46,7 @@ jobs:
           docker push $IMAGE_URI
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
-      # Step 4: Update ECS Task Definition and Deploy the service
+      # Step 5: Update ECS Task Definition and Deploy the service
       - name: Update ECS Task Definition and Deploy
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
