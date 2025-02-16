@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -62,5 +63,16 @@ public class Content {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     // TODO (MIGHT HAVE TO CHANGE IN FUTURE) this won't work with instant as instant does not have calendar features like LocalDateTime etc.
     private Date updatedDate;
+
+    @Lob
+    @Column(name = "js_code", columnDefinition = "TEXT")
+    @JsonProperty("js_code")
+    private String jsCode;
+
+    // New field for JSON code
+    @Lob
+    @Column(name = "json_data", columnDefinition = "TEXT")
+    @JsonProperty("json_data")
+    private String jsonData;
 
 }

@@ -53,7 +53,7 @@ public class ContentService {
     }
 
     @Transactional
-    public Content saveContent(Long topicId, Map<String, Object> uploadResult, Long contentTypeId) throws Exception {
+    public Content saveContent(Long topicId, Map<String, Object> uploadResult, Long contentTypeId, String jsCode, String jsonData) throws Exception {
         try {
 
             Content content = new Content();
@@ -62,21 +62,28 @@ public class ContentService {
 
             Topic topic = topicService.getTopicById(topicId);
             String format = (String) uploadResult.get("format");
-            FileType fileType = fileTypeService.getFileTypeByType(format);
-            ContentType contentType = getContentTypeById(contentTypeId);
 
-            if(topic.getTopicType().getTopicTypeName().equals(Constant.GET_TOPIC_TYPE_ASSIGNMENT) && !contentType.getContentTypeName().equals(Constant.GET_CONTENT_TYPE_ASSIGNMENT)) {
-                throw new IllegalArgumentException("For Assignment content type and topic type must be same");
+            if(contentTypeId != 4) {
+                FileType fileType = fileTypeService.getFileTypeByType(format);
+                ContentType contentType = getContentTypeById(contentTypeId);
+
+                if (fileType.getArchived() == 'Y') {
+                    throw new IllegalArgumentException("File Type not supported");
+                }
+                if(topic.getTopicType().getTopicTypeName().equals(Constant.GET_TOPIC_TYPE_ASSIGNMENT) && !contentType.getContentTypeName().equals(Constant.GET_CONTENT_TYPE_ASSIGNMENT)) {
+                    throw new IllegalArgumentException("For Assignment content type and topic type must be same");
+                }
+
+                content.setFileType(fileType);
+                content.setContentType(contentType);
+            } else {
+                content.setJsCode(jsCode);
+                content.setJsonData(jsonData);
             }
 
-            if (fileType.getArchived() == 'Y') {
-                throw new IllegalArgumentException("File Type not supported");
-            }
             content.setCreatedDate(currentDate);
             content.setUpdatedDate(currentDate);
-            content.setFileType(fileType);
             content.setTopic(topic);
-            content.setContentType(contentType);
             content.setUrl(uploadResult.get("url").toString());
 
             return entityManager.merge(content);

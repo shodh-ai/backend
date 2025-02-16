@@ -62,21 +62,27 @@ public class ContentController {
     public ResponseEntity<?> uploadContent(HttpServletRequest request,
                                            @RequestParam("file") MultipartFile file,
                                            @RequestParam("topic_id") Long topicId,
-                                           @RequestParam("content_type_id") Long contentTypeId) {
+                                           @RequestParam("content_type_id") Long contentTypeId,
+                                           @RequestParam("js_code") String jsCode,        // Accept JS code as a parameter
+                                           @RequestParam("json_data") String jsonData) {
         try {
 
-            // Upload profile picture to Cloudinary
-            Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-
-            /*// Set the profile picture URL in the student DTO
-            String fileUrl = uploadResult.get("url").toString();
-            // Get the file format from the response
-            String format = (String) uploadResult.get("format");
-
-            System.out.println("Uploaded file format: " + format);*/
-
             contentService.validateContent(topicId, contentTypeId);
-            Content content = contentService.saveContent(topicId, uploadResult, contentTypeId);
+
+            Map<String, Object> uploadResult = null;
+            if(contentTypeId == 4) {
+                // Upload profile picture to Cloudinary
+                uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+
+                /*// Set the profile picture URL in the student DTO
+                String fileUrl = uploadResult.get("url").toString();
+                // Get the file format from the response
+                String format = (String) uploadResult.get("format");
+
+                System.out.println("Uploaded file format: " + format);*/
+            }
+
+            Content content = contentService.saveContent(topicId, uploadResult, contentTypeId, jsCode, jsonData);
 
             return ResponseService.generateSuccessResponse("File Uploaded Successfully", content, HttpStatus.OK);
 
