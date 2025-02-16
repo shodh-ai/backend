@@ -58,6 +58,7 @@ public class Constant {
 
     public static String GET_CONTENT_BY_TOPIC = "SELECT c FROM Content c WHERE c.topic = :topic";
     public static String GET_CONTENT_BY_ID = "SELECT c FROM Content c WHERE c.contentId = :contentId";
+    public static String GET_CONTENT_BY_TOPIC_ID = "SELECT c FROM Content c WHERE c.topic = :topic";
 
     public static String GET_QUESTION_BY_TOPIC = "SELECT q FROM Question q WHERE q.topic = :topic";
 

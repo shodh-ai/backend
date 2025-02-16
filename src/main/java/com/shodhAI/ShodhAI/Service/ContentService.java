@@ -123,6 +123,24 @@ public class ContentService {
         }
     }
 
+    public List<Content> getContentByTopicId(Long topicId) throws Exception {
+        try {
+
+            Topic topic = topicService.getTopicById(topicId);
+
+            TypedQuery<Content> query = entityManager.createQuery(Constant.GET_CONTENT_BY_TOPIC_ID, Content.class);
+            query.setParameter("topic", topic);
+            return query.getResultList();
+
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            throw new IndexOutOfBoundsException("Content not found with given Id");
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception);
+        }
+    }
+
     public List<ContentType> getAllContentTypes() throws Exception {
         try {
 

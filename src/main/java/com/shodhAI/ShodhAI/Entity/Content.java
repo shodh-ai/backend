@@ -1,5 +1,6 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
@@ -42,6 +43,7 @@ public class Content {
     @ManyToOne
     @JoinColumn(name = "topic_id")
     @JsonProperty("topic")
+    @JsonBackReference
     private Topic topic;
 
     @ManyToOne
