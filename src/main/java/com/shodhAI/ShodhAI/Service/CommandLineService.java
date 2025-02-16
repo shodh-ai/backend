@@ -65,6 +65,7 @@ public class CommandLineService implements CommandLineRunner {
             entityManager.merge(new ContentType(1L, "TEACHING", 'N', currentDate, currentDate));
             entityManager.merge(new ContentType(2L, "PRACTICE_QUESTION", 'N', currentDate, currentDate));
             entityManager.merge(new ContentType(3L, "ASSIGNMENT_QUESTION", 'N', currentDate, currentDate));
+            entityManager.merge(new ContentType(4L, "SIMULATION", 'N', currentDate, currentDate));
         }
 
         if (entityManager.createQuery("SELECT COUNT(p) FROM PriorityLevel p", Long.class).getSingleResult() == 0) {
@@ -73,7 +74,7 @@ public class CommandLineService implements CommandLineRunner {
 
             entityManager.merge(new PriorityLevel(1L, "HIGH", 'N', currentDate, currentDate));
             entityManager.merge(new PriorityLevel(2L, "MEDIUM", 'N', currentDate, currentDate));
-            entityManager.merge(new PriorityLevel(3L, "LOW", 'N', currentDate, currentDate));
+            entityManager.merge(new PriorityLevel(3L, "LOW+", 'N', currentDate, currentDate));
         }
 
     }

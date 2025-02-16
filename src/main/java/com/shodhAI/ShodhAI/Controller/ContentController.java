@@ -62,21 +62,27 @@ public class ContentController {
     public ResponseEntity<?> uploadContent(HttpServletRequest request,
                                            @RequestParam("file") MultipartFile file,
                                            @RequestParam("topic_id") Long topicId,
-                                           @RequestParam("content_type_id") Long contentTypeId) {
+                                           @RequestParam("content_type_id") Long contentTypeId,
+                                           @RequestParam("js_code") String jsCode,        // Accept JS code as a parameter
+                                           @RequestParam("json_data") String jsonData) {
         try {
 
-            // Upload profile picture to Cloudinary
-            Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-
-            /*// Set the profile picture URL in the student DTO
-            String fileUrl = uploadResult.get("url").toString();
-            // Get the file format from the response
-            String format = (String) uploadResult.get("format");
-
-            System.out.println("Uploaded file format: " + format);*/
-
             contentService.validateContent(topicId, contentTypeId);
-            Content content = contentService.saveContent(topicId, uploadResult, contentTypeId);
+
+            Map<String, Object> uploadResult = null;
+            if(contentTypeId == 4) {
+                // Upload profile picture to Cloudinary
+                uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+
+                /*// Set the profile picture URL in the student DTO
+                String fileUrl = uploadResult.get("url").toString();
+                // Get the file format from the response
+                String format = (String) uploadResult.get("format");
+
+                System.out.println("Uploaded file format: " + format);*/
+            }
+
+            Content content = contentService.saveContent(topicId, uploadResult, contentTypeId, jsCode, jsonData);
 
             return ResponseService.generateSuccessResponse("File Uploaded Successfully", content, HttpStatus.OK);
 
@@ -99,7 +105,7 @@ public class ContentController {
     }
 
     @GetMapping(value = "/get-content-by-id/{contentIdString}")
-    public ResponseEntity<?> uploadContent(HttpServletRequest request, @PathVariable("contentIdString") String contentIdString) {
+    public ResponseEntity<?> retrieveContentById(HttpServletRequest request, @PathVariable("contentIdString") String contentIdString) {
         try {
 
             Long contentId = Long.parseLong(contentIdString);
@@ -110,6 +116,37 @@ public class ContentController {
             }
 
             return ResponseService.generateSuccessResponse("Content Retrieved Successfully", content, HttpStatus.OK);
+
+        } catch (DataIntegrityViolationException dataIntegrityViolationException) {
+            exceptionHandlingService.handleException(dataIntegrityViolationException);
+            return ResponseService.generateErrorResponse("Data Integrity Exception caught: " + dataIntegrityViolationException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (PersistenceException persistenceException) {
+            exceptionHandlingService.handleException(persistenceException);
+            return ResponseService.generateErrorResponse("Persistence Exception Caught: " + persistenceException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping(value = "/get-content-by-topic-id/{topicIdString}")
+    public ResponseEntity<?> retrieveContentByTopicId(HttpServletRequest request, @PathVariable("topicIdString") String topicIdString) {
+        try {
+
+            Long topicId = Long.parseLong(topicIdString);
+            List<Content> contents = contentService.getContentByTopicId(topicId);
+
+            if (contents == null) {
+                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
+            }
+
+            return ResponseService.generateSuccessResponse("Content Retrieved Successfully", contents, HttpStatus.OK);
 
         } catch (DataIntegrityViolationException dataIntegrityViolationException) {
             exceptionHandlingService.handleException(dataIntegrityViolationException);
