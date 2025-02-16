@@ -52,7 +52,7 @@ jobs:
         with:
           task-definition: ecs-task-def.json
           service: backend-service
-          cluster: backend-cluster
+          cluster: backend-cluster1
           wait-for-service-stability: true
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
