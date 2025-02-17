@@ -18,6 +18,7 @@ import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.TopicService;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/content", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+@Slf4j
 public class ContentController {
 
     @Autowired
@@ -66,7 +68,6 @@ public class ContentController {
                                            @RequestParam("js_code") String jsCode,        // Accept JS code as a parameter
                                            @RequestParam("json_data") String jsonData) {
         try {
-
             contentService.validateContent(topicId, contentTypeId);
 
             Map<String, Object> uploadResult = null;

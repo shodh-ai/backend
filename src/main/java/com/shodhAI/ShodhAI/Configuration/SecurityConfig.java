@@ -52,7 +52,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.disable())
                 .authorizeHttpRequests(
                         auth ->
-                                auth.requestMatchers("/content/get-all-content-type").authenticated()
+                                auth.requestMatchers("/content/get-all-content-type", "/upload").authenticated()
                                         .requestMatchers("/auth/login-with-username-password", "/student/add", "/faculty/add")
                                         .permitAll()
                                         .anyRequest().authenticated())
