@@ -194,7 +194,7 @@ public class StudentController {
 
     }
 
-    @CrossOrigin(origins = "*")
+//    @CrossOrigin(origins = "*")
     @GetMapping("/get-leaderboard")
     public ResponseEntity<?> retrieveStudentLeaderboard(HttpServletRequest request) {
         try {

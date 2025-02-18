@@ -64,4 +64,6 @@ public class Constant {
 
     public static String GET_STUDENT_SIMULATION_PROGRESS = "SELECT s FROM StudentSimulationProgress s WHERE s.topic = :topic AND s.student = :student";
 
+    public static String GET_ASSIGNMENT_BY_ID = "SELECT a FROM Assignment a WHERE a.assignmentId = :assignmentId";
+
 }

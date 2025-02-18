@@ -15,6 +15,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -48,11 +53,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.disable())
+        http.
+                csrf(csrf -> csrf.disable())
+//                .cors(cors -> cors.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(
                         auth ->
-                                auth.requestMatchers("/content/get-all-content-type").authenticated()
+                                auth.requestMatchers("/content/get-all-content-type", "/upload").authenticated()
                                         .requestMatchers("/auth/login-with-username-password", "/student/add", "/faculty/add")
                                         .permitAll()
                                         .anyRequest().authenticated())
@@ -103,22 +110,22 @@ public class SecurityConfig {
 //        return http.build();
 //    }
 //
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration corsConfiguration = new CorsConfiguration();
-//        // Instead of "*", specify the exact origins you want to allow
-//        corsConfiguration.addAllowedOrigin("http://localhost:3000"); // Add your client URL here
-//        corsConfiguration.addAllowedOrigin("http://example.com"); // If needed for another origin
-//
-//        corsConfiguration.addAllowedMethod("*"); // Allow all methods (GET, POST, etc.)
-//        corsConfiguration.addAllowedHeader("*"); // Allow all headers
-//        corsConfiguration.setAllowCredentials(true); // Allow cookies/credentials if necessary
-//        corsConfiguration.setMaxAge(3600L); // Cache preflight response for 1 hour
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", corsConfiguration); // Apply CORS configuration globally
-//        return source;
-//    }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        // Instead of "*", specify the exact origins you want to allow
+        corsConfiguration.addAllowedOrigin("http://localhost:3000"); // Add your client URL here
+        corsConfiguration.addAllowedOrigin("http://example.com"); // If needed for another origin
+
+        corsConfiguration.addAllowedMethod("*"); // Allow all methods (GET, POST, etc.)
+        corsConfiguration.addAllowedHeader("*"); // Allow all headers
+        corsConfiguration.setAllowCredentials(true); // Allow cookies/credentials if necessary
+        corsConfiguration.setMaxAge(3600L); // Cache preflight response for 1 hour
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfiguration); // Apply CORS configuration globally
+        return source;
+    }
 
     @Bean
     public Filter jwtAuthenticationFilter() {

@@ -9,10 +9,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,7 +30,6 @@ public class Content {
     private Long contentId;
 
     @ManyToOne
-    @NotNull
     @JoinColumn(name = "file_type_id")
     @JsonProperty("file_type")
     private FileType fileType;
@@ -64,13 +61,12 @@ public class Content {
     // TODO (MIGHT HAVE TO CHANGE IN FUTURE) this won't work with instant as instant does not have calendar features like LocalDateTime etc.
     private Date updatedDate;
 
-    @Lob
+//    @Lob
     @Column(name = "js_code", columnDefinition = "TEXT")
     @JsonProperty("js_code")
     private String jsCode;
 
-    // New field for JSON code
-    @Lob
+//    @Lob
     @Column(name = "json_data", columnDefinition = "TEXT")
     @JsonProperty("json_data")
     private String jsonData;
