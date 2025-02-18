@@ -133,9 +133,9 @@ public class AuthController {
                     if (existingToken != null && jwtUtil.validateToken(existingToken, ipAddress, userAgent)) {
                         Map<String, Object> userDetails = new HashMap<>();
                         userDetails.put("username", student.getUserName());
-                        userDetails.put("password", student.getPassword());
-                        userDetails.put("studentId", student.getId());
-                        ApiResponse response = new ApiResponse(existingToken, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been signed in");
+                        userDetails.put("mobile_number", student.getMobileNumber());
+                        userDetails.put("student_id", student.getId());
+                        ApiResponse response = new ApiResponse(existingToken, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
                         return ResponseEntity.ok(response);
 
                     } else {
@@ -145,9 +145,9 @@ public class AuthController {
                         session.setAttribute(tokenKey, token);
                         Map<String, Object> userDetails = new HashMap<>();
                         userDetails.put("username", student.getUserName());
-                        userDetails.put("password", student.getPassword());
-                        userDetails.put("studentId", student.getId());
-                        ApiResponse response = new ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been signed in");
+                        userDetails.put("mobile_number", student.getMobileNumber());
+                        userDetails.put("student_id", student.getId());
+                        ApiResponse response = new ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
                         return ResponseEntity.ok(response);
                     }
                 } else {
@@ -171,9 +171,9 @@ public class AuthController {
                     if (existingToken != null && jwtUtil.validateToken(existingToken, ipAddress, userAgent)) {
                         Map<String, Object> userDetails = new HashMap<>();
                         userDetails.put("username", faculty.getUserName());
-                        userDetails.put("password", faculty.getPassword());
-                        userDetails.put("facultyId", faculty.getId());
-                        ApiResponse response = new ApiResponse(existingToken, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been signed in");
+                        userDetails.put("mobile_number", faculty.getMobileNumber());
+                        userDetails.put("faculty_id", faculty.getId());
+                        ApiResponse response = new ApiResponse(existingToken, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
                         return ResponseEntity.ok(response);
 
                     } else {
@@ -183,9 +183,9 @@ public class AuthController {
                         session.setAttribute(tokenKey, token);
                         Map<String, Object> userDetails = new HashMap<>();
                         userDetails.put("username", faculty.getUserName());
-                        userDetails.put("password", faculty.getPassword());
-                        userDetails.put("facultyId", faculty.getId());
-                        ApiResponse response = new ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been signed in");
+                        userDetails.put("mobile_number", faculty.getMobileNumber());
+                        userDetails.put("faculty_id", faculty.getId());
+                        ApiResponse response = new ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
                         return ResponseEntity.ok(response);
                     }
                 } else {

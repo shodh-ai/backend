@@ -28,6 +28,7 @@ public class StudentSimulationProgressService {
     @Autowired
     private ExceptionHandlingService exceptionHandlingService;
 
+    @Transactional
     public StudentSimulationProgress updateSimulationProgress(Long studentId, Long topicId, Double timestamp) throws Exception {
         try {
 
@@ -49,7 +50,7 @@ public class StudentSimulationProgressService {
         }
     }
 
-    @Transactional
+
     public StudentSimulationProgress getStudentSimulationProgress(Long studentId, Long topicId) throws Exception {
         try {
 
@@ -59,7 +60,13 @@ public class StudentSimulationProgressService {
             TypedQuery<StudentSimulationProgress> query = entityManager.createQuery(Constant.GET_STUDENT_SIMULATION_PROGRESS, StudentSimulationProgress.class);
             query.setParameter("topic", topic);
             query.setParameter("student", student);
-            return query.getResultList().get(0);
+
+            List<StudentSimulationProgress> studentSimulationProgressList = query.getResultList();
+
+            if(!studentSimulationProgressList.isEmpty()) {
+                return studentSimulationProgressList.get(0);
+            }
+            return null;
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);

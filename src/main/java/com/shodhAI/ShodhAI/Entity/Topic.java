@@ -94,4 +94,10 @@ public class Topic {
     @JsonProperty("topic_duration")
     private String topicDuration;
 
+    @ManyToOne
+    @JoinColumn(name = "default_parent_topic_id")
+    @JsonProperty("default_parent_topic")
+    @JsonBackReference
+    private Topic defaultParentTopic;
+
 }

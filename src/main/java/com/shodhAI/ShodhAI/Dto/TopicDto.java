@@ -28,4 +28,7 @@ public class TopicDto {
     @JsonProperty("topic_duration")
     private String topicDuration;
 
+    @JsonProperty("default_parent_topic_id")
+    private Long defaultParentTopicId;
+
 }

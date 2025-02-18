@@ -1,5 +1,6 @@
 package com.shodhAI.ShodhAI.Controller;
 
+import com.shodhAI.ShodhAI.Dto.ParentTopicWrapper;
 import com.shodhAI.ShodhAI.Dto.TopicDto;
 import com.shodhAI.ShodhAI.Entity.Question;
 import com.shodhAI.ShodhAI.Entity.Topic;
@@ -21,8 +22,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -69,6 +72,41 @@ public class TopicController {
     }
 
     // TODO We have to make this filter api for topic in future. (based on title, course , module etc).
+
+    @GetMapping("/get-all")
+    public ResponseEntity<?> retrieveTableOfTopics(HttpServletRequest request,
+                                                  @RequestParam(value = "courseId", required = false) Long courseId,
+                                                  @RequestParam("moduleId") Long moduleId) {
+        try {
+
+            List<Topic> parentTopicList = topicService.getParentTopicListByModuleId(moduleId);
+
+            if (parentTopicList.isEmpty()) {
+                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
+            }
+
+            List<ParentTopicWrapper> wrapper = new ArrayList<>();
+            for(Topic parentTopic: parentTopicList) {
+                List<Topic> subTopics = topicService.getSubTopic(parentTopic);
+
+                ParentTopicWrapper topicWrapper = new ParentTopicWrapper();
+                topicWrapper.wrapDetails(parentTopic, subTopics);
+                wrapper.add(topicWrapper);
+
+            }
+            return ResponseService.generateSuccessResponse("Topic Retrieved Successfully", wrapper, HttpStatus.OK);
+
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     @GetMapping("/get-topic-by-id/{topicIdString}")
     public ResponseEntity<?> retrieveTopicById(HttpServletRequest request, @PathVariable String topicIdString) {

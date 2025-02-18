@@ -43,6 +43,8 @@ public class Constant {
     public static String GET_MODULE_BY_ID = "SELECT m FROM Module m WHERE m.archived = 'N' AND m.moduleId = :moduleId";
 
     public static String GET_TOPIC_BY_ID = "SELECT t FROM Topic t WHERE t.archived = 'N' AND t.topicId = :topicId";
+    public static String GET_PARENT_TOPIC_BY_MODULE_ID = "SELECT t FROM Topic t WHERE t.archived = 'N' AND t.module = :module AND t.defaultParentTopic IS NULL";
+    public static String GET_SUB_TOPIC_BY_PARENT_TOPIC = "SELECT t FROM Topic t WHERE t.archived = 'N' AND t.defaultParentTopic = :defaultParentTopic";
 
     public static String GET_ALL_TOPIC_TYPE = "SELECT t FROM TopicType t WHERE t.archived = 'N'";
     public static String GET_TOPIC_TYPE_BY_ID = "SELECT t FROM TopicType t WHERE t.archived = 'N' AND t.topicTypeId = :topicTypeId";
