@@ -56,7 +56,7 @@ public class TopicService {
             if(topicDto.getCourseId() == null || topicDto.getCourseId() <= 0) {
                 throw new IllegalArgumentException(("Course Id cannot be null or <= 0"));
             }
-            if(topicDto.getDefaultParentTopicId() == null || topicDto.getDefaultParentTopicId() <= 0) {
+            if(topicDto.getDefaultParentTopicId() != null && topicDto.getDefaultParentTopicId() <= 0) {
                 throw new IllegalArgumentException(("Default Parent Topic Id cannot be null or <= 0"));
             }
             if(topicDto.getModuleId() == null || topicDto.getModuleId() <= 0) {
