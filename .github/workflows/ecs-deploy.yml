@@ -51,7 +51,7 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ecs-task-def.json
-          service: backend-service
+          service: backend-servicealb
           cluster: backend-cluster1
           wait-for-service-stability: true
         env:
