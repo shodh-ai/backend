@@ -5,6 +5,7 @@ import com.shodhAI.ShodhAI.Dto.TopicDto;
 import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.Module;
 import com.shodhAI.ShodhAI.Entity.Topic;
+import com.shodhAI.ShodhAI.Entity.TopicType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class TopicService {
@@ -54,8 +56,14 @@ public class TopicService {
             if(topicDto.getCourseId() == null || topicDto.getCourseId() <= 0) {
                 throw new IllegalArgumentException(("Course Id cannot be null or <= 0"));
             }
+            if(topicDto.getDefaultParentTopicId() != null && topicDto.getDefaultParentTopicId() <= 0) {
+                throw new IllegalArgumentException(("Default Parent Topic Id cannot be null or <= 0"));
+            }
             if(topicDto.getModuleId() == null || topicDto.getModuleId() <= 0) {
                 throw new IllegalArgumentException(("Module Id cannot be null or <= 0"));
+            }
+            if(topicDto.getTopicTypeId() == null || topicDto.getTopicTypeId() <= 0) {
+                throw new IllegalArgumentException(("Topic Type Id cannot be null or <= 0"));
             }
 
         } catch (IllegalArgumentException illegalArgumentException) {
@@ -73,8 +81,14 @@ public class TopicService {
         try {
 
             Topic topic = new Topic();
+            Topic defaultParentTopic = null;
+            if(topicDto.getDefaultParentTopicId() != null) {
+                defaultParentTopic = getTopicById(topicDto.getDefaultParentTopicId());
+            }
+
             Course course = courseService.getCourseById(topicDto.getCourseId());
             Module module = moduleService.getModuleById(topicDto.getModuleId());
+            TopicType topicType = getTopicTypeById(topicDto.getTopicTypeId());
 
             Date currentDate = new Date();
 
@@ -85,6 +99,8 @@ public class TopicService {
             topic.setTopicDuration(topicDto.getTopicDuration());
             topic.setCourse(course);
             topic.setModule(module);
+            topic.setTopicType(topicType);
+            topic.setDefaultParentTopic(defaultParentTopic);
 
             return entityManager.merge(topic);
 
@@ -112,4 +128,70 @@ public class TopicService {
             throw new Exception(exception);
         }
     }
+
+    public List<TopicType> getAllTopicTypes() throws Exception {
+        try {
+
+            TypedQuery<TopicType> query = entityManager.createQuery(Constant.GET_ALL_TOPIC_TYPE, TopicType.class);
+            return query.getResultList();
+
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            throw new IndexOutOfBoundsException(indexOutOfBoundsException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception);
+        }
+    }
+
+    public TopicType getTopicTypeById(Long topicTypeId) throws Exception {
+        try {
+
+            TypedQuery<TopicType> query = entityManager.createQuery(Constant.GET_TOPIC_TYPE_BY_ID, TopicType.class);
+            query.setParameter("topicTypeId", topicTypeId);
+            return query.getResultList().get(0);
+
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            throw new IndexOutOfBoundsException(indexOutOfBoundsException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception);
+        }
+    }
+
+    public List<Topic> getParentTopicListByModuleId(Long moduleId) throws Exception {
+        try {
+
+            Module module = moduleService.getModuleById(moduleId);
+
+            TypedQuery<Topic> query = entityManager.createQuery(Constant.GET_PARENT_TOPIC_BY_MODULE_ID, Topic.class);
+            query.setParameter("module", module);
+            return query.getResultList();
+
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            throw new IndexOutOfBoundsException(indexOutOfBoundsException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception);
+        }
+    }
+
+    public List<Topic> getSubTopic(Topic defaultParentTopic) throws Exception {
+        try {
+
+            TypedQuery<Topic> query = entityManager.createQuery(Constant.GET_SUB_TOPIC_BY_PARENT_TOPIC, Topic.class);
+            query.setParameter("defaultParentTopic", defaultParentTopic);
+            return query.getResultList();
+
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            throw new IndexOutOfBoundsException(indexOutOfBoundsException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception);
+        }
+    }
+
 }

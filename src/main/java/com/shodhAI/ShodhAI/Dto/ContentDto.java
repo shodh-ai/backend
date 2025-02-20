@@ -17,4 +17,7 @@ public class ContentDto {
     @JsonProperty("topic_id")
     private Long topicId;
 
+    @JsonProperty("content_type_id")
+    private Long contentTypeId;
+
 }

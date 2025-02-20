@@ -2,15 +2,12 @@ package com.shodhAI.ShodhAI.Controller;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.shodhAI.ShodhAI.Dto.LeaderboardWrapper;
-import com.shodhAI.ShodhAI.Dto.ScoreDto;
-import com.shodhAI.ShodhAI.Dto.StudentDto;
-import com.shodhAI.ShodhAI.Dto.StudentSemesterDto;
-import com.shodhAI.ShodhAI.Dto.StudentWrapper;
-import com.shodhAI.ShodhAI.Entity.Student;
+import com.shodhAI.ShodhAI.Dto.FacultyDto;
+import com.shodhAI.ShodhAI.Dto.FacultyWrapper;
+import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
+import com.shodhAI.ShodhAI.Service.FacultyService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
-import com.shodhAI.ShodhAI.Service.StudentService;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +15,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,26 +29,26 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/student", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-public class StudentController {
+@RequestMapping(value = "/faculty", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+public class FacultyController {
 
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
     @Autowired
-    StudentService studentService;
+    FacultyService facultyService;
 
     @Autowired
     private Cloudinary cloudinary;
 
     @PostMapping(value = "/add")
-    public ResponseEntity<?> addStudent(HttpServletRequest request, @RequestBody StudentDto studentDto) {
+    public ResponseEntity<?> addFaculty(HttpServletRequest request, @RequestBody FacultyDto facultyDto) {
         try {
 
-            studentService.validateStudent(studentDto);
-            Student student = studentService.saveStudent(studentDto);
+            facultyService.validateFaculty(facultyDto);
+            Faculty faculty = facultyService.saveFaculty(facultyDto);
 
-            return ResponseService.generateSuccessResponse("Student Created Successfully", student, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Faculty Created Successfully", faculty, HttpStatus.OK);
 
         } catch (DataIntegrityViolationException dataIntegrityViolationException) {
             exceptionHandlingService.handleException(dataIntegrityViolationException);
@@ -72,14 +68,14 @@ public class StudentController {
         }
     }
 
-    @PostMapping(value = "/upload-profile-picture/{studentIdString}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadProfilePicture(HttpServletRequest request, @PathVariable String studentIdString,
-                                        @RequestParam("profile_picture") MultipartFile profilePicture) {
+    @PostMapping(value = "/upload-profile-picture/{facultyIdString}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadProfilePicture(HttpServletRequest request, @PathVariable String facultyIdString,
+                                                  @RequestParam("profile_picture") MultipartFile profilePicture) {
         try {
 
-            Long studentId = Long.parseLong(studentIdString);
-            Student student = studentService.getStudentById(studentId);
-            if (student == null) {
+            Long facultyId = Long.parseLong(facultyIdString);
+            Faculty faculty = facultyService.getFacultyById(facultyId);
+            if (faculty == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
 
@@ -88,11 +84,11 @@ public class StudentController {
 
             // Set the profile picture URL in the student DTO
             String profilePictureUrl = uploadResult.get("url").toString();
-            student.setProfilePictureUrl(profilePictureUrl);
+            faculty.setProfilePictureUrl(profilePictureUrl);
 
-            student = studentService.uploadProfilePicture(student);
+            faculty = facultyService.uploadProfilePicture(faculty);
 
-            return ResponseService.generateSuccessResponse("Profile Picture Uploaded Successfully", student, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Profile Picture Uploaded Successfully", faculty, HttpStatus.OK);
 
         } catch (DataIntegrityViolationException dataIntegrityViolationException) {
             exceptionHandlingService.handleException(dataIntegrityViolationException);
@@ -113,22 +109,22 @@ public class StudentController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<?> retrieveAllStudent(HttpServletRequest request) {
+    public ResponseEntity<?> retrieveAllFaculty(HttpServletRequest request) {
         try {
 
-            List<Student> studentList = studentService.getAllStudent();
-            if (studentList.isEmpty()) {
+            List<Faculty> facultyList = facultyService.getAllFaculty();
+            if (facultyList.isEmpty()) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
 
-            List<StudentWrapper> studentWrapperList = new ArrayList<>();
-            for(Student student: studentList) {
-                StudentWrapper studentWrapper = new StudentWrapper();
-                studentWrapper.wrapDetails(student);
+            List<FacultyWrapper> facultyWrapperList = new ArrayList<>();
+            for(Faculty faculty: facultyList) {
+                FacultyWrapper facultyWrapper = new FacultyWrapper();
+                facultyWrapper.wrapDetails(faculty);
 
-                studentWrapperList.add(studentWrapper);
+                facultyWrapperList.add(facultyWrapper);
             }
-            return ResponseService.generateSuccessResponse("Student Data Retrieved Successfully", studentWrapperList, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Faculty Data Retrieved Successfully", facultyWrapperList, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
@@ -142,76 +138,21 @@ public class StudentController {
         }
     }
 
-    @CrossOrigin(origins = "*")
-    @GetMapping("/get-student-by-id/{studentIdString}")
-    public ResponseEntity<?> retrieveStudentById(HttpServletRequest request, @PathVariable String studentIdString) {
+    @GetMapping("/get-faculty-by-id/{facultyIdString}")
+    public ResponseEntity<?> retrieveFacultyById(HttpServletRequest request, @PathVariable String facultyIdString) {
         try {
 
-            Long studentId = Long.parseLong(studentIdString);
-            Student student = studentService.getStudentById(studentId);
+            Long facultyId = Long.parseLong(facultyIdString);
+            Faculty faculty = facultyService.getFacultyById(facultyId);
 
-            if (student == null) {
+            if (faculty == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
 
-            StudentSemesterDto studentSemesterDto = new StudentSemesterDto();
-            List<ScoreDto> semesterScoreDto = new ArrayList<>();
+            FacultyWrapper facultyWrapper = new FacultyWrapper();
+            facultyWrapper.wrapDetails(faculty);
 
-            ScoreDto accuracyScoreDto = new ScoreDto();
-            accuracyScoreDto.wrapDetails(student.getAccuracy());
-
-            ScoreDto criticalThinkingScoreDto = new ScoreDto();
-            criticalThinkingScoreDto.wrapDetails(student.getCriticalThinking());
-
-            ScoreDto timeSpentScoreDto = new ScoreDto();
-            timeSpentScoreDto.wrapDetails(student.getTimeSpent());
-
-            ScoreDto overallScoreDto = new ScoreDto();
-            overallScoreDto.wrapDetails(student);
-
-            semesterScoreDto.add(overallScoreDto);
-            semesterScoreDto.add(accuracyScoreDto);
-            semesterScoreDto.add(criticalThinkingScoreDto);
-            semesterScoreDto.add(timeSpentScoreDto);
-
-            studentSemesterDto.wrapDetails(semesterScoreDto);
-
-        /*StudentWrapper studentWrapper = new StudentWrapper();
-            studentWrapper.wrapDetails(student);*/
-
-            return ResponseService.generateSuccessResponse("Student Retrieved Successfully", studentSemesterDto, HttpStatus.OK);
-
-        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
-            exceptionHandlingService.handleException(indexOutOfBoundsException);
-            return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (IllegalArgumentException illegalArgumentException) {
-            exceptionHandlingService.handleException(illegalArgumentException);
-            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (Exception exception) {
-            exceptionHandlingService.handleException(exception);
-            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-    }
-
-//    @CrossOrigin(origins = "*")
-    @GetMapping("/get-leaderboard")
-    public ResponseEntity<?> retrieveStudentLeaderboard(HttpServletRequest request) {
-        try {
-
-            List<Student> studentList = studentService.getStudentLeaderboard();
-            if (studentList.isEmpty()) {
-                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
-            }
-
-            List<LeaderboardWrapper> leaderboardWrapperList = new ArrayList<>();
-            for(Student student: studentList) {
-                LeaderboardWrapper leaderboardWrapper = new LeaderboardWrapper();
-                leaderboardWrapper.wrapDetails(student);
-
-                leaderboardWrapperList.add(leaderboardWrapper);
-            }
-            return ResponseService.generateSuccessResponse("Student Data Retrieved Successfully", leaderboardWrapperList, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Faculty Retrieved Successfully", facultyWrapper, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);

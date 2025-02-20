@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,30 +16,21 @@ import lombok.NonNull;
 import java.util.Date;
 
 @Entity
-@Table(name="academic_degree")
+@Table(name = "topic_type")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AcademicDegree {
+public class TopicType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="degree_id")
-    private Long degreeId;
+    @Column(name = "topic_type_id")
+    @JsonProperty("topic_type_id")
+    private Long topicTypeId;
 
-    @NonNull
-    @Column(name = "degree_name")
-    @JsonProperty("degree_name")
-    @Pattern(regexp = "^[A-Za-z].*", message = "Degree name must start with an alphabet.")
-    private String degreeName;
-
-    @Column(name = "program_name")
-    @JsonProperty("program_name")
-    private String programName;
-
-    @Column(name = "institution_name")
-    @JsonProperty("institution_name")
-    private String institutionName;
+    @Column(name = "topic_type_name", unique = true)
+    @JsonProperty("topic_type_name")
+    private String topicTypeName;
 
     @NonNull
     @Column(name = "archived")

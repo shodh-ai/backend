@@ -1,17 +1,17 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
-import com.shodhAI.ShodhAI.Entity.Role;
+import com.shodhAI.ShodhAI.Entity.PriorityLevel;
+import com.shodhAI.ShodhAI.Entity.TopicType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-public class RoleService {
+public class PriorityLevelService {
 
     @Autowired
     EntityManager entityManager;
@@ -19,25 +19,26 @@ public class RoleService {
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
-    @Transactional
-    public List<Role> getAllRole() throws Exception {
+    public List<PriorityLevel> getAllPriorityLevels() throws Exception {
         try {
 
-            TypedQuery<Role> query = entityManager.createQuery(Constant.GET_ALL_ROLES, Role.class);
+            TypedQuery<PriorityLevel> query = entityManager.createQuery(Constant.GET_ALL_PRIORITY_LEVEL, PriorityLevel.class);
             return query.getResultList();
 
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            throw new IndexOutOfBoundsException(indexOutOfBoundsException.getMessage());
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
-            throw new Exception(exception.getMessage());
+            throw new Exception(exception);
         }
     }
 
-    @Transactional
-    public Role getRoleById(Long roleId) throws Exception {
+    public PriorityLevel getPriorityLevelById(Long priorityLevelId) throws Exception {
         try {
 
-            TypedQuery<Role> query = entityManager.createQuery(Constant.GET_ROLE_BY_ID, Role.class);
-            query.setParameter("roleId", roleId);
+            TypedQuery<PriorityLevel> query = entityManager.createQuery(Constant.GET_PRIORITY_LEVEL_BY_ID, PriorityLevel.class);
+            query.setParameter("priorityLevelId", priorityLevelId);
             return query.getResultList().get(0);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
@@ -48,27 +49,4 @@ public class RoleService {
             throw new Exception(exception);
         }
     }
-
-    @Transactional
-    public String findRoleNameById(Long roleId) throws Exception {
-        try {
-            String response= entityManager.createQuery(Constant.FETCH_ROLE_NAME_BY_ID, String.class)
-                    .setParameter("roleId", roleId)
-                    .getResultStream()
-                    .findFirst()
-                    .orElse(null);
-            if(response==null)
-                return "EMPTY";
-            else return response;
-
-        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
-            exceptionHandlingService.handleException(indexOutOfBoundsException);
-            throw new IndexOutOfBoundsException(indexOutOfBoundsException.getMessage());
-        } catch (Exception exception) {
-            exceptionHandlingService.handleException(exception);
-            throw new Exception(exception);
-        }
-
-    }
-
 }

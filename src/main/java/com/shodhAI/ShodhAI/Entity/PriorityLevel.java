@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,46 +16,37 @@ import lombok.NonNull;
 import java.util.Date;
 
 @Entity
-@Table(name="academic_degree")
+@Table(name = "priority_level")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AcademicDegree {
+public class PriorityLevel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="degree_id")
-    private Long degreeId;
+    @Column(name = "priority_level_id")
+    @JsonProperty("priority_level_id")
+    private Long priorityLevelId;
 
     @NonNull
-    @Column(name = "degree_name")
-    @JsonProperty("degree_name")
-    @Pattern(regexp = "^[A-Za-z].*", message = "Degree name must start with an alphabet.")
-    private String degreeName;
-
-    @Column(name = "program_name")
-    @JsonProperty("program_name")
-    private String programName;
-
-    @Column(name = "institution_name")
-    @JsonProperty("institution_name")
-    private String institutionName;
+    @Column(name = "priority_level")
+    @JsonProperty("priority_level")
+    private String priorityLevel;
 
     @NonNull
     @Column(name = "archived")
     @JsonProperty("archived")
     private Character archived = 'N';
 
+    @NonNull
     @Column(name = "created_date")
     @JsonProperty("created_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-    // TODO (MIGHT HAVE TO CHANGE IN FUTURE) this won't work with instant as instant does not have calendar features like LocalDateTime etc.
     private Date createdDate;
 
     @Column(name = "modified_date")
     @JsonProperty("modified_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-    // TODO (MIGHT HAVE TO CHANGE IN FUTURE) this won't work with instant as instant does not have calendar features like LocalDateTime etc.
     private Date updatedDate;
 
 }

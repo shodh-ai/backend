@@ -1,5 +1,6 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.AttributeOverride;
@@ -61,6 +62,7 @@ public class Question {
     @ManyToOne
     @JoinColumn(name = "topic_id")
     @JsonProperty("topic")
+    @JsonBackReference
     private Topic topic;
 
     @Column(name = "created_date")

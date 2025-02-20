@@ -17,7 +17,7 @@ import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +55,7 @@ public class StudentService {
     TimeSpentService timeSpentService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 
     public void validateStudent(StudentDto studentDto) throws Exception {
         try {
@@ -224,4 +225,21 @@ public class StudentService {
             throw new Exception(exception.getMessage());
         }
     }
+
+    public Student retrieveStudentByUsername(String username) {
+
+        // Execute the query using JdbcTemplate
+        TypedQuery<Student> query = entityManager.createQuery("SELECT s FROM Student s WHERE s.collegeEmail = : username", Student.class);
+        query.setParameter("username", username);
+        List<Student> students = query.getResultList();
+
+        // Check if the user exists
+        if (students.isEmpty()) {
+            throw new UsernameNotFoundException("Student not found with username: " + username);
+        }
+
+        Student student = students.get(0);  // Assuming only one user with this username
+        return student;
+    }
+
 }
