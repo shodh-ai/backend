@@ -20,7 +20,9 @@ jobs:
 
       # Step 2: Build the application to generate the JAR file
       - name: Build Application with Maven
-        run: ./mvnw package
+        run: |
+          ./mvnw package -Dspring.server.port=8080
+          echo "server.port=8080" >> src/main/resources/application.properties
 
       # Step 3: Log in to Amazon ECR
       - name: Log in to Amazon ECR
