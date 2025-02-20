@@ -1,0 +1,62 @@
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches:
+      - main  # Trigger deployment on pushes to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout your repository code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # New Step: Set execute permission for mvnw
+      - name: Set Maven Wrapper Permissions
+        run: chmod +x mvnw
+
+      # Step 2: Build the application to generate the JAR file
+      - name: Build Application with Maven
+        run: |
+          ./mvnw package -Dspring.server.port=8080
+          echo "server.port=8080" >> src/main/resources/application.properties
+
+      # Step 3: Log in to Amazon ECR
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ap-south-1
+
+      # Step 4: Build, tag, and push the Docker image to ECR
+      - name: Build, Tag, and Push Docker Image
+        env:
+          AWS_ACCOUNT_ID: 302263050318
+          AWS_REGION: ap-south-1
+          IMAGE_TAG: latest
+        run: |
+          IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/backend-api:${IMAGE_TAG}"
+          echo "Building Docker image..."
+          docker build -t backend-api .
+          echo "Tagging image as ${IMAGE_URI}..."
+          docker tag backend-api:latest $IMAGE_URI
+          echo "Pushing image to ECR..."
+          docker push $IMAGE_URI
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
+      # Step 5: Update ECS Task Definition and Deploy the service
+      - name: Update ECS Task Definition and Deploy
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ecs-task-def.json
+          service: backend-servicealb
+          cluster: backend-cluster1
+          wait-for-service-stability: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ap-south-1

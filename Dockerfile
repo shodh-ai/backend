@@ -11,4 +11,6 @@ COPY target/ShodhAI-0.0.1-SNAPSHOT.jar ShodhAI-0.0.1-SNAPSHOT.jar
 EXPOSE 8080
 
 # Command to run the jar file
-ENTRYPOINT ["java", "-jar", "ShodhAI-0.0.1-SNAPSHOT.jar"]
+ENV SERVER_PORT=8080
+ENV SPRING_SERVER_PORT=8080
+ENTRYPOINT ["java", "-Dserver.port=${SERVER_PORT}", "-jar", "ShodhAI-0.0.1-SNAPSHOT.jar"]
