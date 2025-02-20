@@ -8,7 +8,7 @@ WORKDIR /
 COPY target/ShodhAI-0.0.1-SNAPSHOT.jar ShodhAI-0.0.1-SNAPSHOT.jar
 
 # Expose the port that your Spring Boot app will run on
-EXPOSE 8098
+EXPOSE 8080
 
 # Command to run the jar file
 ENTRYPOINT ["java", "-jar", "ShodhAI-0.0.1-SNAPSHOT.jar"]
