@@ -132,7 +132,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private boolean isUnsecuredUri(String requestURI) {
         return requestURI.startsWith("/api/v1/auth")
                 | requestURI.startsWith("/api/v1/faculty/add")
-                | requestURI.startsWith("/api/v1/student/add");
+                | requestURI.startsWith("/api/v1/student/add")
+                | requestURI.equals("/api/v1/");
     }
 
     private boolean authenticateUser(HttpServletRequest request, HttpServletResponse response) throws Exception {

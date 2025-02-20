@@ -60,7 +60,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth ->
                                 auth.requestMatchers("/content/get-all-content-type", "/upload").authenticated()
-                                        .requestMatchers("/auth/login-with-username-password", "/student/add", "/faculty/add")
+                                        .requestMatchers("/auth/login-with-username-password", "/student/add", "/faculty/add", "/")
                                         .permitAll()
                                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
