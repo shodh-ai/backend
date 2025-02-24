@@ -68,4 +68,6 @@ public class Constant {
 
     public static String GET_ASSIGNMENT_BY_ID = "SELECT a FROM Assignment a WHERE a.assignmentId = :assignmentId";
 
+    public static String GET_NODE_BY_TOPIC_ID = "SELECT n FROM Node n WHERE n.topic = :topic";
+    public static String GET_EDGE_BY_TOPIC_ID = "SELECT e FROM Edge e WHERE e.topic = :topic";
 }

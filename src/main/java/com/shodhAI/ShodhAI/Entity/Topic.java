@@ -100,4 +100,12 @@ public class Topic {
     @JsonBackReference
     private Topic defaultParentTopic;
 
+    @Column(name = "jsx_code", columnDefinition = "TEXT")
+    @JsonProperty("jsx_code")
+    private String jsxCode;
+
+    @Column(name = "narration", columnDefinition = "TEXT")
+    @JsonProperty("narration")
+    private String narration;
+
 }
