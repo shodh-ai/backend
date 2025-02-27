@@ -1,5 +1,6 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,16 +24,19 @@ public class StudentSimulationProgress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "progress_id")
+    @JsonIgnore
     private Long progressId;
 
     @ManyToOne
     @JoinColumn(name = "topic_id", nullable = false)
     @JsonProperty("topic_id")
+    @JsonIgnore
     private Topic topic;
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
     @JsonProperty("student_id")
+    @JsonIgnore
     private Student student;
 
     @Column(name = "timestamp")

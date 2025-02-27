@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/simulation-progress")
+@RequestMapping("/simulation")
 public class StudentSimulationController {
 
     @Autowired
@@ -23,7 +23,7 @@ public class StudentSimulationController {
     @Autowired
     private ExceptionHandlingService exceptionHandlingService;
 
-    @PostMapping("/update")
+    @PostMapping("/update-timestamp")
     public ResponseEntity<?> updateProgress(@RequestParam Long studentId,
                                             @RequestParam Long topicId,
                                             @RequestParam Double timestamp) {
@@ -36,7 +36,7 @@ public class StudentSimulationController {
         }
     }
 
-    @GetMapping("/get")
+    @GetMapping("/get-timestamp")
     public ResponseEntity<?> getProgress(@RequestParam Long studentId,
                                          @RequestParam Long topicId) {
         try {
