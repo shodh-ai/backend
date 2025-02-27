@@ -19,8 +19,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
@@ -115,7 +113,7 @@ public class SecurityConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         // Instead of "*", specify the exact origins you want to allow
         corsConfiguration.addAllowedOrigin("http://localhost:3000"); // Add your client URL here
-        corsConfiguration.addAllowedOrigin("http://example.com"); // If needed for another origin
+        corsConfiguration.addAllowedOrigin("https://release.shodhlab.ai"); // If needed for another origin
 
         corsConfiguration.addAllowedMethod("*"); // Allow all methods (GET, POST, etc.)
         corsConfiguration.addAllowedHeader("*"); // Allow all headers

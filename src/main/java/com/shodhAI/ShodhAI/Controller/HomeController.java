@@ -8,7 +8,7 @@ public class HomeController {
 
     @GetMapping("/")
     public String HomePage(){
-        return "HOME1";
+        return "HOME12";
     }
 
     @GetMapping("/dummy")
