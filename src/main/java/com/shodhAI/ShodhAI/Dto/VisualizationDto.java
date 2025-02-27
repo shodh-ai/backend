@@ -24,6 +24,9 @@ public class VisualizationDto {
     @JsonProperty("jsx_code")
     private String jsxCode;
 
+    @JsonProperty("topic_id")
+    private Long topicId;
+
     @JsonProperty("topic")
     private String topic;
 

@@ -25,7 +25,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/visualization", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-public class Visualization {
+public class VisualizationController {
 
     @Autowired
     TopicService topicService;
@@ -53,6 +53,7 @@ public class Visualization {
             visualizationDto.setEdges(edges);
             visualizationDto.setNodes(nodes);
             visualizationDto.setTopic(topic.getTopicTitle());
+            visualizationDto.setTopicId(topic.getTopicId());
             visualizationDto.setJsxCode(topic.getJsxCode());
             visualizationDto.setNarration(topic.getNarration());
 

@@ -11,5 +11,7 @@ public class HomeController {
         return "HOME";
     }
 
+    @GetMapping("/dummy")
+    public String DummyPage() {return "dummy";}
 }
 

@@ -27,7 +27,7 @@ public class Edge {
     private Long id;
 
     @Column(name = "source_id")
-    @JsonProperty("source_id")
+    @JsonProperty("source")
     private String source;
 
     @Column(name = "target")
@@ -48,4 +48,3 @@ public class Edge {
     private Topic topic;
 
 }
-
