@@ -31,7 +31,7 @@ public class Node {
     private Long id;
 
     @Column(name = "node_id")
-    @JsonProperty("node_id")
+    @JsonProperty("id")
     private String nodeId;
 
     @Column(name = "name")
