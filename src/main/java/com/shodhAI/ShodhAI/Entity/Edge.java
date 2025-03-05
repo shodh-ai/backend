@@ -47,4 +47,9 @@ public class Edge {
     @JsonIgnore
     private Topic topic;
 
+    @ManyToOne
+    @JoinColumn(name = "doubt_id")
+    @JsonIgnore
+    private Doubt doubt;
+
 }

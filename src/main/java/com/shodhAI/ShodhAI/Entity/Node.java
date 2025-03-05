@@ -63,4 +63,9 @@ public class Node {
     @JsonIgnore
     private Topic topic;
 
+    @ManyToOne
+    @JoinColumn(name = "doubt_id")
+    @JsonIgnore
+    private Doubt doubt;
+
 }

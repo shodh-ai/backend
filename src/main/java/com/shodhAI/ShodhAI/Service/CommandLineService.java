@@ -1,6 +1,7 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Entity.ContentType;
+import com.shodhAI.ShodhAI.Entity.DoubtLevel;
 import com.shodhAI.ShodhAI.Entity.FileType;
 import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.PriorityLevel;
@@ -66,6 +67,15 @@ public class CommandLineService implements CommandLineRunner {
             entityManager.merge(new ContentType(2L, "PRACTICE_QUESTION", 'N', currentDate, currentDate));
             entityManager.merge(new ContentType(3L, "ASSIGNMENT_QUESTION", 'N', currentDate, currentDate));
             entityManager.merge(new ContentType(4L, "SIMULATION", 'N', currentDate, currentDate));
+        }
+
+        if (entityManager.createQuery("SELECT COUNT(d) FROM DoubtLevel d", Long.class).getSingleResult() == 0) {
+
+            Date currentDate = new Date();
+
+            entityManager.merge(new DoubtLevel(1L, "BASIC", 'N', currentDate, currentDate));
+            entityManager.merge(new ContentType(2L, "MEDIATE", 'N', currentDate, currentDate));
+            entityManager.merge(new ContentType(3L, "ADVANCED", 'N', currentDate, currentDate));
         }
 
         if (entityManager.createQuery("SELECT COUNT(p) FROM PriorityLevel p", Long.class).getSingleResult() == 0) {
