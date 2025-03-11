@@ -2,11 +2,11 @@ package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.DoubtDto;
-import com.shodhAI.ShodhAI.Entity.ContentType;
 import com.shodhAI.ShodhAI.Entity.Doubt;
 import com.shodhAI.ShodhAI.Entity.DoubtLevel;
-import com.shodhAI.ShodhAI.Entity.FileType;
+import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.Topic;
+import com.shodhAI.ShodhAI.Entity.UserDoubt;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
@@ -25,6 +25,9 @@ public class DoubtService {
 
     @Autowired
     TopicService topicService;
+
+    @Autowired
+    RoleService roleService;
 
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
@@ -56,12 +59,36 @@ public class DoubtService {
 
             Topic topic = topicService.getTopicById(doubtDto.getTopicId());
 
-            doubt.(currentDate);
-            content.setUpdatedDate(currentDate);
-            content.setTopic(topic);
-            content.setUrl(uploadResult.get("url").toString());
+            doubt.setCreatedDate(currentDate);
+            doubt.setUpdatedDate(currentDate);
+            doubt.setTopic(topic);
+            doubt.setDoubt(doubt.getDoubt());
 
-            return entityManager.merge(content);
+            return entityManager.merge(doubt);
+
+        } catch (PersistenceException persistenceException) {
+            exceptionHandlingService.handleException(persistenceException);
+            throw new PersistenceException(persistenceException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
+
+    @Transactional
+    public UserDoubt saveStudentDoubtLinkage(Long userId, Long roleId, Doubt doubt) throws Exception {
+        try {
+
+            Role role = roleService.getRoleById(roleId);
+
+            UserDoubt userDoubt = new UserDoubt();
+            userDoubt.setUserId(userId);
+            userDoubt.setRole(role);
+            userDoubt.setDoubt(doubt);
+
+            Date currentDate = new Date();
+            userDoubt.setAskedAt(currentDate);
+            return entityManager.merge(userDoubt);
 
         } catch (PersistenceException persistenceException) {
             exceptionHandlingService.handleException(persistenceException);
@@ -115,7 +142,7 @@ public class DoubtService {
             throw new IndexOutOfBoundsException(indexOutOfBoundsException.getMessage());
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
-            throw new Exception(exception);`
+            throw new Exception(exception);
         }
     }
 

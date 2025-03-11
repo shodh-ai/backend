@@ -1,5 +1,6 @@
 package com.shodhAI.ShodhAI.Controller;
 
+import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Dto.DoubtDto;
 import com.shodhAI.ShodhAI.Entity.Doubt;
 import com.shodhAI.ShodhAI.Entity.DoubtLevel;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,15 +32,23 @@ public class DoubtController {
     DoubtService doubtService;
 
     @Autowired
+    JwtUtil jwtTokenUtil;
+
+    @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
     @PostMapping(value = "/ask-doubt")
-    public ResponseEntity<?> addDoubt(HttpServletRequest request, @RequestBody DoubtDto doubtDto) {
+    public ResponseEntity<?> addDoubt(HttpServletRequest request, @RequestBody DoubtDto doubtDto, @RequestHeader(value = "Authorization") String authHeader) {
         try {
+
+            String jwtToken = authHeader.substring(7);
+            Long roleId = jwtTokenUtil.extractRoleId(jwtToken);
+            Long userId = jwtTokenUtil.extractId(jwtToken);
 
             doubtService.validateDoubt(doubtDto);
             Doubt doubt = doubtService.saveDoubt(doubtDto);
 
+            doubtService.saveStudentDoubtLinkage(userId, roleId, doubt);
             return ResponseService.generateSuccessResponse("Doubt Resolved Successfully", doubt, HttpStatus.OK);
 
         } catch (DataIntegrityViolationException dataIntegrityViolationException) {
