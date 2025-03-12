@@ -1,6 +1,5 @@
 package com.shodhAI.ShodhAI.Dto;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.shodhAI.ShodhAI.Entity.Edge;
 import com.shodhAI.ShodhAI.Entity.Node;
