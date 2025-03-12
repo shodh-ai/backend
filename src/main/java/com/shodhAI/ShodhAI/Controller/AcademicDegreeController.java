@@ -2,7 +2,6 @@ package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Dto.AcademicDegreeDto;
 import com.shodhAI.ShodhAI.Entity.AcademicDegree;
-import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Service.AcademicDegreeService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +34,6 @@ public class AcademicDegreeController {
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
-    @Transactional
     @PostMapping("/add")
     public ResponseEntity<?> addAcademicDegree(@RequestBody AcademicDegreeDto academicDegreeDto) {
         try {
@@ -61,7 +58,6 @@ public class AcademicDegreeController {
         }
     }
 
-    @Transactional
     @GetMapping("/get-all")
     public ResponseEntity<?> retrieveAllAcademicDegree(HttpServletRequest request) {
         try {
@@ -84,7 +80,6 @@ public class AcademicDegreeController {
         }
     }
 
-    @Transactional
     @GetMapping("/get-academic-degree-by-id/{academicDegreeIdString}")
     public ResponseEntity<?> retrieveAcademicDegreeById(HttpServletRequest request, @PathVariable String academicDegreeIdString) {
         try {
@@ -107,4 +102,5 @@ public class AcademicDegreeController {
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

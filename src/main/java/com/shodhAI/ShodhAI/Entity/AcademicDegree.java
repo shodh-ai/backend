@@ -26,7 +26,7 @@ public class AcademicDegree {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="degree_id")
-    private int degreeId;
+    private Long degreeId;
 
     @NonNull
     @Column(name = "degree_name")
