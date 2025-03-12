@@ -5,6 +5,7 @@ import com.shodhAI.ShodhAI.Entity.DoubtLevel;
 import com.shodhAI.ShodhAI.Entity.FileType;
 import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.PriorityLevel;
+import com.shodhAI.ShodhAI.Entity.QuestionType;
 import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.TopicType;
 import jakarta.persistence.EntityManager;
@@ -67,6 +68,16 @@ public class CommandLineService implements CommandLineRunner {
             entityManager.merge(new ContentType(2L, "PRACTICE_QUESTION", 'N', currentDate, currentDate));
             entityManager.merge(new ContentType(3L, "ASSIGNMENT_QUESTION", 'N', currentDate, currentDate));
             entityManager.merge(new ContentType(4L, "SIMULATION", 'N', currentDate, currentDate));
+        }
+
+        if (entityManager.createQuery("SELECT COUNT(c) FROM QuestionType c", Long.class).getSingleResult() == 0) {
+
+            Date currentDate = new Date();
+
+            entityManager.merge(new QuestionType(1L, "PRACTICE_QUESTION", 'N', currentDate, currentDate));
+            entityManager.merge(new QuestionType(2L, "EXAMPLE_QUESTION", 'N', currentDate, currentDate));
+            entityManager.merge(new QuestionType(3L, "TESTING_QUESTION", 'N', currentDate, currentDate));
+            entityManager.merge(new QuestionType(4L, "QUIZ", 'N', currentDate, currentDate));
         }
 
         if (entityManager.createQuery("SELECT COUNT(d) FROM DoubtLevel d", Long.class).getSingleResult() == 0) {
