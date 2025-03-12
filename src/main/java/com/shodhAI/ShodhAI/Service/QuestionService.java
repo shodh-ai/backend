@@ -104,7 +104,7 @@ public class QuestionService {
             question.setUpdatedDate(currentDate);
 
             question.setQuestion(questionResponseDto.getQuestion());
-            question.setAnswer(question.getAnswer());
+//            question.setAnswer(question.getAnswer());
             question.setCognitiveDomain(question.getQuestion());
             question.setHints(question.getHints());
 
@@ -190,7 +190,7 @@ public class QuestionService {
                 // Create a new Question object to save
                 Question question = new Question();
                 question.setQuestion(questionResponseDto.getQuestion());
-                question.setAnswer(questionResponseDto.getAnswer());
+//                question.setAnswer(questionResponseDto.getAnswer());
                 question.setCognitiveDomain(questionResponseDto.getCognitiveDomain());
                 question.setTopic(topic);
                 // Process hints and add to the question
