@@ -1,0 +1,45 @@
+package com.shodhAI.ShodhAI.Entity;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Date;
+
+@Entity
+@Table(name = "session")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Session {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "session_id")
+    @JsonProperty("session_id")
+    private Long sessionId;
+
+    @Column(name = "user_id", nullable = false)
+    @JsonProperty("user_id")
+    private Long userId;
+
+    @Column(name = "start_time", nullable = false)
+    @JsonProperty("start_time")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
+    private Date startTime;
+
+    @Column(name = "end_time")
+    @JsonProperty("end_time")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
+    private Date endTime;
+
+    @ManyToOne
+    @JoinColumn(name = "user_role_id", nullable = false)
+    @JsonProperty("user_role")
+    private Role userRole;
+
+}
+

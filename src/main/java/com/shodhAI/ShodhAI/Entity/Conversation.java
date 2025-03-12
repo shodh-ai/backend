@@ -13,34 +13,34 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
 
 @Entity
-@Table(name="doubt")
+@Table(name="conversation")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class Doubt {
+@NoArgsConstructor
+@Getter
+@Setter
+public class Conversation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "doubt_id")
-    @JsonProperty("doubt_id")
+    @Column(name = "interaction_id")
+    @JsonProperty("interaction_id")
     private Long id;
 
-    @Column(name="doubt", columnDefinition = "TEXT")
-    @JsonProperty("doubt")
-    private String doubt;
+    @Column(name="user_text", columnDefinition = "TEXT")
+    @JsonProperty("user_text")
+    private String userText;
 
-    @Column(name = "jsx_code", columnDefinition = "TEXT")
-    @JsonProperty("jsx_code")
-    private String jsxCode;
-
-    @Column(name = "narration", columnDefinition = "TEXT")
-    @JsonProperty("narration")
-    private String narration;
+    @Column(name = "response", columnDefinition = "TEXT")
+    @JsonProperty("response")
+    private String response;
 
     @ManyToOne
     @NotNull
@@ -48,16 +48,35 @@ public class Doubt {
     @JsonProperty("topic_id")
     private Topic topic;
 
-    @Column(name = "created_date")
+    @ManyToOne
+    @JoinColumn(name = "session_id", nullable = false)
+    @JsonProperty("session_id")
+    private Session session;
+
+    @Column(name = "user_id")
+    @JsonProperty("user_id")
+    private Long userId;
+
+    @ManyToOne
+    @JoinColumn(name = "user_role_id")
+    @JsonProperty("user_role")
+    private Role userRole;
+
+    @ManyToOne
+    @JoinColumn(name = "question_type_id")
+    @JsonProperty("question_type")
+    private QuestionType questionType;
+
+    @Column(name = "user_text_timestamp")
     @JsonProperty("created_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     // TODO (MIGHT HAVE TO CHANGE IN FUTURE) this won't work with instant as instant does not have calendar features like LocalDateTime etc.
-    private Date createdDate;
+    private Date userTextTimestamp;
 
-    @Column(name = "modified_date")
-    @JsonProperty("modified_date")
+    @Column(name = "response_timestamp")
+    @JsonProperty("response_timestamp")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     // TODO (MIGHT HAVE TO CHANGE IN FUTURE) this won't work with instant as instant does not have calendar features like LocalDateTime etc.
-    private Date updatedDate;
+    private Date responseTimestamp;
 
 }
