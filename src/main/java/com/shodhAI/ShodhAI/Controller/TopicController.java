@@ -1,6 +1,8 @@
 package com.shodhAI.ShodhAI.Controller;
 
+import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Dto.ParentTopicWrapper;
+import com.shodhAI.ShodhAI.Dto.ReportWrapper;
 import com.shodhAI.ShodhAI.Dto.TopicDto;
 import com.shodhAI.ShodhAI.Dto.TopicWrapper;
 import com.shodhAI.ShodhAI.Entity.Question;
@@ -22,12 +24,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/topic", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -44,6 +49,9 @@ public class TopicController {
 
     @Autowired
     QuestionService questionService;
+
+    @Autowired
+    JwtUtil jwtTokenUtil;
 
     @PostMapping(value = "/add")
     public ResponseEntity<?> addTopic(@RequestBody TopicDto topicDto) {
@@ -227,6 +235,49 @@ public class TopicController {
             List<Question> questionList = questionService.getQuestionByTopic(topic);
 
             return ResponseService.generateSuccessResponse("Assignment Question Retrieved Successfully", questionList, HttpStatus.OK);
+
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/generate-report/{topicIdString}")
+    public ResponseEntity<?> generateReport(HttpServletRequest request,
+                                            @PathVariable String topicIdString,
+                                            @RequestHeader(value = "Authorization") String authHeader) {
+        try {
+
+            Long topicId = Long.parseLong(topicIdString);
+            Topic topic = topicService.getTopicById(topicId);
+            if (topic == null) {
+                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
+            }
+
+            String jwtToken = authHeader.substring(7);
+            Long roleId = jwtTokenUtil.extractRoleId(jwtToken);
+            Long userId = jwtTokenUtil.extractId(jwtToken);
+
+            Map<String, Object> dataMap = new HashMap<>();
+            dataMap.put("module", topic.getModule().getModuleTitle());
+            dataMap.put("topic", topic.getDefaultParentTopic().getTopicTitle());
+            dataMap.put("sub-topic", topic.getTopicTitle());
+
+            List<Map<String, Object>> conversations = new ArrayList<>();
+
+
+            dataMap.put("conversations", conversations);
+
+
+            // ml-api integration
+            ReportWrapper reportWrapper = null;
+            return ResponseService.generateSuccessResponse("Report Generated Successfully", reportWrapper, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
