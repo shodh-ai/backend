@@ -3,23 +3,31 @@ package com.shodhAI.ShodhAI.Controller;
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.QuestionRequestDto;
 import com.shodhAI.ShodhAI.Dto.QuestionResponseDto;
+import com.shodhAI.ShodhAI.Entity.Assignment;
 import com.shodhAI.ShodhAI.Entity.Content;
 import com.shodhAI.ShodhAI.Entity.Module;
 import com.shodhAI.ShodhAI.Entity.Question;
+import com.shodhAI.ShodhAI.Entity.QuestionType;
 import com.shodhAI.ShodhAI.Entity.Topic;
 import com.shodhAI.ShodhAI.Service.AIService;
 import com.shodhAI.ShodhAI.Service.ContentService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.QuestionService;
+import com.shodhAI.ShodhAI.Service.QuestionTypeService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.TopicService;
+import jakarta.persistence.PersistenceException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -42,6 +50,12 @@ public class QuestionController {
 
     @Autowired
     AIService aiService;
+
+    @Autowired
+    TopicService topicService;
+
+    @Autowired
+    QuestionTypeService questionTypeService;
 
     @PostMapping("/generate-questions")
     public ResponseEntity<?> generateQuestions(@Valid @RequestBody QuestionRequestDto questionRequestDto) {
@@ -140,6 +154,42 @@ public class QuestionController {
                 // fetch the questions from the db once they get saved in the db.
                 return ResponseService.generateSuccessResponse("Question Fetched Successfully", questionList, HttpStatus.OK);
             }
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping(value = "/get-filter-question")
+    public ResponseEntity<?> getQuestion (@RequestParam(value = "topic_id", required = false) Long topicId,
+                                          @RequestParam(value = "question_type_id", required = false) Long questionTypeId) {
+
+        try {
+            if( topicId <=0 ) {
+                throw new IllegalArgumentException("Topic Id cannot be <= 0");
+            }
+            Topic topic = topicService.getTopicById(topicId);
+
+            if( questionTypeId <= 0) {
+                throw new IllegalArgumentException("Question Type Id cannot be <= 0");
+            }
+            QuestionType questionType = questionTypeService.getQuestionTypeById(questionTypeId);
+
+            List<Question> questions = questionService.questionFilter(topic, questionType.getQuestionTypeId());
+            return ResponseService.generateSuccessResponse("Questions fetched Successfully", questions, HttpStatus.OK);
+
+        } catch (DataIntegrityViolationException dataIntegrityViolationException) {
+            exceptionHandlingService.handleException(dataIntegrityViolationException);
+            return ResponseService.generateErrorResponse("Data Integrity Exception caught: " + dataIntegrityViolationException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (PersistenceException persistenceException) {
+            exceptionHandlingService.handleException(persistenceException);
+            return ResponseService.generateErrorResponse("Persistence Exception Caught: " + persistenceException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

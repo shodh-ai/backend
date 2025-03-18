@@ -43,12 +43,6 @@ public class Conversation {
     private String response;
 
     @ManyToOne
-    @NotNull
-    @JoinColumn(name = "topic_id")
-    @JsonProperty("topic_id")
-    private Topic topic;
-
-    @ManyToOne
     @JoinColumn(name = "session_id", nullable = false)
     @JsonProperty("session_id")
     private Session session;
@@ -61,11 +55,6 @@ public class Conversation {
     @JoinColumn(name = "user_role_id")
     @JsonProperty("user_role")
     private Role userRole;
-
-    @ManyToOne
-    @JoinColumn(name = "question_type_id")
-    @JsonProperty("question_type")
-    private QuestionType questionType;
 
     @Column(name = "user_text_timestamp")
     @JsonProperty("created_date")
