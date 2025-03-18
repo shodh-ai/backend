@@ -1,6 +1,6 @@
 package com.shodhAI.ShodhAI.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,42 +14,36 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Entity
-@Table(name = "edges")
+@Table(name = "user_doubt")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Edge {
+public class UserDoubt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     private Long id;
 
-    @Column(name = "source_id")
-    @JsonProperty("source")
-    private String source;
-
-    @Column(name = "target")
-    @JsonProperty("target")
-    private String target;
-
-    @Column(name = "type")
-    @JsonProperty("type")
-    private String type;
-
-    @Column(name = "description")
-    @JsonProperty("description")
-    private String description;
+    @Column(name = "user_id")
+    @JsonProperty("user_id")
+    private Long userId;
 
     @ManyToOne
-    @JoinColumn(name = "topic_id")
-    @JsonIgnore
-    private Topic topic;
+    @JoinColumn(name = "role_id")
+    @JsonProperty("role")
+    private Role role;
 
     @ManyToOne
     @JoinColumn(name = "doubt_id")
-    @JsonIgnore
+    @JsonProperty("doubt")
     private Doubt doubt;
+
+    @Column(name = "asked_at")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
+    @JsonProperty("asked_at")
+    private Date askedAt;
 
 }

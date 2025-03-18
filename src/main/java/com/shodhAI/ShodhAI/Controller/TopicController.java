@@ -2,6 +2,7 @@ package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Dto.ParentTopicWrapper;
 import com.shodhAI.ShodhAI.Dto.TopicDto;
+import com.shodhAI.ShodhAI.Dto.TopicWrapper;
 import com.shodhAI.ShodhAI.Entity.Question;
 import com.shodhAI.ShodhAI.Entity.Topic;
 import com.shodhAI.ShodhAI.Entity.TopicType;
@@ -114,10 +115,19 @@ public class TopicController {
 
             Long topicId = Long.parseLong(topicIdString);
             Topic topic = topicService.getTopicById(topicId);
+
+            List<Question> practiceQuestion = questionService.questionFilter(topic, 1L);
+            List<Question> exampleQuestion = questionService.questionFilter(topic, 2L);
+            List<Question> testingQuestion = questionService.questionFilter(topic, 3L);
+            List<Question> quiz = questionService.questionFilter(topic, 4L);
+
+            TopicWrapper wrapper = new TopicWrapper();
+            wrapper.wrapDetails(topic, practiceQuestion, exampleQuestion, testingQuestion,quiz);
+
             if (topic == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            return ResponseService.generateSuccessResponse("Topic Retrieved Successfully", topic, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Topic Retrieved Successfully", wrapper, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);

@@ -7,6 +7,8 @@ import com.shodhAI.ShodhAI.Dto.QuestionResponseDto;
 import com.shodhAI.ShodhAI.Entity.Hint;
 import com.shodhAI.ShodhAI.Entity.Module;
 import com.shodhAI.ShodhAI.Entity.Question;
+import com.shodhAI.ShodhAI.Entity.QuestionType;
+import com.shodhAI.ShodhAI.Entity.Session;
 import com.shodhAI.ShodhAI.Entity.Topic;
 import com.shodhAI.ShodhAI.Entity.TopicType;
 import jakarta.persistence.EntityManager;
@@ -104,7 +106,7 @@ public class QuestionService {
             question.setUpdatedDate(currentDate);
 
             question.setQuestion(questionResponseDto.getQuestion());
-            question.setAnswer(question.getAnswer());
+//            question.setAnswer(question.getAnswer());
             question.setCognitiveDomain(question.getQuestion());
             question.setHints(question.getHints());
 
@@ -190,7 +192,7 @@ public class QuestionService {
                 // Create a new Question object to save
                 Question question = new Question();
                 question.setQuestion(questionResponseDto.getQuestion());
-                question.setAnswer(questionResponseDto.getAnswer());
+//                question.setAnswer(questionResponseDto.getAnswer());
                 question.setCognitiveDomain(questionResponseDto.getCognitiveDomain());
                 question.setTopic(topic);
                 // Process hints and add to the question
@@ -223,4 +225,37 @@ public class QuestionService {
         }
     }
 
+    @Transactional
+    public List<Question> questionFilter(Topic topic, Long questionTypeId) throws Exception {
+        try {
+
+            StringBuilder jpql = new StringBuilder("SELECT s FROM Question s WHERE 1=1 ");
+
+            if (topic != null) {
+                jpql.append("AND s.topic.id = :topicId ");
+            }
+            if (questionTypeId != null) {
+                jpql.append("AND s.questionType.id = :questionTypeId ");
+            }
+
+            // Create the query
+            TypedQuery<Question> query = entityManager.createQuery(jpql.toString(), Question.class);
+
+            if (topic != null) {
+                query.setParameter("topicId", topic.getTopicId());
+            }
+            if (questionTypeId != null) {
+                query.setParameter("questionTypeId", questionTypeId);
+            }
+
+            return query.getResultList();
+
+        } catch (PersistenceException persistenceException) {
+            exceptionHandlingService.handleException(persistenceException);
+            throw new PersistenceException(persistenceException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
 }
