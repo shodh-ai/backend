@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class ConversationService {
@@ -61,20 +62,26 @@ public class ConversationService {
     public Conversation saveConversation(Long userId, Long roleId, ConversationDto conversationDto) throws Exception {
         try {
 
-            /*Conversation conversation = new Conversation();
+            Conversation conversation = new Conversation();
             Date currentDate = new Date();
 
             Role role = roleService.getRoleById(roleId);
-            Session session = sessionService.
+            List<Session> session = sessionService.sessionFilter(conversationDto.getSessionId(), null, null, null, null);
 
-            session.setTopic(topic);
-            session.setQuestionType(questionType);
-            session.setStartTime(currentDate);
-            session.setUserId(userId);
-            session.setUserRole(role);
+            if(session.isEmpty()) {
+                throw new IllegalArgumentException("No Session found with this session Id");
+            }
+            conversation.setSession(session.get(0));
+            conversation.setUserTextTimestamp(currentDate);
+            conversation.setUserText(conversationDto.getUserText());
 
-            return entityManager.merge(session);*/
-            return null;
+            // ml-api integration
+
+
+            conversation.setUserId(userId);
+            conversation.setUserRole(role);
+
+            return entityManager.merge(conversation);
 
         } catch (PersistenceException persistenceException) {
             exceptionHandlingService.handleException(persistenceException);

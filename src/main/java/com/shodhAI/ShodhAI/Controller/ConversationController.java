@@ -3,6 +3,7 @@ package com.shodhAI.ShodhAI.Controller;
 import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Dto.ConversationDto;
 import com.shodhAI.ShodhAI.Dto.DoubtDto;
+import com.shodhAI.ShodhAI.Entity.Conversation;
 import com.shodhAI.ShodhAI.Entity.Doubt;
 import com.shodhAI.ShodhAI.Service.ConversationService;
 import com.shodhAI.ShodhAI.Service.DoubtService;
@@ -46,10 +47,9 @@ public class ConversationController {
             Long userId = jwtTokenUtil.extractId(jwtToken);
 
             conversationService.validateConversation(conversationDto);
-            conversationService.saveConversation(conversationDto);
+            Conversation conversation = conversationService.saveConversation(userId, roleId, conversationDto);
 
-            doubtService.saveStudentDoubtLinkage(userId, roleId, Conversation);
-            return ResponseService.generateSuccessResponse("Doubt Resolved Successfully", doubt, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Conversation Stored Successfully", conversation, HttpStatus.OK);
 
         } catch (DataIntegrityViolationException dataIntegrityViolationException) {
             exceptionHandlingService.handleException(dataIntegrityViolationException);
