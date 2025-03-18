@@ -3,6 +3,7 @@ package com.shodhAI.ShodhAI.Entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,17 @@ public class Session {
     @Column(name = "user_id", nullable = false)
     @JsonProperty("user_id")
     private Long userId;
+
+    @ManyToOne
+    @NotNull
+    @JoinColumn(name = "topic_id")
+    @JsonProperty("topic_id")
+    private Topic topic;
+
+    @ManyToOne
+    @JoinColumn(name = "question_type_id")
+    @JsonProperty("question_type")
+    private QuestionType questionType;
 
     @Column(name = "start_time", nullable = false)
     @JsonProperty("start_time")
