@@ -19,6 +19,4 @@ public class AcademicDegreeDto {
     @JsonProperty("institution_name")
     private String institutionName;
 
-
-
 }
