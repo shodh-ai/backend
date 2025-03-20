@@ -176,10 +176,10 @@ public class StudentController {
 
             studentSemesterDto.wrapDetails(semesterScoreDto);
 
-        /*StudentWrapper studentWrapper = new StudentWrapper();
-            studentWrapper.wrapDetails(student);*/
+            StudentWrapper studentWrapper = new StudentWrapper();
+            studentWrapper.wrapDetails(student);
 
-            return ResponseService.generateSuccessResponse("Student Retrieved Successfully", studentSemesterDto, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Student Retrieved Successfully", studentWrapper, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);

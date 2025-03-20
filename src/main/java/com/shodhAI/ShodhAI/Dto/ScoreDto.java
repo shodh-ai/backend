@@ -37,7 +37,7 @@ public class ScoreDto {
     public void wrapDetails(TimeSpent timeSpent) {
         this.label = "Time Spent";
         this.value = timeSpent.getTimeSpent();
-        this.improvedValue = timeSpent.getTimeSpentIncresed();
+        this.improvedValue = timeSpent.getTimeSpentIncreased();
         this.improvedFlag = true;
     }
 

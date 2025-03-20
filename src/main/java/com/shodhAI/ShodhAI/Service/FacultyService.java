@@ -107,7 +107,7 @@ public class FacultyService {
         try {
 
             Gender gender = genderService.getGenderById(facultyDto.getGenderId());
-            Role role = roleService.getRoleById(4L);
+            Role role = roleService.getRoleById(3L);
 
             Date currentDate = new Date();
 
