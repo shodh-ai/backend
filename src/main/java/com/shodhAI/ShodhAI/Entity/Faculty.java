@@ -1,6 +1,8 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -117,7 +119,8 @@ public class Faculty {
     private String profilePictureUrl;
 
     // Many-to-Many relationship with Course
-    @ManyToMany(mappedBy = "facultyMembers")
+    @ManyToMany(mappedBy = "facultyMembers",cascade = CascadeType.ALL)
+    @JsonBackReference("courses-faculty-reference")
     @JsonProperty("courses")
     private List<Course> courses = new ArrayList<>();
 
@@ -129,9 +132,10 @@ public class Faculty {
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
     @JsonProperty("students")
+    @JsonBackReference("students-faculty-reference")
     private List<Student> students = new ArrayList<>();
 
-    // One-to-Many relationship with notifications
+    @JsonIgnore
     @OneToMany(mappedBy = "sender")
     @JsonProperty("notifications")
     private List<Notification> notifications;

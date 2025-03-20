@@ -1,5 +1,6 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,12 +24,13 @@ public class NotificationType {
 
     @Column(name = "type_name", unique = true)
     @JsonProperty("type_name")
-    private String typeName; // EMAIL, SMS, PUSH, IN_APP, etc.
+    private String typeName;
 
     @Column(name = "description")
     @JsonProperty("description")
     private String description;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "notificationTypes")
     private List<Notification> notifications;
 }

@@ -1,6 +1,10 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -153,9 +157,15 @@ public class Student {
     // Many-to-Many relationship with Faculty
     @ManyToMany(mappedBy = "students")
     @JsonProperty("faculty_members")
+    @JsonManagedReference("students-faculty-reference")
     private List<Faculty> facultyMembers = new ArrayList<>();
 
-    // Relationship with notification recipients
+    @ManyToMany(mappedBy = "students")
+    @JsonIgnoreProperties("students")
+    @JsonProperty("courses")
+    private List<Course> courses = new ArrayList<>();
+
+    @JsonIgnore
     @OneToMany(mappedBy = "recipient")
     @JsonProperty("notification_recipients")
     private List<NotificationRecipient> notificationRecipients;

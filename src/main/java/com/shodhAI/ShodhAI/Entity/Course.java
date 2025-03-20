@@ -1,6 +1,8 @@
 package com.shodhAI.ShodhAI.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -91,8 +93,19 @@ public class Course {
             joinColumns = @JoinColumn(name = "course_id"),
             inverseJoinColumns = @JoinColumn(name = "faculty_id")
     )
+    @JsonManagedReference("courses-faculty-reference")
     @JsonProperty("faculty_members")
     private List<Faculty> facultyMembers = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "course_student",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
+    @JsonIgnoreProperties("courses")
+    @JsonProperty("students")
+    private List<Student> students = new ArrayList<>();
 
     // One-to-Many relationship with notifications
     @OneToMany(mappedBy = "course")
