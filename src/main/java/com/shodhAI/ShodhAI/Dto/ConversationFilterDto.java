@@ -8,12 +8,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConversationDto {
+public class ConversationFilterDto {
 
     @JsonProperty("session_id")
     private Long sessionId;
 
-    @JsonProperty("user_dialogue")
-    private String userDialogue;
+    @JsonProperty("topic_id")
+    private Long topicId;
 
 }

@@ -23,6 +23,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "student")
@@ -146,6 +147,16 @@ public class Student {
     @JsonProperty("critical_thinking")
     private CriticalThinking criticalThinking;
 
+    @OneToOne
+    @JoinColumn(name = "understanding_id")
+    @JsonProperty("understanding")
+    private Understanding understanding;
+
+    @OneToOne
+    @JoinColumn(name = "memory_id")
+    @JsonProperty("memory")
+    private Memory memory;
+
     @Column(name = "profile_picture_url")
     @JsonProperty("profile_picture_url")
     private String profilePictureUrl;
@@ -155,5 +166,15 @@ public class Student {
     @JoinColumn(name="time_spent_id")
     @JsonProperty("time_spent")
     private TimeSpent timeSpent;
+
+    @Column(name = "summary", columnDefinition = "TEXT")
+    @JsonProperty("summary")
+    private String summary;
+
+    @JsonProperty("strengths")
+    private List<String> strengths;
+
+    @JsonProperty("weaknesses")
+    private List<String> weaknesses;
 
 }

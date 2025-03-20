@@ -17,27 +17,31 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name="time_spent")
+@Table(name="memory")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TimeSpent {
+public class Memory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "time_spent_id")
-    @JsonProperty("time_spent_id")
+    @Column(name = "memory_id")
+    @JsonProperty("memory_id")
     private Long id;
 
-    @Column(name = "time_spent")
-    @JsonProperty("time_spent")
-    @Min(value = 0, message = "Accuracy must be at least 0.0")
-    @Max(value = 100, message = "Accuracy must not exceed 100.0")
-    private Double timeSpent = 0.0;
+    @Column(name = "memory")
+    @JsonProperty("memory")
+    @Min(value = 0, message = "Memory must be at least 0.0")
+    @Max(value = 100, message = "Memory must not exceed 100.0")
+    private Double criticalThinking = 100.0;
 
-    @Column(name = "time_spent_increased")
-    @JsonProperty("time_spent_increased")
-    private Double timeSpentIncreased = 0.0;
+    @Column(name = "memory_improvement_flag")
+    @JsonProperty("memory_improvement_flag")
+    private Boolean criticalThinkingImprovementFlag;
+
+    @Column(name = "memory_improvement")
+    @JsonProperty("memory_improvement")
+    private Double criticalThinkingImprovement = 0.0;
 
     @Column(name = "created_date")
     @JsonProperty("created_date")
