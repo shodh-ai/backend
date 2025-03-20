@@ -104,6 +104,9 @@ public class SessionService {
                 jpql.append("AND s.questionType.id = :questionTypeId ");
             }
 
+            // Add ORDER BY clause to sort by sessionId
+            jpql.append("ORDER BY s.id ASC");
+
             // Create the query
             TypedQuery<Session> query = entityManager.createQuery(jpql.toString(), Session.class);
 

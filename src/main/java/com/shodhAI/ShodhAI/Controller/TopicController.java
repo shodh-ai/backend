@@ -5,12 +5,16 @@ import com.shodhAI.ShodhAI.Dto.ParentTopicWrapper;
 import com.shodhAI.ShodhAI.Dto.ReportWrapper;
 import com.shodhAI.ShodhAI.Dto.TopicDto;
 import com.shodhAI.ShodhAI.Dto.TopicWrapper;
+import com.shodhAI.ShodhAI.Entity.Conversation;
 import com.shodhAI.ShodhAI.Entity.Question;
+import com.shodhAI.ShodhAI.Entity.Session;
 import com.shodhAI.ShodhAI.Entity.Topic;
 import com.shodhAI.ShodhAI.Entity.TopicType;
+import com.shodhAI.ShodhAI.Service.ConversationService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.QuestionService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.SessionService;
 import com.shodhAI.ShodhAI.Service.TopicService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
@@ -30,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +57,12 @@ public class TopicController {
 
     @Autowired
     JwtUtil jwtTokenUtil;
+
+    @Autowired
+    SessionService sessionService;
+
+    @Autowired
+    ConversationService conversationService;
 
     @PostMapping(value = "/add")
     public ResponseEntity<?> addTopic(@RequestBody TopicDto topicDto) {
@@ -270,14 +281,42 @@ public class TopicController {
             dataMap.put("sub-topic", topic.getTopicTitle());
 
             List<Map<String, Object>> conversations = new ArrayList<>();
+            // first find the last session and then find  the conversation from the conversation table.
 
+            List<Long> allowedQuestionTypeIds = Arrays.asList(null, 1L, 2L, 3L, 4L);
+
+            for (Long questionTypeId : allowedQuestionTypeIds) {
+                List<Session> filteredSessions = sessionService.sessionFilter(null, userId, roleId, topicId, questionTypeId);
+
+                if (!filteredSessions.isEmpty()) {
+                    // Get the last session for the current question type
+                    Session latestSession = filteredSessions.get(filteredSessions.size() - 1);
+
+                    List<Conversation> filteredConversations = conversationService.conversationFilter(latestSession.getSessionId(), userId, roleId);
+                    List<Map<String, String>> conversationDetails = new ArrayList<>();
+
+                    for (Conversation conversation : filteredConversations) {
+                        Map<String, String> dialogueMap = new HashMap<>();
+                        dialogueMap.put("user_dialogue", conversation.getUserDialogue());
+                        dialogueMap.put("assistant_dialogue", conversation.getAssistantDialogue());
+                        conversationDetails.add(dialogueMap);
+                    }
+
+                    if (!conversationDetails.isEmpty()) {
+                        Map<String, Object> conversationMap = new HashMap<>();
+                        conversationMap.put("reference_answer", null); // Add reference answer if needed
+                        conversationMap.put("conversation", conversationDetails);
+                        conversations.add(conversationMap);
+                    }
+                }
+            }
 
             dataMap.put("conversations", conversations);
 
-
             // ml-api integration
+
             ReportWrapper reportWrapper = null;
-            return ResponseService.generateSuccessResponse("Report Generated Successfully", reportWrapper, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Report Generated Successfully", dataMap, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
