@@ -3,15 +3,7 @@ package com.shodhAI.ShodhAI.Entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -24,7 +16,9 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name="faculty")
@@ -121,6 +115,26 @@ public class Faculty {
     @Column(name = "profile_picture_url")
     @JsonProperty("profile_picture_url")
     private String profilePictureUrl;
+
+    // Many-to-Many relationship with Course
+    @ManyToMany(mappedBy = "facultyMembers")
+    @JsonProperty("courses")
+    private List<Course> courses = new ArrayList<>();
+
+    // Many-to-Many relationship with Student
+    @ManyToMany
+    @JoinTable(
+            name = "faculty_student",
+            joinColumns = @JoinColumn(name = "faculty_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
+    @JsonProperty("students")
+    private List<Student> students = new ArrayList<>();
+
+    // One-to-Many relationship with notifications
+    @OneToMany(mappedBy = "sender")
+    @JsonProperty("notifications")
+    private List<Notification> notifications;
 
 }
 

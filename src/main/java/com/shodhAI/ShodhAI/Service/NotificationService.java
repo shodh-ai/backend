@@ -1,12 +1,6 @@
 package com.shodhAI.ShodhAI.Service;
 
-//import com.shodhAI.ShodhAI.Entity.DeliveryStatus;
-import com.shodhAI.ShodhAI.Entity.DeliveryStatus;
-import com.shodhAI.ShodhAI.Entity.Faculty;
-import com.shodhAI.ShodhAI.Entity.Notification;
-import com.shodhAI.ShodhAI.Entity.NotificationRecipient;
-import com.shodhAI.ShodhAI.Entity.NotificationType;
-import com.shodhAI.ShodhAI.Entity.Student;
+import com.shodhAI.ShodhAI.Entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -29,7 +23,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class NotificationService {
-
 
     private static final Logger logger = Logger.getLogger(NotificationService.class.getName());
 
@@ -81,40 +74,60 @@ public class NotificationService {
     }
 
     @Transactional
-    public void sendNotificationToClass(Long classId, Notification notification) {
-        Class classEntity = entityManager.find(Class.class, classId);
-        if (classEntity == null) {
-            throw new RuntimeException("Class not found with ID: " + classId);
+    public void sendNotificationToCourse(Long courseId, Notification notification) {
+        Course course = entityManager.find(Course.class, courseId);
+        if (course == null) {
+            throw new RuntimeException("Course not found with ID: " + courseId);
         }
 
-        // Get students in class
-        TypedQuery<ClassStudent> query = entityManager.createQuery(
-                "SELECT cs FROM ClassStudent cs WHERE cs.classEntity.id = :classId AND cs.archived = 'N'",
-                ClassStudent.class
-        );
-        query.setParameter("classId", classId);
-        List<ClassStudent> classStudents = query.getResultList();
-
-        // Get pending delivery status
-        DeliveryStatus pendingStatus = entityManager.find(DeliveryStatus.class, 1L);
-        if (pendingStatus == null) {
-            throw new RuntimeException("Pending delivery status not found");
+        // Get faculty members associated with this course
+        List<Faculty> facultyMembers = course.getFacultyMembers();
+        if (facultyMembers == null || facultyMembers.isEmpty()) {
+            throw new RuntimeException("No faculty members associated with course ID: " + courseId);
         }
+
+        // Get all students associated with these faculty members
+        List<Student> students = new ArrayList<>();
+        for (Faculty faculty : facultyMembers) {
+            List<Student> facultyStudents = faculty.getStudents();
+            if (facultyStudents != null && !facultyStudents.isEmpty()) {
+                students.addAll(facultyStudents);
+            }
+        }
+
+        // Remove duplicates (if a student has multiple faculty members from the course)
+        students = students.stream().distinct().collect(Collectors.toList());
+
+        if (students.isEmpty()) {
+            throw new RuntimeException("No students found for course ID: " + courseId);
+        }
+
+        // Set course relationship and mark as course announcement
+        notification.setCourse(course);
+        notification.setIsCourseAnnouncement(true);
+        entityManager.merge(notification);
 
         // Create notification recipients
         List<NotificationRecipient> recipients = new ArrayList<>();
-        for (ClassStudent classStudent : classStudents) {
+        for (Student student : students) {
             NotificationRecipient recipient = new NotificationRecipient();
             recipient.setNotification(notification);
-            recipient.setStudent(classStudent.getStudent());
-            recipient.setIsRead(false);
+            recipient.setRecipient(student);
+            recipient.setReadStatus(false);
+
+            // Find the pending delivery status
+            DeliveryStatus pendingStatus = entityManager.createQuery(
+                            "SELECT ds FROM DeliveryStatus ds WHERE ds.code = :code", DeliveryStatus.class)
+                    .setParameter("code", "PENDING")
+                    .getSingleResult();
+
             recipient.setDeliveryStatus(pendingStatus);
 
             entityManager.persist(recipient);
             recipients.add(recipient);
         }
 
-        // Associate recipients with notification (this is what was missing)
+        // Associate recipients with notification
         notification.setRecipients(recipients);
 
         // Process notifications
@@ -133,37 +146,30 @@ public class NotificationService {
         query.setParameter("id", notificationId);
         return query.getSingleResult();
     }
+
     @Transactional
     public void processNotifications(Notification notification, List<NotificationRecipient> recipients) {
         // Mark notification as sent
         notification.setIsSent(true);
         entityManager.merge(notification);
 
-        // Get delivery statuses by ID
-        DeliveryStatus deliveredStatus = entityManager.find(DeliveryStatus.class, 2L);
-        DeliveryStatus failedStatus = entityManager.find(DeliveryStatus.class, 3L);
-
-        if (deliveredStatus == null || failedStatus == null) {
-            throw new RuntimeException("Required delivery statuses not found");
-        }
-
-        // Extract all notification type codes
-        List<String> notificationTypeCodes = notification.getNotificationTypes()
+        // Extract all notification type names
+        List<String> notificationTypeNames = notification.getNotificationTypes()
                 .stream()
-                .map(NotificationType::getCode)
+                .map(NotificationType::getTypeName)
                 .collect(Collectors.toList());
 
         try {
             // Process each notification type
-            for (String notificationTypeCode : notificationTypeCodes) {
-                switch (notificationTypeCode) {
+            for (String typeName : notificationTypeNames) {
+                switch (typeName) {
                     case "EMAIL":
                         sendBatchEmails(recipients, notification);
                         break;
                     case "SMS":
                         sendBatchSms(recipients, notification);
                         break;
-                    case "APP":
+                    case "IN_APP":
                         // In-app notifications are already created
                         break;
                     case "ALL":
@@ -171,24 +177,34 @@ public class NotificationService {
                         sendBatchSms(recipients, notification);
                         break;
                     default:
-                        logger.warning("Unknown notification type: " + notificationTypeCode);
+                        logger.warning("Unknown notification type: " + typeName);
                         break;
                 }
             }
 
             // Mark recipients as delivered
-            updateRecipientsStatus(recipients, deliveredStatus);
+            updateRecipientsStatus(recipients, "DELIVERED");
 
         } catch (Exception e) {
             logger.severe("Error processing notifications: " + e.getMessage());
-            updateRecipientsStatus(recipients, failedStatus);
+            updateRecipientsStatus(recipients, "FAILED");
             throw new RuntimeException("Failed to process notifications", e);
         }
     }
 
-    private void updateRecipientsStatus(List<NotificationRecipient> recipients, DeliveryStatus status) {
+    private void updateRecipientsStatus(List<NotificationRecipient> recipients, String statusCode) {
+        // Find the delivery status by code
+        DeliveryStatus status = entityManager.createQuery(
+                        "SELECT ds FROM DeliveryStatus ds WHERE ds.code = :code", DeliveryStatus.class)
+                .setParameter("code", statusCode)
+                .getSingleResult();
+
+        Date now = new Date();
         for (NotificationRecipient recipient : recipients) {
             recipient.setDeliveryStatus(status);
+            if ("DELIVERED".equals(statusCode)) {
+                recipient.setReadDate(now); // Using readDate as delivery date
+            }
             entityManager.merge(recipient);
         }
     }
@@ -197,7 +213,7 @@ public class NotificationService {
         try {
             // Extract email addresses from recipients
             List<String> emailAddresses = recipients.stream()
-                    .map(r -> r.getStudent().getCollegeEmail())
+                    .map(r -> r.getRecipient().getCollegeEmail())
                     .collect(Collectors.toList());
 
             // Send batch email
@@ -258,14 +274,15 @@ public class NotificationService {
 
     @Transactional
     public void sendNotificationToStudents(List<Long> studentIds, Notification notification) {
-        // Get pending delivery status
-        DeliveryStatus pendingStatus = entityManager.find(DeliveryStatus.class, 1L);
-        if (pendingStatus == null) {
-            throw new RuntimeException("Pending delivery status not found");
-        }
-
         // Create notification recipients
         List<NotificationRecipient> recipients = new ArrayList<>();
+
+        // Find the pending delivery status
+        DeliveryStatus pendingStatus = entityManager.createQuery(
+                        "SELECT ds FROM DeliveryStatus ds WHERE ds.code = :code", DeliveryStatus.class)
+                .setParameter("code", "PENDING")
+                .getSingleResult();
+
         for (Long studentId : studentIds) {
             Student student = entityManager.find(Student.class, studentId);
             if (student == null) {
@@ -275,19 +292,21 @@ public class NotificationService {
 
             NotificationRecipient recipient = new NotificationRecipient();
             recipient.setNotification(notification);
-            recipient.setStudent(student);
-            recipient.setIsRead(false);
+            recipient.setRecipient(student);
+            recipient.setReadStatus(false);
             recipient.setDeliveryStatus(pendingStatus);
 
             entityManager.persist(recipient);
             recipients.add(recipient);
         }
 
+        // Associate recipients with notification
+        notification.setRecipients(recipients);
+        entityManager.merge(notification);
+
         // Process notifications in batch
         processNotifications(notification, recipients);
     }
-
-
 
     @Transactional
     public List<Notification> getNotificationsBySender(Long facultyId) {
@@ -303,7 +322,7 @@ public class NotificationService {
     public List<Notification> getNotificationsForStudent(Long studentId) {
         TypedQuery<NotificationRecipient> query = entityManager.createQuery(
                 "SELECT nr FROM NotificationRecipient nr " +
-                        "WHERE nr.student.id = :studentId AND nr.archived = 'N' " +
+                        "WHERE nr.recipient.id = :studentId AND nr.notification.archived = 'N' " +
                         "ORDER BY nr.notification.createdDate DESC",
                 NotificationRecipient.class
         );
@@ -322,7 +341,7 @@ public class NotificationService {
     public void markNotificationAsRead(Long notificationId, Long studentId) {
         TypedQuery<NotificationRecipient> query = entityManager.createQuery(
                 "SELECT nr FROM NotificationRecipient nr " +
-                        "WHERE nr.notification.id = :notificationId AND nr.student.id = :studentId",
+                        "WHERE nr.notification.id = :notificationId AND nr.recipient.id = :studentId",
                 NotificationRecipient.class
         );
         query.setParameter("notificationId", notificationId);
@@ -331,9 +350,63 @@ public class NotificationService {
         List<NotificationRecipient> recipients = query.getResultList();
         if (!recipients.isEmpty()) {
             NotificationRecipient recipient = recipients.get(0);
-            recipient.setIsRead(true);
+            recipient.setReadStatus(true);
             recipient.setReadDate(new Date());
             entityManager.merge(recipient);
         }
+    }
+
+    @Transactional
+    public void sendCourseAnnouncement(Long courseId, Notification notification) {
+        // Get the course
+        Course course = entityManager.find(Course.class, courseId);
+        if (course == null) {
+            throw new RuntimeException("Course not found with ID: " + courseId);
+        }
+
+        // Set course relationship and mark as course announcement
+        notification.setCourse(course);
+        notification.setIsCourseAnnouncement(true);
+        entityManager.merge(notification);
+
+        // Find all students associated with the course through faculty members
+        List<Student> students = new ArrayList<>();
+        for (Faculty faculty : course.getFacultyMembers()) {
+            students.addAll(faculty.getStudents());
+        }
+
+        // Remove duplicates
+        students = students.stream().distinct().collect(Collectors.toList());
+
+        if (students.isEmpty()) {
+            throw new RuntimeException("No students found for course ID: " + courseId);
+        }
+
+        // Create notification recipients
+        List<NotificationRecipient> recipients = new ArrayList<>();
+
+        // Find the pending delivery status
+        DeliveryStatus pendingStatus = entityManager.createQuery(
+                        "SELECT ds FROM DeliveryStatus ds WHERE ds.code = :code", DeliveryStatus.class)
+                .setParameter("code", "PENDING")
+                .getSingleResult();
+
+        for (Student student : students) {
+            NotificationRecipient recipient = new NotificationRecipient();
+            recipient.setNotification(notification);
+            recipient.setRecipient(student);
+            recipient.setReadStatus(false);
+            recipient.setDeliveryStatus(pendingStatus);
+
+            entityManager.persist(recipient);
+            recipients.add(recipient);
+        }
+
+        // Associate recipients with notification
+        notification.setRecipients(recipients);
+        entityManager.merge(notification);
+
+        // Process notifications in batch
+        processNotifications(notification, recipients);
     }
 }

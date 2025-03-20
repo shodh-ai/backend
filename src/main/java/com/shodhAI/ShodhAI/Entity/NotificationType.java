@@ -1,6 +1,5 @@
 package com.shodhAI.ShodhAI.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -14,7 +13,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties("notifications") // Prevents infinite recursion issue
 public class NotificationType {
 
     @Id
@@ -23,9 +21,9 @@ public class NotificationType {
     @JsonProperty("notification_type_id")
     private Long id;
 
-    @Column(name = "code", unique = true, nullable = false)
-    @JsonProperty("code")
-    private String code;
+    @Column(name = "type_name", unique = true)
+    @JsonProperty("type_name")
+    private String typeName; // EMAIL, SMS, PUSH, IN_APP, etc.
 
     @Column(name = "description")
     @JsonProperty("description")

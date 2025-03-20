@@ -2,14 +2,7 @@ package com.shodhAI.ShodhAI.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -17,7 +10,10 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 
 @Entity
 @Table(name="course")
@@ -88,4 +84,18 @@ public class Course {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     private Date endDate;
 
+    // Many-to-Many relationship with Faculty
+    @ManyToMany
+    @JoinTable(
+            name = "course_faculty",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "faculty_id")
+    )
+    @JsonProperty("faculty_members")
+    private List<Faculty> facultyMembers = new ArrayList<>();
+
+    // One-to-Many relationship with notifications
+    @OneToMany(mappedBy = "course")
+    @JsonProperty("notifications")
+    private List<Notification> notifications;
 }

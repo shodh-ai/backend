@@ -3,16 +3,7 @@ package com.shodhAI.ShodhAI.Entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -48,12 +39,12 @@ public class NotificationRecipient {
 
     @ManyToOne
     @JoinColumn(name = "student_id")
-    @JsonProperty("student")
-    private Student student;
+    @JsonProperty("recipient")
+    private Student recipient;
 
-    @Column(name = "is_read")
-    @JsonProperty("is_read")
-    private Boolean isRead = false;
+    @Column(name = "read_status")
+    @JsonProperty("read_status")
+    private Boolean readStatus = false;
 
     @Column(name = "read_date")
     @JsonProperty("read_date")

@@ -3,15 +3,7 @@ package com.shodhAI.ShodhAI.Entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -22,7 +14,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "student")
@@ -155,5 +149,15 @@ public class Student {
     @JoinColumn(name="time_spent_id")
     @JsonProperty("time_spent")
     private TimeSpent timeSpent;
+
+    // Many-to-Many relationship with Faculty
+    @ManyToMany(mappedBy = "students")
+    @JsonProperty("faculty_members")
+    private List<Faculty> facultyMembers = new ArrayList<>();
+
+    // Relationship with notification recipients
+    @OneToMany(mappedBy = "recipient")
+    @JsonProperty("notification_recipients")
+    private List<NotificationRecipient> notificationRecipients;
 
 }

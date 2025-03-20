@@ -19,10 +19,10 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
-    @PostMapping("/send-class-notification")
-    public ResponseEntity<?> sendClassNotification(
+    @PostMapping("/send-notification")
+    public ResponseEntity<?> sendCourseNotification(
             @RequestParam Long facultyId,
-            @RequestParam Long classId,
+            @RequestParam Long courseId,
             @RequestParam String title,
             @RequestParam String message,
             @RequestParam List<Long> notificationTypeIds) {
@@ -33,11 +33,10 @@ public class NotificationController {
                     title, message, facultyId, notificationTypeIds, new Date()
             );
 
-            // Send to class
-            notificationService.sendNotificationToClass(classId, notification);
+            // Send to course students
+            notificationService.sendNotificationToCourse(courseId, notification);
 
             // Refresh notification with recipients (if needed)
-            // This might be needed if you're using a separate session or transaction
             notification = notificationService.getNotificationWithRecipients(notification.getId());
 
             Map<String, Object> response = new HashMap<>();
@@ -53,12 +52,12 @@ public class NotificationController {
     @PostMapping("/send-quick-notification")
     public ResponseEntity<?> sendQuickNotification(
             @RequestParam Long facultyId,
-            @RequestParam Long classId,
+            @RequestParam Long courseId,
             @RequestParam String notificationText) {
 
         try {
             // Parse the notification text
-            String title = "Class Announcement";
+            String title = "Course Announcement";
             String message = notificationText;
 
             // Find the ALL notification type (assuming it has ID 4)
@@ -69,8 +68,8 @@ public class NotificationController {
                     title, message, facultyId, notificationTypeIds, new Date()
             );
 
-            // Send to class
-            notificationService.sendNotificationToClass(classId, notification);
+            // Send to course students
+            notificationService.sendNotificationToCourse(courseId, notification);
 
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Quick notification sent successfully");
@@ -101,6 +100,33 @@ public class NotificationController {
 
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Notification sent successfully to " + studentIds.size() + " students");
+            response.put("notification", notification);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/send-course-announcement")
+    public ResponseEntity<?> sendCourseAnnouncement(
+            @RequestParam Long facultyId,
+            @RequestParam Long courseId,
+            @RequestParam String title,
+            @RequestParam String message,
+            @RequestParam List<Long> notificationTypeIds) {
+
+        try {
+            // Create notification with multiple notification types
+            Notification notification = notificationService.createNotification(
+                    title, message, facultyId, notificationTypeIds, new Date()
+            );
+
+            // Send as course announcement
+            notificationService.sendCourseAnnouncement(courseId, notification);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Course announcement sent successfully");
             response.put("notification", notification);
 
             return ResponseEntity.ok(response);
