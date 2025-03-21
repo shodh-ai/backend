@@ -15,9 +15,12 @@ import org.springframework.stereotype.Service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -83,12 +86,11 @@ public class NotificationService {
         notification.setMessage(message);
         notification.setSender(sender);
         notification.setNotificationTypes(notificationTypes);
-        notification.setScheduledDate(scheduledDate);
-        notification.setCreatedDate(new Date());
+        notification.setNotificationTimestamp(LocalDateTime.now());
         notification.setIsSent(false);
-
         entityManager.persist(notification);
         entityManager.flush();
+        entityManager.refresh(notification);
         return notification;
     }
 
@@ -121,10 +123,11 @@ public class NotificationService {
             throw new IllegalArgumentException("No students found for course ID: " + courseId);
         }
 
-        // Set course relationship and mark as course announcement
         notification.setCourse(course);
         notification.setIsCourseAnnouncement(true);
-        entityManager.merge(notification);
+        notification = entityManager.merge(notification);
+
+        entityManager.flush();
 
         // Create notification recipients
         List<NotificationRecipient> recipients = new ArrayList<>();
@@ -148,6 +151,7 @@ public class NotificationService {
 
         // Associate recipients with notification
         notification.setRecipients(recipients);
+        entityManager.merge(notification);
 
         // Process notifications
         processNotifications(notification, recipients);
@@ -155,6 +159,7 @@ public class NotificationService {
         // Refresh the notification entity to ensure it has the latest data
         entityManager.refresh(notification);
     }
+
 
     @Transactional
     public Notification getNotificationWithRecipients(Long notificationId) {
@@ -171,14 +176,15 @@ public class NotificationService {
         // Mark notification as sent
         notification.setIsSent(true);
         entityManager.merge(notification);
+        entityManager.flush();
 
-        // Extract notification type names safely
         List<Long> notificationTypeIds = notification.getNotificationTypes()
                 .stream()
                 .filter(nt -> nt != null && nt.getId() != null)
                 .map(NotificationType::getId)
                 .collect(Collectors.toList());
 
+        boolean success = false;
         try {
             for (Long typeId : notificationTypeIds) {
                 if (typeId.equals(1L)) {
@@ -193,14 +199,15 @@ public class NotificationService {
                     logger.warning("Unknown notification type: " + typeId);
                 }
             }
-
-            // Mark recipients as delivered
-            updateRecipientsStatus(recipients, "DELIVERED");
-
+            success = true;
         } catch (Exception e) {
             logger.severe("Error processing notifications: " + e.getMessage());
-            updateRecipientsStatus(recipients, "FAILED");
-            throw new RuntimeException("Failed to process notifications", e);
+        } finally {
+            if (success) {
+                updateRecipientsStatus(recipients, "DELIVERED");
+            } else {
+                updateRecipientsStatus(recipients, "FAILED");
+            }
         }
     }
 
@@ -212,6 +219,7 @@ public class NotificationService {
                 .getSingleResult();
 
         Date now = new Date();
+
         for (NotificationRecipient recipient : recipients) {
             recipient.setDeliveryStatus(status);
             if ("DELIVERED".equals(statusCode)) {
@@ -219,6 +227,7 @@ public class NotificationService {
             }
             entityManager.merge(recipient);
         }
+        entityManager.flush();
     }
 
     private void sendBatchEmails(List<NotificationRecipient> recipients, Notification notification) {
@@ -287,32 +296,101 @@ public class NotificationService {
     }
 
     @Transactional
-    public List<Notification> getNotificationsBySender(Long facultyId) {
+    public Map<String, Object> getNotificationsBySender(Long facultyId, int offset, int limit) {
+        if (offset < 0) {
+            throw new IllegalArgumentException("Offset cannot be a negative number");
+        }
+        if (limit <= 0) {
+            throw new IllegalArgumentException("Limit must be greater than 0");
+        }
+
+        Faculty faculty= entityManager.find(Faculty.class,facultyId);
+        if(faculty==null)
+        {
+            throw new IllegalArgumentException("Faculty with id "+ facultyId + " does not exist");
+        }
+
+        // Get total count of notifications
+        TypedQuery<Long> countQuery = entityManager.createQuery(
+                "SELECT COUNT(n) FROM Notification n WHERE n.sender.id = :facultyId AND n.archived = 'N'", Long.class);
+        countQuery.setParameter("facultyId", facultyId);
+        Long totalItems = countQuery.getSingleResult();
+
+        // Fetch paginated notifications
         TypedQuery<Notification> query = entityManager.createQuery(
-                "SELECT n FROM Notification n WHERE n.sender.id = :facultyId AND n.archived = 'N' ORDER BY n.createdDate DESC",
-                Notification.class
-        );
+                "SELECT n FROM Notification n WHERE n.sender.id = :facultyId AND n.archived = 'N' " +
+                        "ORDER BY n.notificationTimestamp DESC", Notification.class);
         query.setParameter("facultyId", facultyId);
-        return query.getResultList();
+        query.setFirstResult(offset * limit);
+        query.setMaxResults(limit);
+        List<Notification> notifications = query.getResultList();
+
+        // Calculate total pages
+        int totalPages = (int) Math.ceil((double) totalItems / limit);
+        if (offset >= totalPages && offset != 0) {
+            throw new IllegalArgumentException("No more notifications available");
+        }
+
+        // Create pagination response
+        Map<String, Object> response = new HashMap<>();
+        response.put("notifications", notifications);
+        response.put("totalItems", totalItems);
+        response.put("totalPages", totalPages);
+        response.put("currentPage", offset);
+
+        return response;
     }
 
+
     @Transactional
-    public List<Notification> getNotificationsForStudent(Long studentId) {
+    public Map<String, Object> getNotificationsForStudent(Long studentId, int offset, int limit) {
+        if (offset < 0) {
+            throw new IllegalArgumentException("Offset cannot be a negative number");
+        }
+        if (limit <= 0) {
+            throw new IllegalArgumentException("Limit must be greater than 0");
+        }
+
+        Student student= entityManager.find(Student.class,studentId);
+        if(student==null)
+        {
+            throw new IllegalArgumentException("Student with id " + studentId + " not found ");
+        }
+        // Get total count of notifications for the student
+        TypedQuery<Long> countQuery = entityManager.createQuery(
+                "SELECT COUNT(nr) FROM NotificationRecipient nr " +
+                        "WHERE nr.recipient.id = :studentId AND nr.notification.archived = 'N'", Long.class);
+        countQuery.setParameter("studentId", studentId);
+        Long totalItems = countQuery.getSingleResult();
+
+        // Fetch paginated notifications
         TypedQuery<NotificationRecipient> query = entityManager.createQuery(
                 "SELECT nr FROM NotificationRecipient nr " +
                         "WHERE nr.recipient.id = :studentId AND nr.notification.archived = 'N' " +
-                        "ORDER BY nr.notification.createdDate DESC",
-                NotificationRecipient.class
-        );
+                        "ORDER BY nr.notification.notificationTimestamp DESC", NotificationRecipient.class);
         query.setParameter("studentId", studentId);
+        query.setFirstResult(offset * limit);
+        query.setMaxResults(limit);
         List<NotificationRecipient> recipients = query.getResultList();
 
-        List<Notification> notifications = new ArrayList<>();
-        for (NotificationRecipient recipient : recipients) {
-            notifications.add(recipient.getNotification());
+        List<Notification> notifications = recipients.stream()
+                .map(NotificationRecipient::getNotification)
+                .collect(Collectors.toList());
+
+        // Calculate total pages
+        int totalPages = (int) Math.ceil((double) totalItems / limit);
+        if (offset >= totalPages && offset != 0) {
+            throw new IllegalArgumentException("No more notifications available");
         }
 
-        return notifications;
+        // Create pagination response
+        Map<String, Object> response = new HashMap<>();
+        response.put("notifications", notifications);
+        response.put("totalItems", totalItems);
+        response.put("totalPages", totalPages);
+        response.put("currentPage", offset);
+
+        return response;
     }
 
     @Transactional

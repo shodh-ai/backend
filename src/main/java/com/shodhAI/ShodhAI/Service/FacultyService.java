@@ -274,7 +274,7 @@ public class FacultyService {
             }
             if (facultyDto.getCourseIds() != null) {
                 if (!facultyDto.getCourseIds().isEmpty()) {
-                    // Fetch valid courses
+                    // Fetch all valid courses
                     List<Course> coursesToAdd = entityManager.createQuery(
                                     "SELECT c FROM Course c WHERE c.courseId IN :courseIds", Course.class)
                             .setParameter("courseIds", facultyDto.getCourseIds())
@@ -284,9 +284,12 @@ public class FacultyService {
                     if (coursesToAdd.size() != facultyDto.getCourseIds().size()) {
                         throw new IllegalArgumentException("One or more Course IDs are invalid.");
                     }
-
+                    facultyToUpdate.getCourses().forEach(course -> course.getFacultyMembers().remove(facultyToUpdate));
+                    facultyToUpdate.getCourses().clear();
+                    facultyToUpdate.getStudents().forEach(student -> student.getFacultyMembers().remove(facultyToUpdate));
+                    facultyToUpdate.getStudents().clear();
+                    entityManager.merge(facultyToUpdate);
                     facultyToUpdate.setCourses(coursesToAdd);
-
                     List<Student> studentsToAdd = new ArrayList<>();
                     for (Course course : coursesToAdd) {
                         for (Student student : course.getStudents()) {
@@ -295,9 +298,7 @@ public class FacultyService {
                             }
                         }
                     }
-
                     facultyToUpdate.setStudents(studentsToAdd);
-
                     for (Student student : studentsToAdd) {
                         if (!student.getFacultyMembers().contains(facultyToUpdate)) {
                             student.getFacultyMembers().add(facultyToUpdate);
@@ -309,9 +310,14 @@ public class FacultyService {
                             course.getFacultyMembers().add(facultyToUpdate);
                         }
                     }
-                }
-                else {
+                    entityManager.merge(facultyToUpdate);
+                } else {
+                    facultyToUpdate.getCourses().forEach(course -> course.getFacultyMembers().remove(facultyToUpdate));
                     facultyToUpdate.getCourses().clear();
+                    facultyToUpdate.getStudents().forEach(student -> student.getFacultyMembers().remove(facultyToUpdate));
+                    facultyToUpdate.getStudents().clear();
+
+                    entityManager.merge(facultyToUpdate);
                 }
             }
 

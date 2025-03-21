@@ -1,6 +1,7 @@
 package com.shodhAI.ShodhAI.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -107,7 +108,7 @@ public class Course {
     @JsonProperty("students")
     private List<Student> students = new ArrayList<>();
 
-    // One-to-Many relationship with notifications
+    @JsonIgnore
     @OneToMany(mappedBy = "course")
     @JsonProperty("notifications")
     private List<Notification> notifications;

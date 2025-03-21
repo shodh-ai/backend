@@ -1,12 +1,14 @@
 package com.shodhAI.ShodhAI.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -35,15 +37,10 @@ public class Notification {
     @JsonProperty("sender")
     private Faculty sender;
 
-    @Column(name = "created_date")
-    @JsonProperty("created_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-    private Date createdDate;
-
-    @Column(name = "scheduled_date")
-    @JsonProperty("scheduled_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-    private Date scheduledDate;
+    @Column(name = "notification_timestamp", nullable = false, updatable = false)
+    @JsonProperty("notification_timestamp")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "UTC")
+    private LocalDateTime notificationTimestamp;
 
     @Column(name = "is_sent")
     @JsonProperty("is_sent")
@@ -62,9 +59,10 @@ public class Notification {
     private List<NotificationType> notificationTypes;
 
     @OneToMany(mappedBy = "notification", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonProperty("recipients")  // Make sure this annotation is present
+    @JsonProperty("recipients")
     private List<NotificationRecipient> recipients;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "course_id")
     @JsonProperty("course")

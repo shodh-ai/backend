@@ -17,7 +17,7 @@ import java.util.List;
 
 public class FacultyWrapper {
 
-    @JsonProperty("student_id")
+    @JsonProperty("faculty_id")
     private Long id;
 
     @JsonProperty("archived")
