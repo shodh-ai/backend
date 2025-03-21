@@ -6,9 +6,11 @@ import com.shodhAI.ShodhAI.Entity.Accuracy;
 import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.CriticalThinking;
 import com.shodhAI.ShodhAI.Entity.Gender;
+import com.shodhAI.ShodhAI.Entity.Memory;
 import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.Student;
 import com.shodhAI.ShodhAI.Entity.TimeSpent;
+import com.shodhAI.ShodhAI.Entity.Understanding;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -87,6 +89,11 @@ public class StudentWrapper {
 
     @JsonProperty("courses")
     private List<Course> courses= new ArrayList<>();
+    @JsonProperty("memory")
+    private Memory memory;
+
+    @JsonProperty("understanding")
+    private Understanding understanding;
 
     public void wrapDetails(Student student) {
 
@@ -122,5 +129,7 @@ public class StudentWrapper {
         this.timeSpent = student.getTimeSpent();
         this.profilePictureUrl = student.getProfilePictureUrl();
         this.courses=student.getCourses();
+        this.memory = student.getMemory();
+        this.understanding = student.getUnderstanding();
     }
 }

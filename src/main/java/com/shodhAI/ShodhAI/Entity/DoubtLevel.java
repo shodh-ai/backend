@@ -8,36 +8,34 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.util.Date;
 
 @Entity
-@Table(name="time_spent")
+@Table(name = "doubt_level")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TimeSpent {
+public class DoubtLevel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "time_spent_id")
-    @JsonProperty("time_spent_id")
-    private Long id;
+    @Column(name = "doubt_level_id")
+    @JsonProperty("doubt_level_id")
+    private Long doubtLevelId;
 
-    @Column(name = "time_spent")
-    @JsonProperty("time_spent")
-    @Min(value = 0, message = "Accuracy must be at least 0.0")
-    @Max(value = 100, message = "Accuracy must not exceed 100.0")
-    private Double timeSpent = 0.0;
+    @Column(name = "doubt_level", unique = true)
+    @JsonProperty("doubt_level")
+    private String doubtLevel;
 
-    @Column(name = "time_spent_increased")
-    @JsonProperty("time_spent_increased")
-    private Double timeSpentIncreased = 0.0;
+    @NonNull
+    @Column(name = "archived")
+    @JsonProperty("archived")
+    private Character archived = 'N';
 
     @Column(name = "created_date")
     @JsonProperty("created_date")

@@ -3,18 +3,21 @@ package com.shodhAI.ShodhAI.Service;
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.AccuracyDto;
 import com.shodhAI.ShodhAI.Dto.CriticalThinkingDto;
-import com.shodhAI.ShodhAI.Dto.FacultyDto;
+import com.shodhAI.ShodhAI.Dto.MemoryDto;
 import com.shodhAI.ShodhAI.Dto.StudentDto;
 import com.shodhAI.ShodhAI.Dto.TimeSpentDto;
+import com.shodhAI.ShodhAI.Dto.UnderstandingDto;
 import com.shodhAI.ShodhAI.Entity.AcademicDegree;
 import com.shodhAI.ShodhAI.Entity.Accuracy;
 import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.CriticalThinking;
 import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Gender;
+import com.shodhAI.ShodhAI.Entity.Memory;
 import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.Student;
 import com.shodhAI.ShodhAI.Entity.TimeSpent;
+import com.shodhAI.ShodhAI.Entity.Understanding;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
@@ -58,6 +61,12 @@ public class StudentService {
 
     @Autowired
     TimeSpentService timeSpentService;
+
+    @Autowired
+    UnderstandingService understandingService;
+
+    @Autowired
+    MemoryService memoryService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -148,6 +157,8 @@ public class StudentService {
             CriticalThinking criticalThinking = criticalThinkingService.saveCriticalThinking(new CriticalThinkingDto());
             Accuracy accuracy = accuracyService.saveAccuracy(new AccuracyDto());
             TimeSpent timeSpent = timeSpentService.saveTimeSpent(new TimeSpentDto());
+            Understanding understanding = understandingService.saveUnderstanding(new UnderstandingDto());
+            Memory memory = memoryService.saveMemory(new MemoryDto());
 
             student.setCriticalThinking(criticalThinking);
             student.setAccuracy(accuracy);

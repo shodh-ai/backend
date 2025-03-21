@@ -35,13 +35,32 @@ public class Question {
     @JsonProperty("question_id")
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "question_type_id")
+    @JsonProperty("question_type")
+    private QuestionType questionType;
+
     @Column(name = "question")
     @JsonProperty("question")
     private String question;
 
+    @ElementCollection
+    @CollectionTable(
+            name = "question_answers",
+            joinColumns = @JoinColumn(name = "question_id")
+    )
     @Column(name = "answer")
-    @JsonProperty("answer")
-    private String answer;
+    @JsonProperty("answers")
+    private List<String> answers;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "question_answers_template",
+            joinColumns = @JoinColumn(name = "question_id")
+    )
+    @Column(name = "answer_template")
+    @JsonProperty("answers_templates")
+    private List<String> answerTemplates;
 
     @Column(name = "cognitive_domain")
     @JsonProperty("cognitive_domain")

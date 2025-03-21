@@ -70,4 +70,13 @@ public class Constant {
 
     public static String GET_NODE_BY_TOPIC_ID = "SELECT n FROM Node n WHERE n.topic = :topic";
     public static String GET_EDGE_BY_TOPIC_ID = "SELECT e FROM Edge e WHERE e.topic = :topic";
+
+
+    public static String GET_ALL_DOUBT_LEVEL = "SELECT d FROM DoubtLevel d WHERE d.archived = 'N'";
+    public static String GET_DOUBT_LEVEL_BY_ID = "SELECT d FROM DoubtLevel d WHERE d.archived = 'N' AND d.doubtLevelId = :doubtLevelId";
+    public static String GET_DOUBT_LEVEL_BY_DOUBT_LEVEL = "SELECT d FROM DoubtLevel d WHERE d.archived = 'N' AND UPPER(d.doubtLevel) = :doubtLevel";
+
+
+    public static String GET_ALL_QUESTION_TYPE = "SELECT q FROM QuestionType q WHERE q.archived = 'N'";
+    public static String GET_QUESTION_TYPE_BY_ID = "SELECT q FROM QuestionType q WHERE q.archived = 'N' AND q.questionTypeId = :questionTypeId";
 }

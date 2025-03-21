@@ -7,9 +7,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,27 +18,35 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name="time_spent")
+@Table(name="doubt")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class TimeSpent {
+@AllArgsConstructor
+public class Doubt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "time_spent_id")
-    @JsonProperty("time_spent_id")
+    @Column(name = "doubt_id")
+    @JsonProperty("doubt_id")
     private Long id;
 
-    @Column(name = "time_spent")
-    @JsonProperty("time_spent")
-    @Min(value = 0, message = "Accuracy must be at least 0.0")
-    @Max(value = 100, message = "Accuracy must not exceed 100.0")
-    private Double timeSpent = 0.0;
+    @Column(name="doubt", columnDefinition = "TEXT")
+    @JsonProperty("doubt")
+    private String doubt;
 
-    @Column(name = "time_spent_increased")
-    @JsonProperty("time_spent_increased")
-    private Double timeSpentIncreased = 0.0;
+    @Column(name = "jsx_code", columnDefinition = "TEXT")
+    @JsonProperty("jsx_code")
+    private String jsxCode;
+
+    @Column(name = "narration", columnDefinition = "TEXT")
+    @JsonProperty("narration")
+    private String narration;
+
+    @ManyToOne
+    @NotNull
+    @JoinColumn(name = "topic_id")
+    @JsonProperty("topic_id")
+    private Topic topic;
 
     @Column(name = "created_date")
     @JsonProperty("created_date")

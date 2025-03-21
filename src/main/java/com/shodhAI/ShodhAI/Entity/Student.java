@@ -154,6 +154,16 @@ public class Student {
     @JsonProperty("critical_thinking")
     private CriticalThinking criticalThinking;
 
+    @OneToOne
+    @JoinColumn(name = "understanding_id")
+    @JsonProperty("understanding")
+    private Understanding understanding;
+
+    @OneToOne
+    @JoinColumn(name = "memory_id")
+    @JsonProperty("memory")
+    private Memory memory;
+
     @Column(name = "profile_picture_url")
     @JsonProperty("profile_picture_url")
     private String profilePictureUrl;
@@ -179,5 +189,15 @@ public class Student {
     @OneToMany(mappedBy = "recipient")
     @JsonProperty("notification_recipients")
     private List<NotificationRecipient> notificationRecipients;
+
+    @Column(name = "summary", columnDefinition = "TEXT")
+    @JsonProperty("summary")
+    private String summary;
+
+    @JsonProperty("strengths")
+    private List<String> strengths;
+
+    @JsonProperty("weaknesses")
+    private List<String> weaknesses;
 
 }
