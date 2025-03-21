@@ -141,7 +141,10 @@ public class FacultyService {
         } catch (DataIntegrityViolationException dataIntegrityViolationException) {
             exceptionHandlingService.handleException(dataIntegrityViolationException);
             throw new IndexOutOfBoundsException(dataIntegrityViolationException.getMessage());
-        } catch (PersistenceException persistenceException) {
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            throw new IndexOutOfBoundsException(indexOutOfBoundsException.getMessage());
+        }catch (PersistenceException persistenceException) {
             exceptionHandlingService.handleException(persistenceException);
             throw new PersistenceException(persistenceException.getMessage());
         } catch (Exception exception) {
