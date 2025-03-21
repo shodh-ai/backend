@@ -1,6 +1,7 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
+import com.shodhAI.ShodhAI.Dto.AcademicDegreeDto;
 import com.shodhAI.ShodhAI.Dto.AccuracyDto;
 import com.shodhAI.ShodhAI.Dto.CriticalThinkingDto;
 import com.shodhAI.ShodhAI.Dto.MemoryDto;
@@ -125,7 +126,10 @@ public class StudentService {
 
             Gender gender = genderService.getGenderById(studentDto.getGenderId());
             Role role = roleService.getRoleById(4L);
-            AcademicDegree academicDegree = academicDegreeService.getAcademicDegreeById(studentDto.getAcademicDegreeId());
+            AcademicDegree academicDegree = null;
+            if (studentDto.getAcademicDegreeId() != null) {
+                academicDegree = academicDegreeService.getAcademicDegreeById(studentDto.getAcademicDegreeId());
+            }
 
             Date currentDate = new Date();
 
@@ -159,6 +163,8 @@ public class StudentService {
             student.setCriticalThinking(criticalThinking);
             student.setAccuracy(accuracy);
             student.setTimeSpent(timeSpent);
+            student.setMemory(memory);
+            student.setUnderstanding(understanding);
 
             return entityManager.merge(student);
 

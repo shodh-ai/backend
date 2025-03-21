@@ -75,6 +75,7 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtTokenUtil;
 
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login-with-password")
@@ -134,10 +135,11 @@ public class AuthController {
 
             if (roleService.findRoleNameById(roleId).equals(Constant.ROLE_USER)) {
 
-                Student student = studentService.retrieveStudentByUsername(username);
-                if (student == null) {
+                List<Student> students = studentService.filterStudents(null, null, username);
+                if (students.isEmpty()) {
                     return responseService.generateErrorResponse(ApiConstants.NO_RECORDS_FOUND, HttpStatus.NOT_FOUND);
                 }
+                Student student = students.get(0);
 
                 if (passwordEncoder.matches(password, student.getPassword())) {
 
@@ -159,10 +161,11 @@ public class AuthController {
                 }
             } else if (roleService.findRoleNameById(roleId).equals(Constant.ROLE_FACULTY)) {
 
-                Faculty faculty = facultyService.retrieveFacultyByUsername(username);
-                if (faculty == null) {
+                List<Faculty> faculties = facultyService.filterFaculties(null, null, username);
+                if (faculties.isEmpty()) {
                     return responseService.generateErrorResponse(ApiConstants.NO_RECORDS_FOUND, HttpStatus.NOT_FOUND);
                 }
+                Faculty faculty = faculties.get(0);
 
                 if (passwordEncoder.matches(password, faculty.getPassword())) {
 

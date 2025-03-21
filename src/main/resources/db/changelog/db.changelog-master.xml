@@ -5,5 +5,7 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <!-- Add your migration scripts here -->
-    <include file="db/changelog/sql/remove_notnull_constraint.sql"/>
+    <changeSet id="remove-notnull-constraint" author="your-name" runOnChange="true">
+        <sqlFile path="db/changelog/sql/remove_notnull_constraint.sql"/>
+    </changeSet>
 </databaseChangeLog>
