@@ -38,11 +38,11 @@ public class ExceptionHandlingService {
 
     public String handleException(HttpStatus status, Exception e) {
 
-        if(status.equals(HttpStatus.BAD_REQUEST)){
+        if (status.equals(HttpStatus.BAD_REQUEST)) {
             return status + " " + e.getMessage();
-        }else if(status.equals(HttpStatus.INTERNAL_SERVER_ERROR)){
+        } else if (status.equals(HttpStatus.INTERNAL_SERVER_ERROR)) {
             return status + " " + e.getMessage();
-        }else{
+        } else {
             return "Something went wrong: " + e.getMessage();
         }
     }

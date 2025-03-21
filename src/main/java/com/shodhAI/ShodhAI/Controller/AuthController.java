@@ -2,14 +2,21 @@ package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Component.ApiConstants;
 import com.shodhAI.ShodhAI.Component.Constant;
+import com.shodhAI.ShodhAI.Dto.ForgotPasswordDto;
+import com.shodhAI.ShodhAI.Dto.SignUpDto;
+import com.shodhAI.ShodhAI.Dto.VerifyOtpDto;
 import com.shodhAI.ShodhAI.Entity.Faculty;
+import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.Student;
+import com.shodhAI.ShodhAI.Component.JwtUtil;
+import com.shodhAI.ShodhAI.Service.AuthenticationService;
+import com.shodhAI.ShodhAI.Service.EmailService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.FacultyService;
+import com.shodhAI.ShodhAI.Service.OtpService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.RoleService;
 import com.shodhAI.ShodhAI.Service.StudentService;
-import com.shodhAI.ShodhAI.Component.JwtUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -21,11 +28,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -54,12 +63,20 @@ public class AuthController {
     @Autowired
     private ExceptionHandlingService exceptionHandlingService;
 
-    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
-    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
+    private OtpService otpService;
+
+    @Autowired
+    private AuthenticationService authenticationService;
+
+    @Autowired
+    private JwtUtil jwtTokenUtil;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login-with-password")
     @ResponseBody
@@ -71,15 +88,15 @@ public class AuthController {
 
 //            String mobileNumber = (String) loginDetails.get("mobileNumber");
             String username = (String) loginDetails.get("username");
-//            if (mobileNumber != null) {
-//                if (mobileNumber.startsWith("0"))
-//                    mobileNumber = mobileNumber.substring(1);
-//                if (studentService.isValidMobileNumber(mobileNumber) && isNumeric(mobileNumber)) {
-//                    return loginWithCustomerPassword(loginDetails,session,request);
-//                } else {
-//                    return responseService.generateErrorResponse(ApiConstants.INVALID_MOBILE_NUMBER, HttpStatus.BAD_REQUEST);
-//                }
-//            } else
+/*            if (mobileNumber != null) {
+                if (mobileNumber.startsWith("0"))
+                    mobileNumber = mobileNumber.substring(1);
+                if (studentService.isValidMobileNumber(mobileNumber) && isNumeric(mobileNumber)) {
+                    return loginWithCustomerPassword(loginDetails,session,request);
+                } else {
+                    return responseService.generateErrorResponse(ApiConstants.INVALID_MOBILE_NUMBER, HttpStatus.BAD_REQUEST);
+                }
+            } else*/
             if (username != null) {
                 return loginWithUsername(loginDetails, session, request);
             } else {
@@ -94,7 +111,6 @@ public class AuthController {
     }
 
     // Login endpoint to authenticate user and return JWT token
-    @Transactional
     @PostMapping("/login-with-username-password")
     public ResponseEntity<?> loginWithUsername(@RequestBody Map<String, Object> loginDetails, HttpSession session, HttpServletRequest request) {
 
@@ -103,7 +119,6 @@ public class AuthController {
                 return responseService.generateErrorResponse(ApiConstants.INVALID_DATA, HttpStatus.BAD_REQUEST);
             }
 
-            String authHeader = Constant.BEARER;
             String username = (String) loginDetails.get("username");
             String password = (String) loginDetails.get("password");
             Long roleId = Long.parseLong(loginDetails.get("role").toString());
@@ -115,21 +130,20 @@ public class AuthController {
                 return responseService.generateErrorResponse("Student service is not initialized.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
+            String ipAddress = request.getRemoteAddr();
+            String userAgent = request.getHeader("User-Agent");
+
             if (roleService.findRoleNameById(roleId).equals(Constant.ROLE_USER)) {
 
-                Student student = studentService.retrieveStudentByUsername(username);
-                if (student == null) {
+                List<Student> students = studentService.filterStudents(null, null, username);
+                if (students.isEmpty()) {
                     return responseService.generateErrorResponse(ApiConstants.NO_RECORDS_FOUND, HttpStatus.NOT_FOUND);
                 }
+                Student student = students.get(0);
 
                 if (passwordEncoder.matches(password, student.getPassword())) {
 
-                    String tokenKey = "authToken_" + student.getMobileNumber();
                     String existingToken = student.getToken();
-                    authHeader = authHeader + existingToken;
-                    String ipAddress = request.getRemoteAddr();
-                    String userAgent = request.getHeader("User-Agent");
-
                     if (existingToken != null && jwtUtil.validateToken(existingToken, ipAddress, userAgent)) {
                         Map<String, Object> userDetails = new HashMap<>();
                         userDetails.put("username", student.getUserName());
@@ -139,35 +153,23 @@ public class AuthController {
                         return ResponseEntity.ok(response);
 
                     } else {
-                        String token = jwtUtil.generateToken(student.getId(), roleId, ipAddress, userAgent);
-                        student.setToken(token);
-                        entityManager.persist(student);
-                        session.setAttribute(tokenKey, token);
-                        Map<String, Object> userDetails = new HashMap<>();
-                        userDetails.put("username", student.getUserName());
-                        userDetails.put("mobile_number", student.getMobileNumber());
-                        userDetails.put("student_id", student.getId());
-                        ApiResponse response = new ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
+                        ApiResponse response = authenticationService.studentLoginResponse(student, roleId, session, request);
                         return ResponseEntity.ok(response);
                     }
                 } else {
                     return responseService.generateErrorResponse("Invalid password", HttpStatus.BAD_REQUEST);
                 }
-            } else if(roleService.findRoleNameById(roleId).equals(Constant.ROLE_FACULTY)) {
+            } else if (roleService.findRoleNameById(roleId).equals(Constant.ROLE_FACULTY)) {
 
-                Faculty faculty = facultyService.retrieveFacultyByUsername(username);
-                if (faculty == null) {
+                List<Faculty> faculties = facultyService.filterFaculties(null, null, username);
+                if (faculties.isEmpty()) {
                     return responseService.generateErrorResponse(ApiConstants.NO_RECORDS_FOUND, HttpStatus.NOT_FOUND);
                 }
+                Faculty faculty = faculties.get(0);
 
                 if (passwordEncoder.matches(password, faculty.getPassword())) {
 
-                    String tokenKey = "authToken_" + faculty.getMobileNumber();
                     String existingToken = faculty.getToken();
-                    authHeader = authHeader + existingToken;
-                    String ipAddress = request.getRemoteAddr();
-                    String userAgent = request.getHeader("User-Agent");
-
                     if (existingToken != null && jwtUtil.validateToken(existingToken, ipAddress, userAgent)) {
                         Map<String, Object> userDetails = new HashMap<>();
                         userDetails.put("username", faculty.getUserName());
@@ -177,15 +179,7 @@ public class AuthController {
                         return ResponseEntity.ok(response);
 
                     } else {
-                        String token = jwtUtil.generateToken(faculty.getId(), roleId, ipAddress, userAgent);
-                        faculty.setToken(token);
-                        entityManager.persist(faculty);
-                        session.setAttribute(tokenKey, token);
-                        Map<String, Object> userDetails = new HashMap<>();
-                        userDetails.put("username", faculty.getUserName());
-                        userDetails.put("mobile_number", faculty.getMobileNumber());
-                        userDetails.put("faculty_id", faculty.getId());
-                        ApiResponse response = new ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
+                        ApiResponse response = authenticationService.facultyLoginResponse(faculty, roleId, session, request);
                         return ResponseEntity.ok(response);
                     }
                 } else {
@@ -193,14 +187,134 @@ public class AuthController {
                 }
             } else {
                 return responseService.generateErrorResponse(ApiConstants.INVALID_ROLE, HttpStatus.BAD_REQUEST);
-
             }
-        } catch (IllegalArgumentException e) {
-            return ResponseService.generateErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            exceptionHandlingService.handleException(e);
-            return responseService.generateErrorResponse(ApiConstants.SOME_EXCEPTION_OCCURRED + e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return responseService.generateErrorResponse(ApiConstants.SOME_EXCEPTION_OCCURRED + exception.getMessage(), HttpStatus.BAD_REQUEST);
 
+        }
+    }
+
+    @PostMapping("/sign-up")
+    public ResponseEntity<?> signUp(@RequestBody SignUpDto signUp) {
+        try {
+
+            authenticationService.validateSignUp(signUp);
+            Role role = roleService.getRoleById(signUp.getRoleId());
+
+            authenticationService.saveSignUpDetails(role, signUp);
+            return ResponseEntity.ok("OTP sent to your email.");
+
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return responseService.generateErrorResponse(ApiConstants.SOME_EXCEPTION_OCCURRED + exception.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody VerifyOtpDto verifyOtpDto, HttpSession session, HttpServletRequest request) {
+        try {
+
+            authenticationService.validateVerifyOtp(verifyOtpDto);
+
+            Role role = roleService.getRoleById(verifyOtpDto.getRoleId());
+            if (role.getRoleName().equals(Constant.ROLE_USER)) {
+
+                List<Student> students = studentService.filterStudents(null, null, verifyOtpDto.getEmail());
+                if (students.isEmpty()) {
+                    throw new IllegalArgumentException("Student does not exists with this email");
+                }
+
+                Student student = students.get(0);
+                if (!student.getOtp().equals(verifyOtpDto.getOtp())) {
+                    throw new IllegalArgumentException("Invalid OTP");
+                }
+
+                ApiResponse response = authenticationService.studentLoginResponse(student, role.getRoleId(), session, request);
+                return ResponseEntity.ok(response);
+
+            } else if (role.getRoleName().equals(Constant.ROLE_FACULTY)) {
+
+                List<Faculty> faculties = facultyService.filterFaculties(null, null, verifyOtpDto.getEmail());
+                if (faculties.isEmpty()) {
+                    throw new IllegalArgumentException("Faculty does not exists with this email");
+                }
+
+                Faculty faculty = faculties.get(0);
+                if (!faculty.getOtp().equals(verifyOtpDto.getOtp())) {
+                    throw new IllegalArgumentException("Invalid OTP");
+                }
+
+                ApiResponse response = authenticationService.facultyLoginResponse(faculty, role.getRoleId(), session, request);
+                return ResponseEntity.ok(response);
+
+            } else {
+                throw new IllegalArgumentException("Unable to recognize the role");
+            }
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return responseService.generateErrorResponse(ApiConstants.SOME_EXCEPTION_OCCURRED + exception.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Transactional
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> verifyOtp(@RequestBody ForgotPasswordDto forgotPasswordDto, HttpSession session, HttpServletRequest request,
+                                       @RequestHeader(value = "Authorization") String authHeader) {
+        try {
+
+            authenticationService.validateForgotPasswordDto(forgotPasswordDto);
+            String jwtToken = authHeader.substring(7);
+            Long roleId = jwtTokenUtil.extractRoleId(jwtToken);
+            Long userId = jwtTokenUtil.extractId(jwtToken);
+            Role role = roleService.getRoleById(roleId);
+            if (role.getRoleName().equals(Constant.ROLE_USER)) {
+
+                List<Student> students = studentService.filterStudents(null, userId, null);
+                if (students.isEmpty()) {
+                    throw new IllegalArgumentException("Student does not exists with this studentId");
+                }
+
+                Student student = students.get(0);
+                // set new bcrypt password
+                String hashedPassword = passwordEncoder.encode(forgotPasswordDto.getNewPassword());
+                student.setPassword(hashedPassword);
+                entityManager.merge(student);
+
+                return ResponseEntity.ok(student);
+
+            } else if (role.getRoleName().equals(Constant.ROLE_FACULTY)) {
+
+                List<Faculty> faculties = facultyService.filterFaculties(null, userId, null);
+                if (faculties.isEmpty()) {
+                    throw new IllegalArgumentException("Faculty does not exists with this userId");
+                }
+
+                Faculty faculty = faculties.get(0);
+                String hashedPassword = passwordEncoder.encode(forgotPasswordDto.getNewPassword());
+                faculty.setPassword(hashedPassword);
+                entityManager.merge(faculty);
+
+                return ResponseEntity.ok(faculty);
+
+            } else {
+                throw new IllegalArgumentException("Unable to recognize the role");
+            }
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return responseService.generateErrorResponse(ApiConstants.SOME_EXCEPTION_OCCURRED + exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -240,16 +354,17 @@ public class AuthController {
             return message;
         }
 
-        public  class Data {
-            private Map<String,Object> userDetails;
+        public class Data {
+            private Map<String, Object> userDetails;
 
-            public Data(Map<String,Object>customerDetails) {
+            public Data(Map<String, Object> customerDetails) {
                 this.userDetails = customerDetails;
             }
 
-            public Map<String,Object> getUserDetails() {
+            public Map<String, Object> getUserDetails() {
                 return userDetails;
             }
         }
     }
+
 }

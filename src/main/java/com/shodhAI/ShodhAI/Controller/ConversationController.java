@@ -3,13 +3,8 @@ package com.shodhAI.ShodhAI.Controller;
 import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Dto.ConversationDto;
 import com.shodhAI.ShodhAI.Dto.ConversationFilterDto;
-import com.shodhAI.ShodhAI.Dto.DoubtDto;
-import com.shodhAI.ShodhAI.Dto.SessionFilterDto;
 import com.shodhAI.ShodhAI.Entity.Conversation;
-import com.shodhAI.ShodhAI.Entity.Doubt;
-import com.shodhAI.ShodhAI.Entity.Session;
 import com.shodhAI.ShodhAI.Service.ConversationService;
-import com.shodhAI.ShodhAI.Service.DoubtService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import jakarta.persistence.PersistenceException;
@@ -35,9 +30,6 @@ import java.util.Map;
 @RestController
 @RequestMapping(value = "/conversation", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 public class ConversationController {
-
-    @Autowired
-    DoubtService doubtService;
 
     @Autowired
     ConversationService conversationService;
@@ -87,12 +79,10 @@ public class ConversationController {
             @RequestHeader(value = "Authorization") String authHeader) {
 
         try {
-            if(offset<0)
-            {
+            if (offset < 0) {
                 throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
             }
-            if(limit<=0)
-            {
+            if (limit <= 0) {
                 throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
             }
 

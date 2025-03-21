@@ -1,16 +1,10 @@
 package com.shodhAI.ShodhAI.Controller;
 
-import com.cloudinary.utils.ObjectUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shodhAI.ShodhAI.Dto.CourseDto;
-import com.shodhAI.ShodhAI.Dto.StudentDto;
-import com.shodhAI.ShodhAI.Entity.AcademicDegree;
 import com.shodhAI.ShodhAI.Entity.Course;
-import com.shodhAI.ShodhAI.Entity.Student;
 import com.shodhAI.ShodhAI.Service.CourseService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,20 +17,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/course", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 public class CourseController {
-
-    @Autowired
-    EntityManager entityManager;
 
     @Autowired
     ExceptionHandlingService exceptionHandlingService;

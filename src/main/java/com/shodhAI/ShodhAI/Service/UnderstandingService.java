@@ -1,7 +1,6 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Dto.UnderstandingDto;
-import com.shodhAI.ShodhAI.Entity.TimeSpent;
 import com.shodhAI.ShodhAI.Entity.Understanding;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
@@ -21,7 +20,7 @@ public class UnderstandingService {
     ExceptionHandlingService exceptionHandlingService;
 
     @Transactional
-    public Understanding saveUnderstanding (UnderstandingDto understandingDto) throws Exception {
+    public Understanding saveUnderstanding(UnderstandingDto understandingDto) throws Exception {
         try {
 
             Date currentDate = new Date();

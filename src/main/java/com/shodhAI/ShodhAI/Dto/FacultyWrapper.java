@@ -1,14 +1,9 @@
 package com.shodhAI.ShodhAI.Dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.shodhAI.ShodhAI.Entity.AcademicDegree;
-import com.shodhAI.ShodhAI.Entity.Accuracy;
-import com.shodhAI.ShodhAI.Entity.CriticalThinking;
 import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.Role;
-import com.shodhAI.ShodhAI.Entity.Student;
-import com.shodhAI.ShodhAI.Entity.TimeSpent;
 
 import java.util.Date;
 

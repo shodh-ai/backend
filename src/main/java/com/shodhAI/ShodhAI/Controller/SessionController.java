@@ -1,6 +1,5 @@
 package com.shodhAI.ShodhAI.Controller;
 
-
 import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Dto.SessionDto;
 import com.shodhAI.ShodhAI.Dto.SessionFilterDto;
@@ -81,12 +80,10 @@ public class SessionController {
             @RequestHeader(value = "Authorization") String authHeader) {
 
         try {
-            if(offset<0)
-            {
+            if (offset < 0) {
                 throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
             }
-            if(limit<=0)
-            {
+            if (limit <= 0) {
                 throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
             }
 

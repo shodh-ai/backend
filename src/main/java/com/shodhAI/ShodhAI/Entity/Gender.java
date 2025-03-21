@@ -12,7 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="gender")
+@Table(name = "gender")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,11 +24,11 @@ public class Gender {
     @JsonProperty("gender_id")
     protected Long genderId;
 
-    @Column(name="gender_symbol")
+    @Column(name = "gender_symbol")
     @JsonProperty("gender_symbol")
     protected Character genderSymbol;
 
-    @Column(name="gender_name")
+    @Column(name = "gender_name")
     @JsonProperty("gender_name")
     protected String genderName;
 
