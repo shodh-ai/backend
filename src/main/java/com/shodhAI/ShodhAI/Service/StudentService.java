@@ -254,4 +254,38 @@ public class StudentService {
         return student;
     }
 
+    public List<Student> filterStudents(String username, Long studentId, String personalEmail) {
+        StringBuilder queryString = new StringBuilder("SELECT s FROM Student s WHERE 1 = 1");
+
+        if (username != null && !username.isEmpty()) {
+            queryString.append(" AND s.userName = :username");
+        }
+        if (studentId != null) {
+            queryString.append(" AND s.id = :studentId");
+        }
+        if (personalEmail != null && !personalEmail.isEmpty()) {
+            queryString.append(" AND s.personalEmail = :personalEmail");
+        }
+
+        TypedQuery<Student> query = entityManager.createQuery(queryString.toString(), Student.class);
+
+        if (username != null && !username.isEmpty()) {
+            query.setParameter("username", username);
+        }
+        if (studentId != null) {
+            query.setParameter("studentId", studentId);
+        }
+        if (personalEmail != null && !personalEmail.isEmpty()) {
+            query.setParameter("personalEmail", personalEmail);
+        }
+
+        List<Student> students = query.getResultList();
+        /*if (students.isEmpty()) {
+            throw new UsernameNotFoundException("No students found matching the criteria");
+        }*/
+
+        return students;
+    }
+
+
 }

@@ -210,4 +210,39 @@ public class FacultyService {
         return faculty;
     }
 
+    public List<Faculty> filterFaculties(String username, Long facultyId, String personalEmail) {
+        StringBuilder queryString = new StringBuilder("SELECT f FROM Faculty f WHERE 1 = 1");
+
+        if (username != null && !username.isEmpty()) {
+            queryString.append(" AND f.userName = :username");
+        }
+        if (facultyId != null) {
+            queryString.append(" AND f.id = :facultyId");
+        }
+        if (personalEmail != null && !personalEmail.isEmpty()) {
+            queryString.append(" AND f.personalEmail = :personalEmail");
+        }
+
+        TypedQuery<Faculty> query = entityManager.createQuery(queryString.toString(), Faculty.class);
+
+        if (username != null && !username.isEmpty()) {
+            query.setParameter("username", username);
+        }
+        if (facultyId != null) {
+            query.setParameter("facultyId", facultyId);
+        }
+        if (personalEmail != null && !personalEmail.isEmpty()) {
+            query.setParameter("personalEmail", personalEmail);
+        }
+
+        List<Faculty> faculties = query.getResultList();
+
+        /*if (faculties.isEmpty()) {
+            throw new UsernameNotFoundException("No faculties found matching the criteria");
+        }*/
+
+        return faculties;
+    }
+
+
 }

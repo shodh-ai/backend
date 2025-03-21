@@ -98,6 +98,10 @@ public class Faculty {
     @JsonProperty("token")
     private String token;
 
+    @Column(name = "otp")
+    @JsonProperty("otp")
+    private String otp;
+
     @Column(name = "user_name", unique = true)
     @JsonProperty("user_name")
     private String userName;
