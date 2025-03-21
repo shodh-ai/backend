@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
@@ -22,6 +23,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -176,5 +178,9 @@ public class Student {
 
     @JsonProperty("weaknesses")
     private List<String> weaknesses;
+
+    @OneToMany(mappedBy = "student")
+    @JsonProperty("student_assignments")
+    private List<StudentAssignment> studentAssignments = new ArrayList<>();
 
 }

@@ -2,9 +2,13 @@ package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.AssignmentDto;
+import com.shodhAI.ShodhAI.Dto.AssignmentStatisticsDto;
+import com.shodhAI.ShodhAI.Dto.StudentCompletionDto;
 import com.shodhAI.ShodhAI.Entity.Assignment;
-import com.shodhAI.ShodhAI.Entity.Course;
+import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.PriorityLevel;
+import com.shodhAI.ShodhAI.Entity.Student;
+import com.shodhAI.ShodhAI.Entity.StudentAssignment;
 import com.shodhAI.ShodhAI.Entity.Topic;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
@@ -13,9 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AssignmentService {
@@ -163,5 +171,136 @@ public class AssignmentService {
             exceptionHandlingService.handleException(exception);
             throw new Exception(exception.getMessage());
         }
+    }
+
+    public AssignmentStatisticsDto getAssignmentCompletionStatistics(Long assignmentId, Long facultyId) {
+        // Get the assignment
+        Assignment assignment = entityManager.find(Assignment.class, assignmentId);
+        if (assignment == null) {
+            throw new RuntimeException("Assignment not found with ID: " + assignmentId);
+        }
+
+        // Get the faculty
+        Faculty faculty = entityManager.find(Faculty.class, facultyId);
+        if (faculty == null) {
+            throw new RuntimeException("Faculty not found with ID: " + facultyId);
+        }
+
+        // Get all students associated with the faculty
+        TypedQuery<Student> studentQuery = entityManager.createQuery(
+                "SELECT s FROM Student s JOIN s.facultyMembers f WHERE f.id = :facultyId AND s.archived = 'N'",
+                Student.class);
+        studentQuery.setParameter("facultyId", facultyId);
+        List<Student> students = studentQuery.getResultList();
+
+        // Get student assignment data
+        TypedQuery<StudentAssignment> assignmentQuery = entityManager.createQuery(
+                "SELECT sa FROM StudentAssignment sa WHERE sa.assignment.assignmentId = :assignmentId " +
+                        "AND sa.student.id IN :studentIds",
+                StudentAssignment.class);
+        assignmentQuery.setParameter("assignmentId", assignmentId);
+        assignmentQuery.setParameter("studentIds", students.stream().map(Student::getId).collect(Collectors.toList()));
+        List<StudentAssignment> studentAssignments = assignmentQuery.getResultList();
+
+        // Prepare statistics
+        int totalStudents = students.size();
+        int completedCount = (int) studentAssignments.stream()
+                .filter(sa -> sa.getCompletionStatus() != null && sa.getCompletionStatus())
+                .count();
+
+        double completionPercentage = totalStudents > 0 ?
+                (completedCount * 100.0) / totalStudents : 0.0;
+
+        // Student completion list
+        List<StudentCompletionDto> studentCompletionList = new ArrayList<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        // Track completion by date
+        Map<String, Integer> completionByDate = new HashMap<>();
+
+        for (Student student : students) {
+            StudentAssignment studentAssignment = studentAssignments.stream()
+                    .filter(sa -> sa.getStudent().getId().equals(student.getId()))
+                    .findFirst()
+                    .orElse(null);
+
+            Boolean completed = false;
+            Double score = null;
+            String submissionDate = null;
+
+            if (studentAssignment != null) {
+                completed = studentAssignment.getCompletionStatus() != null ?
+                        studentAssignment.getCompletionStatus() : false;
+                score = studentAssignment.getScore();
+
+                if (studentAssignment.getSubmissionDate() != null) {
+                    submissionDate = dateFormat.format(studentAssignment.getSubmissionDate());
+
+                    // Count completions by date
+                    if (completed) {
+                        completionByDate.put(
+                                submissionDate,
+                                completionByDate.getOrDefault(submissionDate, 0) + 1
+                        );
+                    }
+                }
+            }
+
+            studentCompletionList.add(new StudentCompletionDto(
+                    student.getId(),
+                    student.getFirstName() + " " + student.getLastName(),
+                    completed,
+                    score,
+                    submissionDate
+            ));
+        }
+
+        // Create and return the statistics DTO
+        AssignmentStatisticsDto statisticsDTO = new AssignmentStatisticsDto();
+        statisticsDTO.setAssignmentId(assignmentId);
+        statisticsDTO.setAssignmentName(assignment.getAssignmentName());
+        statisticsDTO.setTotalStudents(totalStudents);
+        statisticsDTO.setCompletedCount(completedCount);
+        statisticsDTO.setCompletionPercentage(Math.round(completionPercentage * 100) / 100.0); // Round to 2 decimal places
+        statisticsDTO.setStudentCompletionList(studentCompletionList);
+        statisticsDTO.setCompletionByDate(completionByDate);
+
+        return statisticsDTO;
+    }
+
+    public List<Assignment> getActiveAssignmentsForFaculty(Long facultyId) {
+        // Get current date
+        Date currentDate = new Date();
+
+        // Find all active assignments for the faculty
+        TypedQuery<Assignment> query = entityManager.createQuery(
+                "SELECT DISTINCT a FROM Assignment a " +
+                        "JOIN a.topic t " +
+                        "JOIN t.course c " +
+                        "JOIN c.facultyMembers f " +
+                        "WHERE f.id = :facultyId " +
+                        "AND a.archived = 'N' " +
+                        "AND a.activeStartDate <= :currentDate " +
+                        "AND a.activeEndDate >= :currentDate",
+                Assignment.class);
+        query.setParameter("facultyId", facultyId);
+        query.setParameter("currentDate", currentDate);
+
+        return query.getResultList();
+    }
+
+    /**
+     * Gets completion statistics for all active assignments for a faculty
+     */
+    public List<AssignmentStatisticsDto> getAllActiveAssignmentStatistics(Long facultyId) {
+        List<Assignment> activeAssignments = getActiveAssignmentsForFaculty(facultyId);
+        List<AssignmentStatisticsDto> statisticsList = new ArrayList<>();
+
+        for (Assignment assignment : activeAssignments) {
+            AssignmentStatisticsDto statistics = getAssignmentCompletionStatistics(assignment.getAssignmentId(), facultyId);
+            statisticsList.add(statistics);
+        }
+
+        return statisticsList;
     }
 }

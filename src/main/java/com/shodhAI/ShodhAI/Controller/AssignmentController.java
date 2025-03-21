@@ -1,6 +1,7 @@
 package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Dto.AssignmentDto;
+import com.shodhAI.ShodhAI.Dto.AssignmentStatisticsDto;
 import com.shodhAI.ShodhAI.Entity.Assignment;
 import com.shodhAI.ShodhAI.Service.AssignmentService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
@@ -113,6 +114,34 @@ public class AssignmentController {
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/{assignmentId}/statistics/faculty/{facultyId}")
+    public ResponseEntity<?> getAssignmentStatistics(
+            @PathVariable Long assignmentId,
+            @PathVariable Long facultyId) {
+        try {
+            AssignmentStatisticsDto statistics = assignmentService.getAssignmentCompletionStatistics(assignmentId, facultyId);
+            return ResponseService.generateSuccessResponse("Assignment is retrieved successfully",statistics, HttpStatus.OK);
+
+        }  catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/active/statistics/faculty/{facultyId}")
+    public ResponseEntity<List<AssignmentStatisticsDto>> getAllActiveAssignmentStatistics(
+            @PathVariable Long facultyId) {
+        try {
+            List<AssignmentStatisticsDto> statisticsList = ((AssignmentService) assignmentService)
+                    .getAllActiveAssignmentStatistics(facultyId);
+            return new ResponseEntity<>(statisticsList, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
