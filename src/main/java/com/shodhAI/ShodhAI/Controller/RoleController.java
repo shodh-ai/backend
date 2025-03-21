@@ -23,9 +23,6 @@ import java.util.List;
 public class RoleController {
 
     @Autowired
-    EntityManager entityManager;
-
-    @Autowired
     RoleService roleService;
 
     @Autowired

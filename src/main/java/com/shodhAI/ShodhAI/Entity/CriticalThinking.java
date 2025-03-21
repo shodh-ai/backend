@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name="criticalThinking")
+@Table(name = "critical_thinking")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

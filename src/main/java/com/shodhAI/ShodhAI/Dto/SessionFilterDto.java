@@ -19,10 +19,4 @@ public class SessionFilterDto {
     @JsonProperty("question_type_id")
     private Long questionTypeId;
 
-    @JsonProperty("user_id")
-    private Long userId;
-
-    @JsonProperty("role_id")
-    private Long roleId;
-
 }

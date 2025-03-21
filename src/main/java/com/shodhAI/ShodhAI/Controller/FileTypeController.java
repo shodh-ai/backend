@@ -1,10 +1,8 @@
 package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Entity.FileType;
-import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.FileTypeService;
-import com.shodhAI.ShodhAI.Service.GenderService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;

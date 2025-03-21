@@ -1,6 +1,5 @@
 package com.shodhAI.ShodhAI.Controller;
 
-
 import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Dto.SessionDto;
 import com.shodhAI.ShodhAI.Dto.SessionFilterDto;
@@ -77,20 +76,23 @@ public class SessionController {
     public ResponseEntity<?> getFilterProducts(
             @RequestBody SessionFilterDto sessionDto,
             @RequestParam(defaultValue = "0") int offset,
-            @RequestParam(defaultValue = "10") int limit) {
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestHeader(value = "Authorization") String authHeader) {
 
         try {
-            if(offset<0)
-            {
+            if (offset < 0) {
                 throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
             }
-            if(limit<=0)
-            {
+            if (limit <= 0) {
                 throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
             }
 
+            String jwtToken = authHeader.substring(7);
+            Long roleId = jwtTokenUtil.extractRoleId(jwtToken);
+            Long userId = jwtTokenUtil.extractId(jwtToken);
+
             // Fetch filtered products
-            List<Session> sessions = sessionService.sessionFilter(sessionDto.getSessionId(), sessionDto.getUserId(), sessionDto.getRoleId(), sessionDto.getTopicId(), sessionDto.getQuestionTypeId());
+            List<Session> sessions = sessionService.sessionFilter(sessionDto.getSessionId(), userId, roleId, sessionDto.getTopicId(), sessionDto.getQuestionTypeId());
 
             if (sessions.isEmpty()) {
                 return ResponseService.generateSuccessResponse("No Sessions found with the given criteria", new ArrayList<>(), HttpStatus.OK);
@@ -103,7 +105,7 @@ public class SessionController {
             int toIndex = Math.min(fromIndex + limit, totalItems);
 
             if (offset >= totalPages && offset != 0) {
-                throw new IllegalArgumentException("No more products available");
+                throw new IllegalArgumentException("No more Session available");
             }
             // Validate offset request
             if (fromIndex >= totalItems) {

@@ -39,7 +39,7 @@ public class SessionService {
             if (sessionDto.getTopicId() == null || sessionDto.getTopicId() <= 0) {
                 throw new IllegalArgumentException("Topic Id cannot be null or <= 0");
             }
-            if (sessionDto.getQuestionTypeId() == null || sessionDto.getQuestionTypeId() <= 0) {
+            if (sessionDto.getQuestionTypeId() != null && sessionDto.getQuestionTypeId() <= 0) {
                 throw new IllegalArgumentException("Question Type Id cannot be null or <= 0");
             }
 
@@ -62,7 +62,10 @@ public class SessionService {
 
             Role role = roleService.getRoleById(roleId);
             Topic topic = topicService.getTopicById(sessionDto.getTopicId());
-            QuestionType questionType = questionTypeService.getQuestionTypeById(sessionDto.getQuestionTypeId());
+            QuestionType questionType = null;
+            if (sessionDto.getQuestionTypeId() != null) {
+                questionType = questionTypeService.getQuestionTypeById(sessionDto.getQuestionTypeId());
+            }
 
             session.setTopic(topic);
             session.setQuestionType(questionType);
@@ -100,6 +103,9 @@ public class SessionService {
             if (questionTypeId != null) {
                 jpql.append("AND s.questionType.id = :questionTypeId ");
             }
+
+            // Add ORDER BY clause to sort by sessionId
+            jpql.append("ORDER BY s.id ASC");
 
             // Create the query
             TypedQuery<Session> query = entityManager.createQuery(jpql.toString(), Session.class);

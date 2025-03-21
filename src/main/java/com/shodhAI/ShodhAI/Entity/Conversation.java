@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -20,7 +19,7 @@ import lombok.Setter;
 import java.util.Date;
 
 @Entity
-@Table(name="conversation")
+@Table(name = "conversation")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,13 +33,13 @@ public class Conversation {
     @JsonProperty("interaction_id")
     private Long id;
 
-    @Column(name="user_text", columnDefinition = "TEXT")
-    @JsonProperty("user_text")
-    private String userText;
+    @Column(name = "user_dialogue", columnDefinition = "TEXT")
+    @JsonProperty("user_dialogue")
+    private String userDialogue;
 
-    @Column(name = "response", columnDefinition = "TEXT")
-    @JsonProperty("response")
-    private String response;
+    @Column(name = "assistant_dialogue", columnDefinition = "TEXT")
+    @JsonProperty("assistant_dialogue")
+    private String assistantDialogue;
 
     @ManyToOne
     @JoinColumn(name = "session_id", nullable = false)
@@ -56,16 +55,16 @@ public class Conversation {
     @JsonProperty("user_role")
     private Role userRole;
 
-    @Column(name = "user_text_timestamp")
-    @JsonProperty("created_date")
+    @Column(name = "user_dialogue_timestamp")
+    @JsonProperty("user_dialogue_timestamp")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     // TODO (MIGHT HAVE TO CHANGE IN FUTURE) this won't work with instant as instant does not have calendar features like LocalDateTime etc.
-    private Date userTextTimestamp;
+    private Date userDialogueTimestamp;
 
-    @Column(name = "response_timestamp")
-    @JsonProperty("response_timestamp")
+    @Column(name = "assistant_dialogue_timestamp")
+    @JsonProperty("assistant_dialogue_timestamp")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     // TODO (MIGHT HAVE TO CHANGE IN FUTURE) this won't work with instant as instant does not have calendar features like LocalDateTime etc.
-    private Date responseTimestamp;
+    private Date assistantDialogueTimestamp;
 
 }

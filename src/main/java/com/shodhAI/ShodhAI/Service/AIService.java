@@ -1,7 +1,6 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Dto.FlowListWrapper;
-import com.shodhAI.ShodhAI.Dto.FlowRequestDto;
 import com.shodhAI.ShodhAI.Dto.QuestionListWrapper;
 import com.shodhAI.ShodhAI.Dto.QuestionResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Flow;
 
 @Service
 public class AIService {

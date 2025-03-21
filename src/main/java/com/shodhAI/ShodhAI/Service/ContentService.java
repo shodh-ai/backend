@@ -5,7 +5,6 @@ import com.shodhAI.ShodhAI.Entity.Content;
 import com.shodhAI.ShodhAI.Entity.ContentType;
 import com.shodhAI.ShodhAI.Entity.FileType;
 import com.shodhAI.ShodhAI.Entity.Topic;
-import com.shodhAI.ShodhAI.Entity.TopicType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
@@ -39,7 +38,7 @@ public class ContentService {
                 throw new IllegalArgumentException(("Topic Id cannot be null or <= 0"));
             }
 
-            if(contentTypeId == null || contentTypeId <=0) {
+            if (contentTypeId == null || contentTypeId <= 0) {
                 throw new IllegalArgumentException(("Content Type Id cannot be null or <= 0"));
             }
 
@@ -63,14 +62,14 @@ public class ContentService {
             Topic topic = topicService.getTopicById(topicId);
             String format = (String) uploadResult.get("format");
 
-            if(contentTypeId != 4) {
+            if (contentTypeId != 4) {
                 FileType fileType = fileTypeService.getFileTypeByType(format);
                 ContentType contentType = getContentTypeById(contentTypeId);
 
                 if (fileType.getArchived() == 'Y') {
                     throw new IllegalArgumentException("File Type not supported");
                 }
-                if(topic.getTopicType().getTopicTypeName().equals(Constant.GET_TOPIC_TYPE_ASSIGNMENT) && !contentType.getContentTypeName().equals(Constant.GET_CONTENT_TYPE_ASSIGNMENT)) {
+                if (topic.getTopicType().getTopicTypeName().equals(Constant.GET_TOPIC_TYPE_ASSIGNMENT) && !contentType.getContentTypeName().equals(Constant.GET_CONTENT_TYPE_ASSIGNMENT)) {
                     throw new IllegalArgumentException("For Assignment content type and topic type must be same");
                 }
 

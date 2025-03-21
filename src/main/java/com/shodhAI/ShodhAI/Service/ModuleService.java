@@ -1,7 +1,6 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
-import com.shodhAI.ShodhAI.Dto.CourseDto;
 import com.shodhAI.ShodhAI.Dto.ModuleDto;
 import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.Module;
@@ -48,7 +47,7 @@ public class ModuleService {
                 moduleDto.setModuleDuration(moduleDto.getModuleDescription().trim());
             }
 
-            if(moduleDto.getCourseId() == null || moduleDto.getCourseId() <= 0) {
+            if (moduleDto.getCourseId() == null || moduleDto.getCourseId() <= 0) {
                 throw new IllegalArgumentException(("Course Id cannot be null or <= 0"));
             }
 

@@ -7,8 +7,6 @@ import com.shodhAI.ShodhAI.Dto.QuestionResponseDto;
 import com.shodhAI.ShodhAI.Entity.Hint;
 import com.shodhAI.ShodhAI.Entity.Module;
 import com.shodhAI.ShodhAI.Entity.Question;
-import com.shodhAI.ShodhAI.Entity.QuestionType;
-import com.shodhAI.ShodhAI.Entity.Session;
 import com.shodhAI.ShodhAI.Entity.Topic;
 import com.shodhAI.ShodhAI.Entity.TopicType;
 import jakarta.persistence.EntityManager;

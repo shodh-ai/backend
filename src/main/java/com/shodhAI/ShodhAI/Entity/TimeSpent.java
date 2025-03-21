@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name="time_spent")
+@Table(name = "time_spent")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -37,7 +37,7 @@ public class TimeSpent {
 
     @Column(name = "time_spent_increased")
     @JsonProperty("time_spent_increased")
-    private Double timeSpentIncresed = 0.0;
+    private Double timeSpentIncreased = 0.0;
 
     @Column(name = "created_date")
     @JsonProperty("created_date")

@@ -13,7 +13,7 @@ public class ConversationDto {
     @JsonProperty("session_id")
     private Long sessionId;
 
-    @JsonProperty("user_text")
-    private String userText;
+    @JsonProperty("user_dialogue")
+    private String userDialogue;
 
 }

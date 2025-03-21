@@ -34,8 +34,8 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationEntryPoint point;
 
-//    @Autowired
-//    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    /*@Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;*/
 
     /*@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -58,7 +58,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth ->
                                 auth.requestMatchers("/content/get-all-content-type", "/upload").authenticated()
-                                        .requestMatchers("/auth/login-with-username-password", "/student/add", "/faculty/add", "/")
+                                        .requestMatchers("/auth/login-with-username-password", "/student/add", "/faculty/add", "/", "/auth/sign-up", "/auth/verify-otp", "/auth/forgot-password")
                                         .permitAll()
                                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
@@ -86,28 +86,28 @@ public class SecurityConfig {
     }*/
 
     // Configure the AuthenticationManagerBuilder to use StudentService as the UserDetailsService
-//    @Bean
-//    public AuthenticationManagerBuilder authenticationManagerBuilder(HttpSecurity http) throws Exception {
-//        AuthenticationManagerBuilder authenticationManagerBuilder =
-//                http.getSharedObject(AuthenticationManagerBuilder.class);
-//
-//        authenticationManagerBuilder
-//                .userDetailsService(studentService)  // Using StudentService as the custom UserDetailsService
-//                .passwordEncoder(passwordEncoder()); // Password encoder for password encryption
-//
-//        return authenticationManagerBuilder;
-//    }
+    /*@Bean
+    public AuthenticationManagerBuilder authenticationManagerBuilder(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder =
+                http.getSharedObject(AuthenticationManagerBuilder.class);
 
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http.csrf(csrf -> csrf.disable()) // Disable CSRF for all endpoints
-//                .authorizeHttpRequests(auth -> auth
-//                        .anyRequest().permitAll() // Allow access to all endpoints without authentication
-//                )
-//                .cors(cors -> cors.configurationSource(corsConfigurationSource()));  // Apply global CORS config
-//        return http.build();
-//    }
-//
+        authenticationManagerBuilder
+                .userDetailsService(studentService)  // Using StudentService as the custom UserDetailsService
+                .passwordEncoder(passwordEncoder()); // Password encoder for password encryption
+
+        return authenticationManagerBuilder;
+    }*/
+
+    /*@Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable()) // Disable CSRF for all endpoints
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll() // Allow access to all endpoints without authentication
+                )
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()));  // Apply global CORS config
+        return http.build();
+    }*/
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
