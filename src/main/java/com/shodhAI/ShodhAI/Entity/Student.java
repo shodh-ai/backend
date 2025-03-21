@@ -1,6 +1,7 @@
 package com.shodhAI.ShodhAI.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
@@ -89,6 +90,7 @@ public class Student {
     @JsonProperty("gender")
     private Gender gender;
 
+    @JsonIgnore
     @Column(name = "token", columnDefinition = "TEXT", unique = true)
     @JsonProperty("token")
     private String token;
@@ -166,7 +168,7 @@ public class Student {
 
     @OneToOne
     @NotNull
-    @JoinColumn(name="time_spent_id")
+    @JoinColumn(name = "time_spent_id")
     @JsonProperty("time_spent")
     private TimeSpent timeSpent;
 

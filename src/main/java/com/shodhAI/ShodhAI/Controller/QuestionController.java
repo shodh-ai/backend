@@ -3,7 +3,6 @@ package com.shodhAI.ShodhAI.Controller;
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.QuestionRequestDto;
 import com.shodhAI.ShodhAI.Dto.QuestionResponseDto;
-import com.shodhAI.ShodhAI.Entity.Assignment;
 import com.shodhAI.ShodhAI.Entity.Content;
 import com.shodhAI.ShodhAI.Entity.Module;
 import com.shodhAI.ShodhAI.Entity.Question;
@@ -71,13 +70,13 @@ public class QuestionController {
             dataMap.put("topic", topic.getTopicTitle());
 
             List<Map<String, Object>> contentDataMapList = new ArrayList<>();
-            if(topic.getTopicType().equals(Constant.GET_TOPIC_TYPE_TEACHING)) {
+            if (topic.getTopicType().equals(Constant.GET_TOPIC_TYPE_TEACHING)) {
                 for (Content content : contentList) {
                     Map<String, Object> contentDataMap = new HashMap<>();
                     contentDataMap.put("type", content.getFileType().getFileTypeName().toLowerCase());
                     contentDataMap.put("url", content.getUrl());
 
-                    if(content.getContentType().equals(Constant.GET_CONTENT_TYPE_PRACTICE_QUESTION)) {
+                    if (content.getContentType().equals(Constant.GET_CONTENT_TYPE_PRACTICE_QUESTION)) {
                         contentDataMapList.add(contentDataMap);
                     }
                 }
@@ -89,7 +88,7 @@ public class QuestionController {
 
                     contentDataMapList.add(contentDataMap);
 
-                    if(content.getContentType().equals(Constant.GET_CONTENT_TYPE_ASSIGNMENT)) {
+                    if (content.getContentType().equals(Constant.GET_CONTENT_TYPE_ASSIGNMENT)) {
                         contentDataMapList.add(contentDataMap);
                     }
                 }
@@ -161,16 +160,16 @@ public class QuestionController {
     }
 
     @GetMapping(value = "/get-filter-question")
-    public ResponseEntity<?> getQuestion (@RequestParam(value = "topic_id", required = false) Long topicId,
-                                          @RequestParam(value = "question_type_id", required = false) Long questionTypeId) {
+    public ResponseEntity<?> getQuestion(@RequestParam(value = "topic_id", required = false) Long topicId,
+                                         @RequestParam(value = "question_type_id", required = false) Long questionTypeId) {
 
         try {
-            if( topicId <=0 ) {
+            if (topicId <= 0) {
                 throw new IllegalArgumentException("Topic Id cannot be <= 0");
             }
             Topic topic = topicService.getTopicById(topicId);
 
-            if( questionTypeId <= 0) {
+            if (questionTypeId <= 0) {
                 throw new IllegalArgumentException("Question Type Id cannot be <= 0");
             }
             QuestionType questionType = questionTypeService.getQuestionTypeById(questionTypeId);

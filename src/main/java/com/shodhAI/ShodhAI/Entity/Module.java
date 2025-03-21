@@ -18,7 +18,7 @@ import lombok.NonNull;
 import java.util.Date;
 
 @Entity
-@Table(name="module")
+@Table(name = "module")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,7 +26,7 @@ public class Module {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="module_id")
+    @Column(name = "module_id")
     private Long moduleId;
 
     @Column(name = "title")

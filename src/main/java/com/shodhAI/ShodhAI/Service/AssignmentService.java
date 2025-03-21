@@ -3,7 +3,6 @@ package com.shodhAI.ShodhAI.Service;
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.AssignmentDto;
 import com.shodhAI.ShodhAI.Entity.Assignment;
-import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.PriorityLevel;
 import com.shodhAI.ShodhAI.Entity.Topic;
 import jakarta.persistence.EntityManager;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -46,10 +44,10 @@ public class AssignmentService {
                 assignmentDto.setAssignmentDescription(assignmentDto.getAssignmentDescription().trim());
             }
 
-            if(assignmentDto.getTopicId() == null || assignmentDto.getTopicId() <= 0) {
+            if (assignmentDto.getTopicId() == null || assignmentDto.getTopicId() <= 0) {
                 throw new IllegalArgumentException(("Topic Id cannot be null or <= 0"));
             }
-            if(assignmentDto.getPriorityLevelId() == null || assignmentDto.getPriorityLevelId() <= 0) {
+            if (assignmentDto.getPriorityLevelId() == null || assignmentDto.getPriorityLevelId() <= 0) {
                 throw new IllegalArgumentException(("Priority Level cannot be null or <= 0"));
             }
 
@@ -121,7 +119,7 @@ public class AssignmentService {
     public void validateAssignmentParameters(Long topicId) throws Exception {
         try {
 
-            if(topicId == null || topicId <= 0) {
+            if (topicId == null || topicId <= 0) {
                 throw new IllegalArgumentException(("Topic Id cannot be null or <= 0"));
             }
 

@@ -26,8 +26,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Time;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -69,46 +67,46 @@ public class StudentService {
 
     public void validateStudent(StudentDto studentDto) throws Exception {
         try {
-            if(studentDto.getFirstName() == null || studentDto.getFirstName().isEmpty()) {
+            if (studentDto.getFirstName() == null || studentDto.getFirstName().isEmpty()) {
                 throw new IllegalArgumentException("Student name cannot be null or empty");
             }
             studentDto.setFirstName(studentDto.getFirstName().trim());
 
-            if(studentDto.getLastName() != null) {
-                if(studentDto.getLastName().isEmpty() || studentDto.getLastName().trim().isEmpty()) {
+            if (studentDto.getLastName() != null) {
+                if (studentDto.getLastName().isEmpty() || studentDto.getLastName().trim().isEmpty()) {
                     throw new IllegalArgumentException("Last name cannot be empty");
                 }
                 studentDto.setLastName(studentDto.getLastName().trim());
             }
 
-            if(studentDto.getCountryCode() != null) {
-                if(studentDto.getCountryCode().isEmpty() || studentDto.getCountryCode().trim().isEmpty()) {
+            if (studentDto.getCountryCode() != null) {
+                if (studentDto.getCountryCode().isEmpty() || studentDto.getCountryCode().trim().isEmpty()) {
                     throw new IllegalArgumentException("Country code cannot be empty");
                 }
                 studentDto.setCountryCode(studentDto.getCountryCode().trim());
             }
 
-            if(studentDto.getMobileNumber() == null || studentDto.getMobileNumber().trim().isEmpty()) {
+            if (studentDto.getMobileNumber() == null || studentDto.getMobileNumber().trim().isEmpty()) {
                 throw new IllegalArgumentException("Student Mobile Number cannot be null or empty");
             }
             studentDto.setMobileNumber(studentDto.getMobileNumber().trim());
 
-            if(studentDto.getUserName() == null || studentDto.getUserName().trim().isEmpty()) {
+            if (studentDto.getUserName() == null || studentDto.getUserName().trim().isEmpty()) {
                 throw new IllegalArgumentException("User name cannot be null or empty");
             }
             studentDto.setUserName(studentDto.getUserName().trim());
 
-            if(studentDto.getPassword() == null) {
+            if (studentDto.getPassword() == null) {
                 throw new IllegalArgumentException("Password cannot be null");
             }
             String hashedPassword = passwordEncoder.encode(studentDto.getPassword());
             studentDto.setPassword(hashedPassword);
             studentDto.setUserName(studentDto.getUserName().trim());
 
-            if(studentDto.getGenderId() == null || studentDto.getGenderId() <= 0) {
+            if (studentDto.getGenderId() == null || studentDto.getGenderId() <= 0) {
                 throw new IllegalArgumentException(("Gender Id cannot be null or <= 0"));
             }
-            if(studentDto.getAcademicDegreeId() == null || studentDto.getAcademicDegreeId() <= 0) {
+            if (studentDto.getAcademicDegreeId() == null || studentDto.getAcademicDegreeId() <= 0) {
                 throw new IllegalArgumentException(("Academic Degree Id cannot be null or <= 0"));
             }
 
@@ -122,7 +120,7 @@ public class StudentService {
     }
 
     @Transactional
-    public Student saveStudent(StudentDto studentDto) throws Exception {
+    public Student saveStudent(StudentDto studentDto, String otp, Character archived) throws Exception {
         try {
 
             Gender gender = genderService.getGenderById(studentDto.getGenderId());
@@ -142,6 +140,8 @@ public class StudentService {
             student.setCollegeEmail(studentDto.getCollegeEmail());
             student.setPersonalEmail(studentDto.getPersonalEmail());
             student.setDateOfBirth(studentDto.getDateOfBirth());
+            student.setOtp(otp);
+            student.setArchived(archived);
 
             student.setUserName(studentDto.getUserName());
             student.setPassword(studentDto.getPassword());

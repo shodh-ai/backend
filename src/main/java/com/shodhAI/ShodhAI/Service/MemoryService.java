@@ -1,9 +1,7 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Dto.MemoryDto;
-import com.shodhAI.ShodhAI.Dto.TimeSpentDto;
 import com.shodhAI.ShodhAI.Entity.Memory;
-import com.shodhAI.ShodhAI.Entity.TimeSpent;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import org.springframework.beans.factory.annotation.Autowired;

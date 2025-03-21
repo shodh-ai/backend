@@ -2,27 +2,21 @@ package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Component.ApiConstants;
 import com.shodhAI.ShodhAI.Component.Constant;
-import com.shodhAI.ShodhAI.Dto.AcademicDegreeDto;
-import com.shodhAI.ShodhAI.Dto.AccuracyDto;
-import com.shodhAI.ShodhAI.Dto.CriticalThinkingDto;
 import com.shodhAI.ShodhAI.Dto.ForgotPasswordDto;
-import com.shodhAI.ShodhAI.Dto.MemoryDto;
 import com.shodhAI.ShodhAI.Dto.SignUpDto;
-import com.shodhAI.ShodhAI.Dto.TimeSpentDto;
-import com.shodhAI.ShodhAI.Dto.UnderstandingDto;
 import com.shodhAI.ShodhAI.Dto.VerifyOtpDto;
-import com.shodhAI.ShodhAI.Entity.AcademicDegree;
-import com.shodhAI.ShodhAI.Entity.Accuracy;
-import com.shodhAI.ShodhAI.Entity.CriticalThinking;
 import com.shodhAI.ShodhAI.Entity.Faculty;
-import com.shodhAI.ShodhAI.Entity.Gender;
-import com.shodhAI.ShodhAI.Entity.Memory;
 import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.Student;
-import com.shodhAI.ShodhAI.Entity.TimeSpent;
-import com.shodhAI.ShodhAI.Entity.Understanding;
-import com.shodhAI.ShodhAI.Service.*;
 import com.shodhAI.ShodhAI.Component.JwtUtil;
+import com.shodhAI.ShodhAI.Service.AuthenticationService;
+import com.shodhAI.ShodhAI.Service.EmailService;
+import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
+import com.shodhAI.ShodhAI.Service.FacultyService;
+import com.shodhAI.ShodhAI.Service.OtpService;
+import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.RoleService;
+import com.shodhAI.ShodhAI.Service.StudentService;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -39,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,29 +75,7 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtTokenUtil;
 
-
-    @Autowired
-    AcademicDegreeService academicDegreeService;
-    @Autowired
-    TimeSpentService timeSpentService;
-    @Autowired
-    AccuracyService accuracyService;
-    @Autowired
-    UnderstandingService understandingService;
-    @Autowired
-    MemoryService memoryService;
-    @Autowired
-    CriticalThinkingService criticalThinkingService;
-    @Autowired
-    GenderService genderService;
-
-
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @PostMapping("/login-with-password")
     @ResponseBody
@@ -116,15 +87,15 @@ public class AuthController {
 
 //            String mobileNumber = (String) loginDetails.get("mobileNumber");
             String username = (String) loginDetails.get("username");
-//            if (mobileNumber != null) {
-//                if (mobileNumber.startsWith("0"))
-//                    mobileNumber = mobileNumber.substring(1);
-//                if (studentService.isValidMobileNumber(mobileNumber) && isNumeric(mobileNumber)) {
-//                    return loginWithCustomerPassword(loginDetails,session,request);
-//                } else {
-//                    return responseService.generateErrorResponse(ApiConstants.INVALID_MOBILE_NUMBER, HttpStatus.BAD_REQUEST);
-//                }
-//            } else
+/*            if (mobileNumber != null) {
+                if (mobileNumber.startsWith("0"))
+                    mobileNumber = mobileNumber.substring(1);
+                if (studentService.isValidMobileNumber(mobileNumber) && isNumeric(mobileNumber)) {
+                    return loginWithCustomerPassword(loginDetails,session,request);
+                } else {
+                    return responseService.generateErrorResponse(ApiConstants.INVALID_MOBILE_NUMBER, HttpStatus.BAD_REQUEST);
+                }
+            } else*/
             if (username != null) {
                 return loginWithUsername(loginDetails, session, request);
             } else {
@@ -139,7 +110,6 @@ public class AuthController {
     }
 
     // Login endpoint to authenticate user and return JWT token
-    @Transactional
     @PostMapping("/login-with-username-password")
     public ResponseEntity<?> loginWithUsername(@RequestBody Map<String, Object> loginDetails, HttpSession session, HttpServletRequest request) {
 
@@ -148,7 +118,6 @@ public class AuthController {
                 return responseService.generateErrorResponse(ApiConstants.INVALID_DATA, HttpStatus.BAD_REQUEST);
             }
 
-            String authHeader = Constant.BEARER;
             String username = (String) loginDetails.get("username");
             String password = (String) loginDetails.get("password");
             Long roleId = Long.parseLong(loginDetails.get("role").toString());
@@ -160,6 +129,9 @@ public class AuthController {
                 return responseService.generateErrorResponse("Student service is not initialized.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
+            String ipAddress = request.getRemoteAddr();
+            String userAgent = request.getHeader("User-Agent");
+
             if (roleService.findRoleNameById(roleId).equals(Constant.ROLE_USER)) {
 
                 Student student = studentService.retrieveStudentByUsername(username);
@@ -169,12 +141,7 @@ public class AuthController {
 
                 if (passwordEncoder.matches(password, student.getPassword())) {
 
-                    String tokenKey = "authToken_" + student.getMobileNumber();
                     String existingToken = student.getToken();
-                    authHeader = authHeader + existingToken;
-                    String ipAddress = request.getRemoteAddr();
-                    String userAgent = request.getHeader("User-Agent");
-
                     if (existingToken != null && jwtUtil.validateToken(existingToken, ipAddress, userAgent)) {
                         Map<String, Object> userDetails = new HashMap<>();
                         userDetails.put("username", student.getUserName());
@@ -184,21 +151,13 @@ public class AuthController {
                         return ResponseEntity.ok(response);
 
                     } else {
-                        String token = jwtUtil.generateToken(student.getId(), roleId, ipAddress, userAgent);
-                        student.setToken(token);
-                        entityManager.persist(student);
-                        session.setAttribute(tokenKey, token);
-                        Map<String, Object> userDetails = new HashMap<>();
-                        userDetails.put("username", student.getUserName());
-                        userDetails.put("mobile_number", student.getMobileNumber());
-                        userDetails.put("student_id", student.getId());
-                        ApiResponse response = new ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
+                        ApiResponse response = authenticationService.studentLoginResponse(student, roleId, session, request);
                         return ResponseEntity.ok(response);
                     }
                 } else {
                     return responseService.generateErrorResponse("Invalid password", HttpStatus.BAD_REQUEST);
                 }
-            } else if(roleService.findRoleNameById(roleId).equals(Constant.ROLE_FACULTY)) {
+            } else if (roleService.findRoleNameById(roleId).equals(Constant.ROLE_FACULTY)) {
 
                 Faculty faculty = facultyService.retrieveFacultyByUsername(username);
                 if (faculty == null) {
@@ -207,12 +166,7 @@ public class AuthController {
 
                 if (passwordEncoder.matches(password, faculty.getPassword())) {
 
-                    String tokenKey = "authToken_" + faculty.getMobileNumber();
                     String existingToken = faculty.getToken();
-                    authHeader = authHeader + existingToken;
-                    String ipAddress = request.getRemoteAddr();
-                    String userAgent = request.getHeader("User-Agent");
-
                     if (existingToken != null && jwtUtil.validateToken(existingToken, ipAddress, userAgent)) {
                         Map<String, Object> userDetails = new HashMap<>();
                         userDetails.put("username", faculty.getUserName());
@@ -222,15 +176,7 @@ public class AuthController {
                         return ResponseEntity.ok(response);
 
                     } else {
-                        String token = jwtUtil.generateToken(faculty.getId(), roleId, ipAddress, userAgent);
-                        faculty.setToken(token);
-                        entityManager.persist(faculty);
-                        session.setAttribute(tokenKey, token);
-                        Map<String, Object> userDetails = new HashMap<>();
-                        userDetails.put("username", faculty.getUserName());
-                        userDetails.put("mobile_number", faculty.getMobileNumber());
-                        userDetails.put("faculty_id", faculty.getId());
-                        ApiResponse response = new ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
+                        ApiResponse response = authenticationService.facultyLoginResponse(faculty, roleId, session, request);
                         return ResponseEntity.ok(response);
                     }
                 } else {
@@ -238,7 +184,6 @@ public class AuthController {
                 }
             } else {
                 return responseService.generateErrorResponse(ApiConstants.INVALID_ROLE, HttpStatus.BAD_REQUEST);
-
             }
         } catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
@@ -250,89 +195,14 @@ public class AuthController {
         }
     }
 
-    @Transactional
-    @PostMapping("/send-otp")
-    public ResponseEntity<?> sendOtp(@RequestBody SignUpDto signUp) {
-        try{
+    @PostMapping("/sign-up")
+    public ResponseEntity<?> signUp(@RequestBody SignUpDto signUp) {
+        try {
 
             authenticationService.validateSignUp(signUp);
-
             Role role = roleService.getRoleById(signUp.getRoleId());
-            if(role.getRoleName().equals(Constant.ROLE_USER)) {
 
-                List<Student> students = studentService.filterStudents(null, null, signUp.getEmail());
-                if(!students.isEmpty()) {
-                    // Set is otp to null
-                    Student student = students.get(0);
-                    student.setOtp(null);
-                    entityManager.merge(student);
-
-                    throw new IllegalArgumentException("Student already exists with this email");
-                }
-
-                String otp = otpService.generateOtp(signUp.getEmail());
-                emailService.sendOtp(signUp.getEmail(), otp);
-
-                Date currentDate = new Date();
-
-                Student student = new Student();
-                student.setPersonalEmail(signUp.getEmail());
-                student.setArchived('Y');
-                student.setOtp(otp);
-                student.setRole(role);
-                student.setCreatedDate(currentDate);
-                student.setUpdatedDate(currentDate);
-                student.setCollegeEmail(signUp.getEmail());
-
-                Gender gender = genderService.getGenderById(1L);
-                student.setGender(gender);
-
-                AcademicDegreeDto academicDegreeDto = new AcademicDegreeDto();
-                academicDegreeDto.setDegreeName("hello");
-                AcademicDegree academicDegree = academicDegreeService.saveAcademicDegree(academicDegreeDto);
-                TimeSpent timeSpent = timeSpentService.saveTimeSpent(new TimeSpentDto());
-                Accuracy accuracy = accuracyService.saveAccuracy(new AccuracyDto());
-                Understanding understanding = understandingService.saveUnderstanding(new UnderstandingDto());
-                Memory memory = memoryService.saveMemory(new MemoryDto());
-                CriticalThinking criticalThinking = criticalThinkingService.saveCriticalThinking(new CriticalThinkingDto());
-
-                student.setAccuracy(accuracy);
-                student.setAcademicDegree(academicDegree);
-                student.setTimeSpent(timeSpent);
-                student.setUnderstanding(understanding);
-                student.setMemory(memory);
-                student.setCriticalThinking(criticalThinking);
-                System.out.println(student+ "issue lies in here");
-                entityManager.merge(student);
-
-            } else if( role.getRoleName().equals(Constant.ROLE_FACULTY)) {
-
-                List<Faculty> faculties = facultyService.filterFaculties(null, null, signUp.getEmail());
-                if(!faculties.isEmpty()) {
-                    // Set is otp to null
-                    Faculty faculty = faculties.get(0);
-                    faculty.setOtp(null);
-                    entityManager.merge(faculty);
-
-                    throw new IllegalArgumentException("Faculty already exists with this email");
-                }
-
-                String otp = otpService.generateOtp(signUp.getEmail());
-                emailService.sendOtp(signUp.getEmail(), otp);
-
-                Faculty faculty = new Faculty();
-                faculty.setPersonalEmail(signUp.getEmail());
-                faculty.setArchived('Y');
-                faculty.setOtp(otp);
-                faculty.setRole(role);
-                Gender gender = genderService.getGenderById(1L);
-                faculty.setGender(gender);
-                faculty.setCollegeEmail(signUp.getEmail());
-                entityManager.merge(faculty);
-            } else {
-                throw new IllegalArgumentException("Unable to recognize the role");
-            }
-
+            authenticationService.saveSignUpDetails(role, signUp);
             return ResponseEntity.ok("OTP sent to your email.");
 
         } catch (IllegalArgumentException illegalArgumentException) {
@@ -344,7 +214,6 @@ public class AuthController {
         }
     }
 
-    @Transactional
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody VerifyOtpDto verifyOtpDto, HttpSession session, HttpServletRequest request) {
         try {
@@ -352,62 +221,34 @@ public class AuthController {
             authenticationService.validateVerifyOtp(verifyOtpDto);
 
             Role role = roleService.getRoleById(verifyOtpDto.getRoleId());
-            if(role.getRoleName().equals(Constant.ROLE_USER)) {
+            if (role.getRoleName().equals(Constant.ROLE_USER)) {
 
                 List<Student> students = studentService.filterStudents(null, null, verifyOtpDto.getEmail());
-                if(students.isEmpty()) {
+                if (students.isEmpty()) {
                     throw new IllegalArgumentException("Student does not exists with this email");
                 }
 
                 Student student = students.get(0);
-                if(!student.getOtp().equals(verifyOtpDto.getOtp())){
+                if (!student.getOtp().equals(verifyOtpDto.getOtp())) {
                     throw new IllegalArgumentException("Invalid OTP");
                 }
-                student.setArchived('N');
-                entityManager.merge(student);
 
-                String tokenKey = "authToken_" + student.getMobileNumber();
-                String ipAddress = request.getRemoteAddr();
-                String userAgent = request.getHeader("User-Agent");
-
-                String token = jwtUtil.generateToken(student.getId(), verifyOtpDto.getRoleId(), ipAddress, userAgent);
-                student.setToken(token);
-                entityManager.persist(student);
-                session.setAttribute(tokenKey, token);
-                Map<String, Object> userDetails = new HashMap<>();
-                userDetails.put("username", student.getUserName());
-                userDetails.put("mobile_number", student.getMobileNumber());
-                userDetails.put("student_id", student.getId());
-                ApiResponse response = new ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
+                ApiResponse response = authenticationService.studentLoginResponse(student, role.getRoleId(), session, request);
                 return ResponseEntity.ok(response);
 
-            } else if( role.getRoleName().equals(Constant.ROLE_FACULTY)) {
+            } else if (role.getRoleName().equals(Constant.ROLE_FACULTY)) {
 
                 List<Faculty> faculties = facultyService.filterFaculties(null, null, verifyOtpDto.getEmail());
-                if(faculties.isEmpty()) {
+                if (faculties.isEmpty()) {
                     throw new IllegalArgumentException("Faculty does not exists with this email");
                 }
 
                 Faculty faculty = faculties.get(0);
-                if(!faculty.getOtp().equals(verifyOtpDto.getOtp())){
+                if (!faculty.getOtp().equals(verifyOtpDto.getOtp())) {
                     throw new IllegalArgumentException("Invalid OTP");
                 }
-                faculty.setArchived('N');
-                entityManager.merge(faculty);
 
-                String tokenKey = "authToken_" + faculty.getMobileNumber();
-                String ipAddress = request.getRemoteAddr();
-                String userAgent = request.getHeader("User-Agent");
-
-                String token = jwtUtil.generateToken(faculty.getId(), verifyOtpDto.getRoleId(), ipAddress, userAgent);
-                faculty.setToken(token);
-                entityManager.persist(faculty);
-                session.setAttribute(tokenKey, token);
-                Map<String, Object> userDetails = new HashMap<>();
-                userDetails.put("username", faculty.getUserName());
-                userDetails.put("mobile_number", faculty.getMobileNumber());
-                userDetails.put("faculty_id", faculty.getId());
-                ApiResponse response = new ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
+                ApiResponse response = authenticationService.facultyLoginResponse(faculty, role.getRoleId(), session, request);
                 return ResponseEntity.ok(response);
 
             } else {
@@ -433,10 +274,10 @@ public class AuthController {
             Long roleId = jwtTokenUtil.extractRoleId(jwtToken);
             Long userId = jwtTokenUtil.extractId(jwtToken);
             Role role = roleService.getRoleById(roleId);
-            if(role.getRoleName().equals(Constant.ROLE_USER)) {
+            if (role.getRoleName().equals(Constant.ROLE_USER)) {
 
                 List<Student> students = studentService.filterStudents(null, userId, null);
-                if(students.isEmpty()) {
+                if (students.isEmpty()) {
                     throw new IllegalArgumentException("Student does not exists with this studentId");
                 }
 
@@ -448,10 +289,10 @@ public class AuthController {
 
                 return ResponseEntity.ok(student);
 
-            } else if( role.getRoleName().equals(Constant.ROLE_FACULTY)) {
+            } else if (role.getRoleName().equals(Constant.ROLE_FACULTY)) {
 
                 List<Faculty> faculties = facultyService.filterFaculties(null, userId, null);
-                if(faculties.isEmpty()) {
+                if (faculties.isEmpty()) {
                     throw new IllegalArgumentException("Faculty does not exists with this userId");
                 }
 
@@ -510,18 +351,17 @@ public class AuthController {
             return message;
         }
 
-        public  class Data {
-            private Map<String,Object> userDetails;
+        public class Data {
+            private Map<String, Object> userDetails;
 
-            public Data(Map<String,Object>customerDetails) {
+            public Data(Map<String, Object> customerDetails) {
                 this.userDetails = customerDetails;
             }
 
-            public Map<String,Object> getUserDetails() {
+            public Map<String, Object> getUserDetails() {
                 return userDetails;
             }
         }
     }
-
 
 }

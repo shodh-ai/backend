@@ -5,14 +5,11 @@ import com.shodhAI.ShodhAI.Dto.FacultyDto;
 import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.Role;
-import com.shodhAI.ShodhAI.Entity.Student;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -53,43 +50,43 @@ public class FacultyService {
 
     public void validateFaculty(FacultyDto facultyDto) throws Exception {
         try {
-            if(facultyDto.getFirstName() == null || facultyDto.getFirstName().isEmpty()) {
+            if (facultyDto.getFirstName() == null || facultyDto.getFirstName().isEmpty()) {
                 throw new IllegalArgumentException("Faculty name cannot be null or empty");
             }
             facultyDto.setFirstName(facultyDto.getFirstName().trim());
 
-            if(facultyDto.getLastName() != null) {
-                if(facultyDto.getLastName().isEmpty() || facultyDto.getLastName().trim().isEmpty()) {
+            if (facultyDto.getLastName() != null) {
+                if (facultyDto.getLastName().isEmpty() || facultyDto.getLastName().trim().isEmpty()) {
                     throw new IllegalArgumentException("Last name cannot be empty");
                 }
                 facultyDto.setLastName(facultyDto.getLastName().trim());
             }
 
-            if(facultyDto.getCountryCode() != null) {
-                if(facultyDto.getCountryCode().isEmpty() || facultyDto.getCountryCode().trim().isEmpty()) {
+            if (facultyDto.getCountryCode() != null) {
+                if (facultyDto.getCountryCode().isEmpty() || facultyDto.getCountryCode().trim().isEmpty()) {
                     throw new IllegalArgumentException("Country code cannot be empty");
                 }
                 facultyDto.setCountryCode(facultyDto.getCountryCode().trim());
             }
 
-            if(facultyDto.getMobileNumber() == null || facultyDto.getMobileNumber().trim().isEmpty()) {
+            if (facultyDto.getMobileNumber() == null || facultyDto.getMobileNumber().trim().isEmpty()) {
                 throw new IllegalArgumentException("Faculty Mobile Number cannot be null or empty");
             }
             facultyDto.setMobileNumber(facultyDto.getMobileNumber().trim());
 
-            if(facultyDto.getUserName() == null || facultyDto.getUserName().trim().isEmpty()) {
+            if (facultyDto.getUserName() == null || facultyDto.getUserName().trim().isEmpty()) {
                 throw new IllegalArgumentException("User name cannot be null or empty");
             }
             facultyDto.setUserName(facultyDto.getUserName().trim());
 
-            if(facultyDto.getPassword() == null) {
+            if (facultyDto.getPassword() == null) {
                 throw new IllegalArgumentException("Password cannot be null");
             }
             String hashedPassword = passwordEncoder.encode(facultyDto.getPassword());
             facultyDto.setPassword(hashedPassword);
             facultyDto.setUserName(facultyDto.getUserName().trim());
 
-            if(facultyDto.getGenderId() == null || facultyDto.getGenderId() <= 0) {
+            if (facultyDto.getGenderId() == null || facultyDto.getGenderId() <= 0) {
                 throw new IllegalArgumentException(("Gender Id cannot be null or <= 0"));
             }
 
@@ -103,7 +100,7 @@ public class FacultyService {
     }
 
     @Transactional
-    public Faculty saveFaculty(FacultyDto facultyDto) throws Exception {
+    public Faculty saveFaculty(FacultyDto facultyDto, String otp, Character archived) throws Exception {
         try {
 
             Gender gender = genderService.getGenderById(facultyDto.getGenderId());
@@ -122,6 +119,8 @@ public class FacultyService {
             faculty.setCollegeEmail(facultyDto.getCollegeEmail());
             faculty.setPersonalEmail(facultyDto.getPersonalEmail());
             faculty.setDateOfBirth(facultyDto.getDateOfBirth());
+            faculty.setOtp(otp);
+            faculty.setArchived(archived);
 
             faculty.setUserName(facultyDto.getUserName());
             faculty.setPassword(facultyDto.getPassword());

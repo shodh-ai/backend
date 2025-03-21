@@ -1,9 +1,7 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
-import com.shodhAI.ShodhAI.Dto.AcademicDegreeDto;
 import com.shodhAI.ShodhAI.Dto.CourseDto;
-import com.shodhAI.ShodhAI.Entity.AcademicDegree;
 import com.shodhAI.ShodhAI.Entity.Course;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;

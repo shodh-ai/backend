@@ -43,7 +43,7 @@ public class AssignmentController {
     AssignmentService assignmentService;
 
     @PostMapping(value = "/add")
-    public ResponseEntity<?> addAssignment (@RequestBody AssignmentDto assignmentDto) {
+    public ResponseEntity<?> addAssignment(@RequestBody AssignmentDto assignmentDto) {
         try {
             assignmentService.validateAssignment(assignmentDto);
             Assignment assignment = assignmentService.saveAssignment(assignmentDto);
@@ -92,7 +92,7 @@ public class AssignmentController {
     }
 
     @GetMapping(value = "/get-filter-assignment")
-    public ResponseEntity<?> getAssignment (@RequestParam(value = "topic_id", required = false) Long topicId) {
+    public ResponseEntity<?> getAssignment(@RequestParam(value = "topic_id", required = false) Long topicId) {
         try {
             assignmentService.validateAssignmentParameters(topicId);
             List<Assignment> assignmentList = assignmentService.filterAssignments(topicId);

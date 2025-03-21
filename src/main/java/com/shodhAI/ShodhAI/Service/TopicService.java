@@ -53,16 +53,16 @@ public class TopicService {
                 topicDto.setTopicDuration(topicDto.getTopicDuration().trim());
             }
 
-            if(topicDto.getCourseId() == null || topicDto.getCourseId() <= 0) {
+            if (topicDto.getCourseId() == null || topicDto.getCourseId() <= 0) {
                 throw new IllegalArgumentException(("Course Id cannot be null or <= 0"));
             }
-            if(topicDto.getDefaultParentTopicId() != null && topicDto.getDefaultParentTopicId() <= 0) {
+            if (topicDto.getDefaultParentTopicId() != null && topicDto.getDefaultParentTopicId() <= 0) {
                 throw new IllegalArgumentException(("Default Parent Topic Id cannot be null or <= 0"));
             }
-            if(topicDto.getModuleId() == null || topicDto.getModuleId() <= 0) {
+            if (topicDto.getModuleId() == null || topicDto.getModuleId() <= 0) {
                 throw new IllegalArgumentException(("Module Id cannot be null or <= 0"));
             }
-            if(topicDto.getTopicTypeId() == null || topicDto.getTopicTypeId() <= 0) {
+            if (topicDto.getTopicTypeId() == null || topicDto.getTopicTypeId() <= 0) {
                 throw new IllegalArgumentException(("Topic Type Id cannot be null or <= 0"));
             }
 
@@ -82,7 +82,7 @@ public class TopicService {
 
             Topic topic = new Topic();
             Topic defaultParentTopic = null;
-            if(topicDto.getDefaultParentTopicId() != null) {
+            if (topicDto.getDefaultParentTopicId() != null) {
                 defaultParentTopic = getTopicById(topicDto.getDefaultParentTopicId());
             }
 

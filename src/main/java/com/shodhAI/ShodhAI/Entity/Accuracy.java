@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name="accuracy")
+@Table(name = "accuracy")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
