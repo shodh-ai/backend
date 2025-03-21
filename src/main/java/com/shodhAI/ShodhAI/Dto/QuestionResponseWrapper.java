@@ -2,8 +2,6 @@ package com.shodhAI.ShodhAI.Dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.shodhAI.ShodhAI.Entity.Module;
-import com.shodhAI.ShodhAI.Entity.Question;
-import com.shodhAI.ShodhAI.Entity.Student;
 import com.shodhAI.ShodhAI.Entity.Topic;
 
 import java.util.List;

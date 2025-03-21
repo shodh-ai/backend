@@ -17,7 +17,7 @@ import lombok.NonNull;
 import java.util.Date;
 
 @Entity
-@Table(name="academic_degree")
+@Table(name = "academic_degree")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,7 +25,7 @@ public class AcademicDegree {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="degree_id")
+    @Column(name = "degree_id")
     private Long degreeId;
 
     @NonNull

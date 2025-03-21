@@ -2,7 +2,6 @@ package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Entity.PriorityLevel;
-import com.shodhAI.ShodhAI.Entity.TopicType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name="memory")
+@Table(name = "memory")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

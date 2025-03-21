@@ -8,13 +8,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginRequestDto {
+public class ForgotPasswordDto {
 
-    @JsonProperty("username")
-    private String username;
+    @JsonProperty("new_password")
+    private String newPassword;
 
-    @JsonProperty("password")
-    private String password;
+    @JsonProperty("confirm_password")
+    private String confirmPassword;
 
 }
-

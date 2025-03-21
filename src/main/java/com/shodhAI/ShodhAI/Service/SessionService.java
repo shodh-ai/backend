@@ -63,7 +63,7 @@ public class SessionService {
             Role role = roleService.getRoleById(roleId);
             Topic topic = topicService.getTopicById(sessionDto.getTopicId());
             QuestionType questionType = null;
-            if(sessionDto.getQuestionTypeId() != null) {
+            if (sessionDto.getQuestionTypeId() != null) {
                 questionType = questionTypeService.getQuestionTypeById(sessionDto.getQuestionTypeId());
             }
 

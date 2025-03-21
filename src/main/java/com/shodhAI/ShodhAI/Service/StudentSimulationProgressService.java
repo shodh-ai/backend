@@ -1,7 +1,6 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
-import com.shodhAI.ShodhAI.Entity.Content;
 import com.shodhAI.ShodhAI.Entity.Student;
 import com.shodhAI.ShodhAI.Entity.StudentSimulationProgress;
 import com.shodhAI.ShodhAI.Entity.Topic;
@@ -33,7 +32,7 @@ public class StudentSimulationProgressService {
         try {
 
             StudentSimulationProgress studentSimulationProgress = getStudentSimulationProgress(studentId, topicId);
-            if(studentSimulationProgress == null) {
+            if (studentSimulationProgress == null) {
                 studentSimulationProgress = new StudentSimulationProgress();
                 studentSimulationProgress.setStudent(studentService.getStudentById(studentId));
                 studentSimulationProgress.setTopic(topicService.getTopicById(topicId));
@@ -63,7 +62,7 @@ public class StudentSimulationProgressService {
 
             List<StudentSimulationProgress> studentSimulationProgressList = query.getResultList();
 
-            if(!studentSimulationProgressList.isEmpty()) {
+            if (!studentSimulationProgressList.isEmpty()) {
                 return studentSimulationProgressList.get(0);
             }
             return null;

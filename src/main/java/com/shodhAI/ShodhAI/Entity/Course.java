@@ -20,7 +20,7 @@ import lombok.Setter;
 import java.util.Date;
 
 @Entity
-@Table(name="course")
+@Table(name = "course")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -30,7 +30,7 @@ public class Course {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="course_id")
+    @Column(name = "course_id")
     private Long courseId;
 
     @Column(name = "title", unique = true)
