@@ -1,12 +1,9 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Dto.ConversationDto;
-import com.shodhAI.ShodhAI.Dto.SessionDto;
 import com.shodhAI.ShodhAI.Entity.Conversation;
-import com.shodhAI.ShodhAI.Entity.QuestionType;
 import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.Session;
-import com.shodhAI.ShodhAI.Entity.Topic;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
@@ -24,13 +21,7 @@ public class ConversationService {
     EntityManager entityManager;
 
     @Autowired
-    TopicService topicService;
-
-    @Autowired
     RoleService roleService;
-
-    @Autowired
-    QuestionTypeService questionTypeService;
 
     @Autowired
     SessionService sessionService;
@@ -69,7 +60,7 @@ public class ConversationService {
             Role role = roleService.getRoleById(roleId);
             List<Session> session = sessionService.sessionFilter(conversationDto.getSessionId(), null, null, null, null);
 
-            if(session.isEmpty()) {
+            if (session.isEmpty()) {
                 throw new IllegalArgumentException("No Session found with this session Id");
             }
             conversation.setSession(session.get(0));

@@ -1,6 +1,7 @@
 package com.shodhAI.ShodhAI.Dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,13 +9,13 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginRequestDto {
+public class SignUpDto {
 
-    @JsonProperty("username")
-    private String username;
+    @Email
+    @JsonProperty("email")
+    private String email;
 
-    @JsonProperty("password")
-    private String password;
+    @JsonProperty("role_id")
+    private Long roleId;
 
 }
-

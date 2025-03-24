@@ -1,13 +1,10 @@
 package com.shodhAI.ShodhAI.Service;
 
-import com.shodhAI.ShodhAI.Dto.AccuracyDto;
 import com.shodhAI.ShodhAI.Dto.CriticalThinkingDto;
-import com.shodhAI.ShodhAI.Entity.Accuracy;
 import com.shodhAI.ShodhAI.Entity.CriticalThinking;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

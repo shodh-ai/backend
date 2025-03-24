@@ -4,8 +4,6 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.FlowListWrapper;
-import com.shodhAI.ShodhAI.Dto.FlowRequestDto;
-import com.shodhAI.ShodhAI.Dto.QuestionResponseDto;
 import com.shodhAI.ShodhAI.Entity.Content;
 import com.shodhAI.ShodhAI.Entity.ContentType;
 import com.shodhAI.ShodhAI.Entity.Question;
@@ -71,7 +69,7 @@ public class ContentController {
             contentService.validateContent(topicId, contentTypeId);
 
             Map<String, Object> uploadResult = null;
-            if(contentTypeId == 4) {
+            if (contentTypeId == 4) {
                 // Upload profile picture to Cloudinary
                 uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
 

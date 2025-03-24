@@ -54,7 +54,7 @@ public class StudentController {
         try {
 
             studentService.validateStudent(studentDto);
-            Student student = studentService.saveStudent(studentDto);
+            Student student = studentService.saveStudent(studentDto, null, 'N');
 
             return ResponseService.generateSuccessResponse("Student Created Successfully", student, HttpStatus.OK);
 
@@ -78,7 +78,7 @@ public class StudentController {
 
     @PostMapping(value = "/upload-profile-picture/{studentIdString}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadProfilePicture(HttpServletRequest request, @PathVariable String studentIdString,
-                                        @RequestParam("profile_picture") MultipartFile profilePicture) {
+                                                  @RequestParam("profile_picture") MultipartFile profilePicture) {
         try {
 
             Long studentId = Long.parseLong(studentIdString);
@@ -126,7 +126,7 @@ public class StudentController {
             }
 
             List<StudentWrapper> studentWrapperList = new ArrayList<>();
-            for(Student student: studentList) {
+            for (Student student : studentList) {
                 StudentWrapper studentWrapper = new StudentWrapper();
                 studentWrapper.wrapDetails(student);
 
@@ -198,7 +198,7 @@ public class StudentController {
 
     }
 
-//    @CrossOrigin(origins = "*")
+    //    @CrossOrigin(origins = "*")
     @GetMapping("/get-leaderboard")
     public ResponseEntity<?> retrieveStudentLeaderboard(HttpServletRequest request) {
         try {
@@ -209,7 +209,7 @@ public class StudentController {
             }
 
             List<LeaderboardWrapper> leaderboardWrapperList = new ArrayList<>();
-            for(Student student: studentList) {
+            for (Student student : studentList) {
                 LeaderboardWrapper leaderboardWrapper = new LeaderboardWrapper();
                 leaderboardWrapper.wrapDetails(student);
 

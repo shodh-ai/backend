@@ -122,7 +122,7 @@ public class StudentWrapper {
         if (student.getTotalMarks() == 0.0) {
             this.overallScore = 0.0;
         } else {
-            this.overallScore = student.getMarksObtained()/student.getTotalMarks();
+            this.overallScore = student.getMarksObtained() / student.getTotalMarks();
         }
         this.accuracy = student.getAccuracy();
         this.criticalThinking = student.getCriticalThinking();

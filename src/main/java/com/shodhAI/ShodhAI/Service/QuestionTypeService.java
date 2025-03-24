@@ -1,7 +1,6 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
-import com.shodhAI.ShodhAI.Entity.ContentType;
 import com.shodhAI.ShodhAI.Entity.QuestionType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;

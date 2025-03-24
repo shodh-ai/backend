@@ -26,7 +26,7 @@ public class Content {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="content_id")
+    @Column(name = "content_id")
     private Long contentId;
 
     @ManyToOne
@@ -61,12 +61,12 @@ public class Content {
     // TODO (MIGHT HAVE TO CHANGE IN FUTURE) this won't work with instant as instant does not have calendar features like LocalDateTime etc.
     private Date updatedDate;
 
-//    @Lob
+    //    @Lob
     @Column(name = "js_code", columnDefinition = "TEXT")
     @JsonProperty("js_code")
     private String jsCode;
 
-//    @Lob
+    //    @Lob
     @Column(name = "json_data", columnDefinition = "TEXT")
     @JsonProperty("json_data")
     private String jsonData;

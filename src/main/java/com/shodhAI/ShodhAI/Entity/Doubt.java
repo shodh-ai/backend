@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name="doubt")
+@Table(name = "doubt")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,7 +30,7 @@ public class Doubt {
     @JsonProperty("doubt_id")
     private Long id;
 
-    @Column(name="doubt", columnDefinition = "TEXT")
+    @Column(name = "doubt", columnDefinition = "TEXT")
     @JsonProperty("doubt")
     private String doubt;
 

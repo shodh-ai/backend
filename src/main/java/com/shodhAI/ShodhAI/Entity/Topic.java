@@ -20,7 +20,7 @@ import lombok.NonNull;
 import java.util.Date;
 
 @Entity
-@Table(name="topic")
+@Table(name = "topic")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,7 +28,7 @@ public class Topic {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="topic_id")
+    @Column(name = "topic_id")
     private Long topicId;
 
     @ManyToOne

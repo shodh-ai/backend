@@ -23,8 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class FileType
-{
+public class FileType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

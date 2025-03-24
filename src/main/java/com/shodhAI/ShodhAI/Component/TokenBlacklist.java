@@ -41,14 +41,13 @@ public class TokenBlacklist {
      * @param expirationTime the expiration time
      */
     @Transactional
-    public void blacklistToken(String token,Long exp) {
+    public void blacklistToken(String token, Long exp) {
         try {
             blacklistedTokens.put(token, exp);
             Long id = jwtUtil.extractId(token);
             Long roleId = jwtUtil.extractRoleId(token);
-            if(roleService.findRoleNameById(roleId).equals(Constant.ROLE_USER))
-            {
-                Student existingStudent = entityManager.find(Student.class,id);
+            if (roleService.findRoleNameById(roleId).equals(Constant.ROLE_USER)) {
+                Student existingStudent = entityManager.find(Student.class, id);
                 if (existingStudent != null) {
                     existingStudent.setToken(null);
                     entityManager.merge(existingStudent);

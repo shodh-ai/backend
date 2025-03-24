@@ -52,12 +52,12 @@ public class RoleService {
     @Transactional
     public String findRoleNameById(Long roleId) throws Exception {
         try {
-            String response= entityManager.createQuery(Constant.FETCH_ROLE_NAME_BY_ID, String.class)
+            String response = entityManager.createQuery(Constant.FETCH_ROLE_NAME_BY_ID, String.class)
                     .setParameter("roleId", roleId)
                     .getResultStream()
                     .findFirst()
                     .orElse(null);
-            if(response==null)
+            if (response == null)
                 return "EMPTY";
             else return response;
 

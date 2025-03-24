@@ -49,7 +49,7 @@ public class FacultyController {
         try {
 
             facultyService.validateFaculty(facultyDto);
-            Faculty faculty = facultyService.saveFaculty(facultyDto);
+            Faculty faculty = facultyService.saveFaculty(facultyDto, null, 'N');
 
             return ResponseService.generateSuccessResponse("Faculty Created Successfully", faculty, HttpStatus.OK);
 
@@ -121,7 +121,7 @@ public class FacultyController {
             }
 
             List<FacultyWrapper> facultyWrapperList = new ArrayList<>();
-            for(Faculty faculty: facultyList) {
+            for (Faculty faculty : facultyList) {
                 FacultyWrapper facultyWrapper = new FacultyWrapper();
                 facultyWrapper.wrapDetails(faculty);
 

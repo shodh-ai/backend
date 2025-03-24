@@ -24,20 +24,20 @@ public class AcademicDegreeService {
 
     public void validateAcademicDegree(AcademicDegreeDto academicDegreeDto) throws Exception {
         try {
-            if(academicDegreeDto.getDegreeName() == null || academicDegreeDto.getDegreeName().isEmpty()) {
+            if (academicDegreeDto.getDegreeName() == null || academicDegreeDto.getDegreeName().isEmpty()) {
                 throw new IllegalArgumentException("Degree name cannot be null or empty");
             }
             academicDegreeDto.setDegreeName(academicDegreeDto.getDegreeName().trim());
 
-            if(academicDegreeDto.getInstitutionName() != null) {
-                if(academicDegreeDto.getInstitutionName().isEmpty() || academicDegreeDto.getInstitutionName().trim().isEmpty()) {
+            if (academicDegreeDto.getInstitutionName() != null) {
+                if (academicDegreeDto.getInstitutionName().isEmpty() || academicDegreeDto.getInstitutionName().trim().isEmpty()) {
                     throw new IllegalArgumentException("Institute name cannot be empty");
                 }
                 academicDegreeDto.setInstitutionName(academicDegreeDto.getInstitutionName().trim());
             }
 
-            if(academicDegreeDto.getProgramName() != null) {
-                if(academicDegreeDto.getProgramName().isEmpty()) {
+            if (academicDegreeDto.getProgramName() != null) {
+                if (academicDegreeDto.getProgramName().isEmpty()) {
                     throw new IllegalArgumentException("Program name cannot be null or empty");
                 }
                 academicDegreeDto.setProgramName(academicDegreeDto.getProgramName().trim());
