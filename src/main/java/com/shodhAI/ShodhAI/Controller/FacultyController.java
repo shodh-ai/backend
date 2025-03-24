@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.shodhAI.ShodhAI.Dto.FacultyDto;
 import com.shodhAI.ShodhAI.Dto.FacultyWrapper;
+import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.FacultyService;
@@ -16,9 +17,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,7 +49,7 @@ public class FacultyController {
         try {
 
             facultyService.validateFaculty(facultyDto);
-            Faculty faculty = facultyService.saveFaculty(facultyDto);
+            Faculty faculty = facultyService.saveFaculty(facultyDto, null, 'N');
 
             return ResponseService.generateSuccessResponse("Faculty Created Successfully", faculty, HttpStatus.OK);
 
@@ -118,7 +121,7 @@ public class FacultyController {
             }
 
             List<FacultyWrapper> facultyWrapperList = new ArrayList<>();
-            for(Faculty faculty: facultyList) {
+            for (Faculty faculty : facultyList) {
                 FacultyWrapper facultyWrapper = new FacultyWrapper();
                 facultyWrapper.wrapDetails(faculty);
 
@@ -165,6 +168,28 @@ public class FacultyController {
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    @PatchMapping("/update/{facultyIdString}")
+    public ResponseEntity<?> updateFaculty( @PathVariable String facultyIdString,@RequestBody FacultyDto facultyDto) {
+        try {
+            Long facultyId = Long.parseLong(facultyIdString);
+            Faculty faculty = facultyService.updateFaculty(facultyId,facultyDto);
+
+            FacultyWrapper facultyWrapper = new FacultyWrapper();
+            facultyWrapper.wrapDetails(faculty);
+
+            return ResponseService.generateSuccessResponse("Faculty updated Successfully", facultyWrapper, HttpStatus.OK);
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

@@ -35,6 +35,11 @@ public class GenderService {
 
             TypedQuery<Gender> query = entityManager.createQuery(Constant.GET_GENDER_BY_ID, Gender.class);
             query.setParameter("genderId", genderId);
+
+            List<Gender> genderList = query.getResultList();
+            if (genderList.isEmpty()) {
+                return null;
+            }
             return query.getResultList().get(0);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {

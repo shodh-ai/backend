@@ -44,9 +44,6 @@ import java.util.Map;
 public class TopicController {
 
     @Autowired
-    EntityManager entityManager;
-
-    @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
     @Autowired
@@ -95,8 +92,8 @@ public class TopicController {
 
     @GetMapping("/get-all")
     public ResponseEntity<?> retrieveTableOfTopics(HttpServletRequest request,
-                                                  @RequestParam(value = "courseId", required = false) Long courseId,
-                                                  @RequestParam("moduleId") Long moduleId) {
+                                                   @RequestParam(value = "courseId", required = false) Long courseId,
+                                                   @RequestParam("moduleId") Long moduleId) {
         try {
 
             List<Topic> parentTopicList = topicService.getParentTopicListByModuleId(moduleId);
@@ -106,7 +103,7 @@ public class TopicController {
             }
 
             List<ParentTopicWrapper> wrapper = new ArrayList<>();
-            for(Topic parentTopic: parentTopicList) {
+            for (Topic parentTopic : parentTopicList) {
                 List<Topic> subTopics = topicService.getSubTopic(parentTopic);
 
                 ParentTopicWrapper topicWrapper = new ParentTopicWrapper();
@@ -141,7 +138,7 @@ public class TopicController {
             List<Question> quiz = questionService.questionFilter(topic, 4L);
 
             TopicWrapper wrapper = new TopicWrapper();
-            wrapper.wrapDetails(topic, practiceQuestion, exampleQuestion, testingQuestion,quiz);
+            wrapper.wrapDetails(topic, practiceQuestion, exampleQuestion, testingQuestion, quiz);
 
             if (topic == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);

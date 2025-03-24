@@ -19,7 +19,7 @@ import lombok.Setter;
 import java.util.Date;
 
 @Entity
-@Table(name="conversation")
+@Table(name = "conversation")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -33,7 +33,7 @@ public class Conversation {
     @JsonProperty("interaction_id")
     private Long id;
 
-    @Column(name="user_dialogue", columnDefinition = "TEXT")
+    @Column(name = "user_dialogue", columnDefinition = "TEXT")
     @JsonProperty("user_dialogue")
     private String userDialogue;
 

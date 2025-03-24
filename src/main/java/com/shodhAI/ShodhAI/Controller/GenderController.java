@@ -4,7 +4,6 @@ import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.GenderService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,9 +20,6 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/gender", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 public class GenderController {
-
-    @Autowired
-    EntityManager entityManager;
 
     @Autowired
     GenderService genderService;

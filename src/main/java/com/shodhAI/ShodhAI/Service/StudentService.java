@@ -1,6 +1,7 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
+import com.shodhAI.ShodhAI.Dto.AcademicDegreeDto;
 import com.shodhAI.ShodhAI.Dto.AccuracyDto;
 import com.shodhAI.ShodhAI.Dto.CriticalThinkingDto;
 import com.shodhAI.ShodhAI.Dto.MemoryDto;
@@ -9,7 +10,9 @@ import com.shodhAI.ShodhAI.Dto.TimeSpentDto;
 import com.shodhAI.ShodhAI.Dto.UnderstandingDto;
 import com.shodhAI.ShodhAI.Entity.AcademicDegree;
 import com.shodhAI.ShodhAI.Entity.Accuracy;
+import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.CriticalThinking;
+import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.Memory;
 import com.shodhAI.ShodhAI.Entity.Role;
@@ -26,10 +29,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Time;
-import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class StudentService {
@@ -69,46 +72,46 @@ public class StudentService {
 
     public void validateStudent(StudentDto studentDto) throws Exception {
         try {
-            if(studentDto.getFirstName() == null || studentDto.getFirstName().isEmpty()) {
+            if (studentDto.getFirstName() == null || studentDto.getFirstName().isEmpty()) {
                 throw new IllegalArgumentException("Student name cannot be null or empty");
             }
             studentDto.setFirstName(studentDto.getFirstName().trim());
 
-            if(studentDto.getLastName() != null) {
-                if(studentDto.getLastName().isEmpty() || studentDto.getLastName().trim().isEmpty()) {
+            if (studentDto.getLastName() != null) {
+                if (studentDto.getLastName().isEmpty() || studentDto.getLastName().trim().isEmpty()) {
                     throw new IllegalArgumentException("Last name cannot be empty");
                 }
                 studentDto.setLastName(studentDto.getLastName().trim());
             }
 
-            if(studentDto.getCountryCode() != null) {
-                if(studentDto.getCountryCode().isEmpty() || studentDto.getCountryCode().trim().isEmpty()) {
+            if (studentDto.getCountryCode() != null) {
+                if (studentDto.getCountryCode().isEmpty() || studentDto.getCountryCode().trim().isEmpty()) {
                     throw new IllegalArgumentException("Country code cannot be empty");
                 }
                 studentDto.setCountryCode(studentDto.getCountryCode().trim());
             }
 
-            if(studentDto.getMobileNumber() == null || studentDto.getMobileNumber().trim().isEmpty()) {
+            if (studentDto.getMobileNumber() == null || studentDto.getMobileNumber().trim().isEmpty()) {
                 throw new IllegalArgumentException("Student Mobile Number cannot be null or empty");
             }
             studentDto.setMobileNumber(studentDto.getMobileNumber().trim());
 
-            if(studentDto.getUserName() == null || studentDto.getUserName().trim().isEmpty()) {
+            if (studentDto.getUserName() == null || studentDto.getUserName().trim().isEmpty()) {
                 throw new IllegalArgumentException("User name cannot be null or empty");
             }
             studentDto.setUserName(studentDto.getUserName().trim());
 
-            if(studentDto.getPassword() == null) {
+            if (studentDto.getPassword() == null) {
                 throw new IllegalArgumentException("Password cannot be null");
             }
             String hashedPassword = passwordEncoder.encode(studentDto.getPassword());
             studentDto.setPassword(hashedPassword);
             studentDto.setUserName(studentDto.getUserName().trim());
 
-            if(studentDto.getGenderId() == null || studentDto.getGenderId() <= 0) {
+            if (studentDto.getGenderId() == null || studentDto.getGenderId() <= 0) {
                 throw new IllegalArgumentException(("Gender Id cannot be null or <= 0"));
             }
-            if(studentDto.getAcademicDegreeId() == null || studentDto.getAcademicDegreeId() <= 0) {
+            if (studentDto.getAcademicDegreeId() == null || studentDto.getAcademicDegreeId() <= 0) {
                 throw new IllegalArgumentException(("Academic Degree Id cannot be null or <= 0"));
             }
 
@@ -122,12 +125,15 @@ public class StudentService {
     }
 
     @Transactional
-    public Student saveStudent(StudentDto studentDto) throws Exception {
+    public Student saveStudent(StudentDto studentDto, String otp, Character archived) throws Exception {
         try {
 
             Gender gender = genderService.getGenderById(studentDto.getGenderId());
             Role role = roleService.getRoleById(4L);
-            AcademicDegree academicDegree = academicDegreeService.getAcademicDegreeById(studentDto.getAcademicDegreeId());
+            AcademicDegree academicDegree = null;
+            if (studentDto.getAcademicDegreeId() != null) {
+                academicDegree = academicDegreeService.getAcademicDegreeById(studentDto.getAcademicDegreeId());
+            }
 
             Date currentDate = new Date();
 
@@ -142,6 +148,8 @@ public class StudentService {
             student.setCollegeEmail(studentDto.getCollegeEmail());
             student.setPersonalEmail(studentDto.getPersonalEmail());
             student.setDateOfBirth(studentDto.getDateOfBirth());
+            student.setOtp(otp);
+            student.setArchived(archived);
 
             student.setUserName(studentDto.getUserName());
             student.setPassword(studentDto.getPassword());
@@ -159,6 +167,8 @@ public class StudentService {
             student.setCriticalThinking(criticalThinking);
             student.setAccuracy(accuracy);
             student.setTimeSpent(timeSpent);
+            student.setMemory(memory);
+            student.setUnderstanding(understanding);
 
             return entityManager.merge(student);
 
@@ -252,6 +262,170 @@ public class StudentService {
 
         Student student = students.get(0);  // Assuming only one user with this username
         return student;
+    }
+
+    public void validateAndSaveStudentForUpdate(StudentDto studentDto, Student studentToUpdate) throws Exception {
+        try {
+            if (Objects.nonNull(studentDto.getFirstName())) {
+                if(studentDto.getFirstName().isEmpty()) {
+                    throw new IllegalArgumentException("Student name cannot be empty");
+                }
+                studentDto.setFirstName(studentDto.getFirstName().trim());
+                studentToUpdate.setFirstName(studentDto.getFirstName());
+            }
+            if(studentDto.getLastName() != null) {
+                if(studentDto.getLastName().isEmpty() || studentDto.getLastName().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Last name cannot be empty");
+                }
+                studentDto.setLastName(studentDto.getLastName().trim());
+                studentToUpdate.setFirstName(studentDto.getLastName());
+            }
+
+            if(studentDto.getCountryCode() != null) {
+                if(studentDto.getCountryCode().isEmpty() || studentDto.getCountryCode().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Country code cannot be empty");
+                }
+                studentDto.setCountryCode(studentDto.getCountryCode().trim());
+                studentToUpdate.setCountryCode(studentDto.getCountryCode());
+            }
+
+            if(studentDto.getMobileNumber()!=null)
+            {
+                if(studentDto.getMobileNumber().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Faculty Mobile Number cannot be empty");
+                }
+                studentDto.setMobileNumber(studentDto.getMobileNumber().trim());
+                studentToUpdate.setMobileNumber(studentDto.getMobileNumber());
+            }
+
+            if(studentDto.getUserName()!=null)
+            {
+                if(studentDto.getUserName().trim().isEmpty()) {
+                    throw new IllegalArgumentException("User name cannot be empty");
+                }
+                studentDto.setUserName(studentDto.getUserName().trim());
+                studentToUpdate.setUserName(studentDto.getUserName());
+
+            }
+            if(studentDto.getPassword()!=null)
+            {
+                String hashedPassword = passwordEncoder.encode(studentDto.getPassword());
+                studentDto.setPassword(hashedPassword);
+                studentToUpdate.setPassword(studentDto.getPassword());
+            }
+            if(studentDto.getAcademicDegreeId()!=null)
+            {
+                if(studentDto.getAcademicDegreeId() <= 0) {
+                    throw new IllegalArgumentException(("Academic Degree Id cannot be <= 0"));
+                }
+            }
+            if(studentDto.getGenderId()!=null)
+            {
+                if(studentDto.getGenderId() <= 0) {
+                    throw new IllegalArgumentException(("Gender Id cannot be <= 0"));
+                }
+                Gender gender = genderService.getGenderById(studentDto.getGenderId());
+                studentToUpdate.setGender(gender);
+            }
+            if (studentDto.getCourseIds() != null) {
+                if (!studentDto.getCourseIds().isEmpty()) {
+                    // Fetch all valid courses
+                    List<Course> coursesToAdd = entityManager.createQuery(
+                                    "SELECT c FROM Course c WHERE c.courseId IN :courseIds", Course.class)
+                            .setParameter("courseIds", studentDto.getCourseIds())
+                            .getResultList();
+
+                    if (coursesToAdd.size() != studentDto.getCourseIds().size()) {
+                        throw new IllegalArgumentException("One or more Course IDs are invalid.");
+                    }
+                    studentToUpdate.getCourses().forEach(course -> course.getStudents().remove(studentToUpdate));
+                    studentToUpdate.getCourses().clear();
+                    studentToUpdate.getFacultyMembers().forEach(faculty -> faculty.getStudents().remove(studentToUpdate));
+                    studentToUpdate.getFacultyMembers().clear();
+                    entityManager.merge(studentToUpdate);
+                    studentToUpdate.setCourses(coursesToAdd);
+                    List<Faculty> facultyToAdd = new ArrayList<>();
+                    for (Course course : coursesToAdd) {
+                        for (Faculty faculty : course.getFacultyMembers()) {
+                            if (!facultyToAdd.contains(faculty)) {
+                                facultyToAdd.add(faculty);
+                            }
+                        }
+                    }
+                    studentToUpdate.setFacultyMembers(facultyToAdd);
+                    for (Faculty faculty : facultyToAdd) {
+                        if (!faculty.getStudents().contains(studentToUpdate)) {
+                            faculty.getStudents().add(studentToUpdate);
+                        }
+                    }
+                    for (Course course : coursesToAdd) {
+                        if (!course.getStudents().contains(studentToUpdate)) {
+                            course.getStudents().add(studentToUpdate);
+                        }
+                    }
+                    entityManager.merge(studentToUpdate);
+                }
+                else {
+                    studentToUpdate.getCourses().forEach(course -> course.getStudents().remove(studentToUpdate));
+                    studentToUpdate.getCourses().clear();
+                    studentToUpdate.getFacultyMembers().forEach(faculty -> faculty.getStudents().remove(studentToUpdate));
+                    studentToUpdate.getFacultyMembers().clear();
+                    entityManager.merge(studentToUpdate);
+                }
+
+            }
+
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
+
+    @Transactional
+    public Student updateStudent(Long studentId, StudentDto studentDto) throws Exception {
+        Student studentToUpdate= entityManager.find(Student.class,studentId);
+        if(studentToUpdate==null)
+        {
+            throw new IllegalArgumentException("Student with id "+ studentId+" not found");
+        }
+        validateAndSaveStudentForUpdate(studentDto,studentToUpdate);
+        return entityManager.merge(studentToUpdate);
+    }
+
+    public List<Student> filterStudents(String username, Long studentId, String personalEmail) {
+        StringBuilder queryString = new StringBuilder("SELECT s FROM Student s WHERE 1 = 1");
+
+        if (username != null && !username.isEmpty()) {
+            queryString.append(" AND s.userName = :username");
+        }
+        if (studentId != null) {
+            queryString.append(" AND s.id = :studentId");
+        }
+        if (personalEmail != null && !personalEmail.isEmpty()) {
+            queryString.append(" AND s.personalEmail = :personalEmail");
+        }
+
+        TypedQuery<Student> query = entityManager.createQuery(queryString.toString(), Student.class);
+
+        if (username != null && !username.isEmpty()) {
+            query.setParameter("username", username);
+        }
+        if (studentId != null) {
+            query.setParameter("studentId", studentId);
+        }
+        if (personalEmail != null && !personalEmail.isEmpty()) {
+            query.setParameter("personalEmail", personalEmail);
+        }
+
+        List<Student> students = query.getResultList();
+        /*if (students.isEmpty()) {
+            throw new UsernameNotFoundException("No students found matching the criteria");
+        }*/
+
+        return students;
     }
 
 }

@@ -1,6 +1,10 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
@@ -9,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -54,7 +59,6 @@ public class Student {
     private String lastName;
 
     @Email
-    @NotNull
     @Column(name = "college_email", unique = true)
     @JsonProperty("college_email")
     private String collegeEmail;
@@ -88,14 +92,18 @@ public class Student {
     private Role role;
 
     @ManyToOne
-    @NotNull
     @JoinColumn(name = "gender_id")
     @JsonProperty("gender")
     private Gender gender;
 
+    @JsonIgnore
     @Column(name = "token", columnDefinition = "TEXT", unique = true)
     @JsonProperty("token")
     private String token;
+
+    @Column(name = "otp")
+    @JsonProperty("otp")
+    private String otp;
 
     @Column(name = "user_name", unique = true)
     @JsonProperty("user_name")
@@ -118,7 +126,6 @@ public class Student {
     private Date updatedDate;
 
     @ManyToOne
-    @NotNull
     @JoinColumn(name = "academic_degree_id")
     @JsonProperty("academic_degree")
     private AcademicDegree academicDegree;
@@ -150,11 +157,13 @@ public class Student {
     private CriticalThinking criticalThinking;
 
     @OneToOne
+    @NotNull
     @JoinColumn(name = "understanding_id")
     @JsonProperty("understanding")
     private Understanding understanding;
 
     @OneToOne
+    @NotNull
     @JoinColumn(name = "memory_id")
     @JsonProperty("memory")
     private Memory memory;
@@ -165,9 +174,25 @@ public class Student {
 
     @OneToOne
     @NotNull
-    @JoinColumn(name="time_spent_id")
+    @JoinColumn(name = "time_spent_id")
     @JsonProperty("time_spent")
     private TimeSpent timeSpent;
+
+    // Many-to-Many relationship with Faculty
+    @ManyToMany(mappedBy = "students")
+    @JsonProperty("faculty_members")
+    @JsonManagedReference("students-faculty-reference")
+    private List<Faculty> facultyMembers = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "students")
+    @JsonIgnoreProperties("students")
+    @JsonProperty("courses")
+    private List<Course> courses = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "recipient")
+    @JsonProperty("notification_recipients")
+    private List<NotificationRecipient> notificationRecipients;
 
     @Column(name = "summary", columnDefinition = "TEXT")
     @JsonProperty("summary")

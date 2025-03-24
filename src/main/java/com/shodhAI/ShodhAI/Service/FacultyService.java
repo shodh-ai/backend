@@ -2,6 +2,7 @@ package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.FacultyDto;
+import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.Role;
@@ -11,15 +12,17 @@ import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class FacultyService {
@@ -32,6 +35,9 @@ public class FacultyService {
 
     @Autowired
     RoleService roleService;
+
+    @Autowired
+    CourseService courseService;
 
     @Autowired
     AcademicDegreeService academicDegreeService;
@@ -53,43 +59,43 @@ public class FacultyService {
 
     public void validateFaculty(FacultyDto facultyDto) throws Exception {
         try {
-            if(facultyDto.getFirstName() == null || facultyDto.getFirstName().isEmpty()) {
+            if (facultyDto.getFirstName() == null || facultyDto.getFirstName().isEmpty()) {
                 throw new IllegalArgumentException("Faculty name cannot be null or empty");
             }
             facultyDto.setFirstName(facultyDto.getFirstName().trim());
 
-            if(facultyDto.getLastName() != null) {
-                if(facultyDto.getLastName().isEmpty() || facultyDto.getLastName().trim().isEmpty()) {
+            if (facultyDto.getLastName() != null) {
+                if (facultyDto.getLastName().isEmpty() || facultyDto.getLastName().trim().isEmpty()) {
                     throw new IllegalArgumentException("Last name cannot be empty");
                 }
                 facultyDto.setLastName(facultyDto.getLastName().trim());
             }
 
-            if(facultyDto.getCountryCode() != null) {
-                if(facultyDto.getCountryCode().isEmpty() || facultyDto.getCountryCode().trim().isEmpty()) {
+            if (facultyDto.getCountryCode() != null) {
+                if (facultyDto.getCountryCode().isEmpty() || facultyDto.getCountryCode().trim().isEmpty()) {
                     throw new IllegalArgumentException("Country code cannot be empty");
                 }
                 facultyDto.setCountryCode(facultyDto.getCountryCode().trim());
             }
 
-            if(facultyDto.getMobileNumber() == null || facultyDto.getMobileNumber().trim().isEmpty()) {
+            if (facultyDto.getMobileNumber() == null || facultyDto.getMobileNumber().trim().isEmpty()) {
                 throw new IllegalArgumentException("Faculty Mobile Number cannot be null or empty");
             }
             facultyDto.setMobileNumber(facultyDto.getMobileNumber().trim());
 
-            if(facultyDto.getUserName() == null || facultyDto.getUserName().trim().isEmpty()) {
+            if (facultyDto.getUserName() == null || facultyDto.getUserName().trim().isEmpty()) {
                 throw new IllegalArgumentException("User name cannot be null or empty");
             }
             facultyDto.setUserName(facultyDto.getUserName().trim());
 
-            if(facultyDto.getPassword() == null) {
+            if (facultyDto.getPassword() == null) {
                 throw new IllegalArgumentException("Password cannot be null");
             }
             String hashedPassword = passwordEncoder.encode(facultyDto.getPassword());
             facultyDto.setPassword(hashedPassword);
             facultyDto.setUserName(facultyDto.getUserName().trim());
 
-            if(facultyDto.getGenderId() == null || facultyDto.getGenderId() <= 0) {
+            if (facultyDto.getGenderId() == null || facultyDto.getGenderId() <= 0) {
                 throw new IllegalArgumentException(("Gender Id cannot be null or <= 0"));
             }
 
@@ -103,7 +109,7 @@ public class FacultyService {
     }
 
     @Transactional
-    public Faculty saveFaculty(FacultyDto facultyDto) throws Exception {
+    public Faculty saveFaculty(FacultyDto facultyDto, String otp, Character archived) throws Exception {
         try {
 
             Gender gender = genderService.getGenderById(facultyDto.getGenderId());
@@ -122,6 +128,8 @@ public class FacultyService {
             faculty.setCollegeEmail(facultyDto.getCollegeEmail());
             faculty.setPersonalEmail(facultyDto.getPersonalEmail());
             faculty.setDateOfBirth(facultyDto.getDateOfBirth());
+            faculty.setOtp(otp);
+            faculty.setArchived(archived);
 
             faculty.setUserName(facultyDto.getUserName());
             faculty.setPassword(facultyDto.getPassword());
@@ -136,7 +144,7 @@ public class FacultyService {
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
             throw new IndexOutOfBoundsException(indexOutOfBoundsException.getMessage());
-        } catch (PersistenceException persistenceException) {
+        }catch (PersistenceException persistenceException) {
             exceptionHandlingService.handleException(persistenceException);
             throw new PersistenceException(persistenceException.getMessage());
         } catch (Exception exception) {
@@ -209,5 +217,166 @@ public class FacultyService {
         Faculty faculty = faculties.get(0);  // Assuming only one user with this username
         return faculty;
     }
+
+    public void validateAndSaveFacultyForUpdate(FacultyDto facultyDto,Faculty facultyToUpdate) throws Exception {
+        try {
+            if (Objects.nonNull(facultyDto.getFirstName())) {
+                if(facultyDto.getFirstName().isEmpty()) {
+                    throw new IllegalArgumentException("Faculty name cannot be empty");
+                }
+                facultyDto.setFirstName(facultyDto.getFirstName().trim());
+                facultyToUpdate.setFirstName(facultyDto.getFirstName());
+            }
+            if(facultyDto.getLastName() != null) {
+                if(facultyDto.getLastName().isEmpty() || facultyDto.getLastName().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Last name cannot be empty");
+                }
+                facultyDto.setLastName(facultyDto.getLastName().trim());
+                facultyToUpdate.setFirstName(facultyDto.getLastName());
+            }
+
+            if(facultyDto.getCountryCode() != null) {
+                if(facultyDto.getCountryCode().isEmpty() || facultyDto.getCountryCode().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Country code cannot be empty");
+                }
+                facultyDto.setCountryCode(facultyDto.getCountryCode().trim());
+                facultyToUpdate.setCountryCode(facultyDto.getCountryCode());
+            }
+
+            if(facultyDto.getMobileNumber()!=null)
+            {
+                if(facultyDto.getMobileNumber().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Faculty Mobile Number cannot be empty");
+                }
+                facultyDto.setMobileNumber(facultyDto.getMobileNumber().trim());
+                facultyToUpdate.setMobileNumber(facultyDto.getMobileNumber());
+            }
+
+            if(facultyDto.getUserName()!=null)
+            {
+                if(facultyDto.getUserName().trim().isEmpty()) {
+                    throw new IllegalArgumentException("User name cannot be empty");
+                }
+                facultyDto.setUserName(facultyDto.getUserName().trim());
+                facultyToUpdate.setUserName(facultyDto.getUserName());
+
+            }
+            if(facultyDto.getPassword()!=null)
+            {
+                String hashedPassword = passwordEncoder.encode(facultyDto.getPassword());
+                facultyDto.setPassword(hashedPassword);
+                facultyToUpdate.setPassword(facultyDto.getPassword());
+            }
+            if(facultyDto.getGenderId()!=null)
+            {
+                if(facultyDto.getGenderId() <= 0) {
+                    throw new IllegalArgumentException(("Gender Id cannot be <= 0"));
+                }
+                Gender gender = genderService.getGenderById(facultyDto.getGenderId());
+                facultyToUpdate.setGender(gender);
+            }
+            if (facultyDto.getCourseIds() != null) {
+                if (!facultyDto.getCourseIds().isEmpty()) {
+                    // Fetch all valid courses
+                    List<Course> coursesToAdd = entityManager.createQuery(
+                                    "SELECT c FROM Course c WHERE c.courseId IN :courseIds", Course.class)
+                            .setParameter("courseIds", facultyDto.getCourseIds())
+                            .getResultList();
+
+                    // Validate course IDs
+                    if (coursesToAdd.size() != facultyDto.getCourseIds().size()) {
+                        throw new IllegalArgumentException("One or more Course IDs are invalid.");
+                    }
+                    facultyToUpdate.getCourses().forEach(course -> course.getFacultyMembers().remove(facultyToUpdate));
+                    facultyToUpdate.getCourses().clear();
+                    facultyToUpdate.getStudents().forEach(student -> student.getFacultyMembers().remove(facultyToUpdate));
+                    facultyToUpdate.getStudents().clear();
+                    entityManager.merge(facultyToUpdate);
+                    facultyToUpdate.setCourses(coursesToAdd);
+                    List<Student> studentsToAdd = new ArrayList<>();
+                    for (Course course : coursesToAdd) {
+                        for (Student student : course.getStudents()) {
+                            if (!studentsToAdd.contains(student)) { // Avoid duplicates
+                                studentsToAdd.add(student);
+                            }
+                        }
+                    }
+                    facultyToUpdate.setStudents(studentsToAdd);
+                    for (Student student : studentsToAdd) {
+                        if (!student.getFacultyMembers().contains(facultyToUpdate)) {
+                            student.getFacultyMembers().add(facultyToUpdate);
+                        }
+                    }
+
+                    for (Course course : coursesToAdd) {
+                        if (!course.getFacultyMembers().contains(facultyToUpdate)) {
+                            course.getFacultyMembers().add(facultyToUpdate);
+                        }
+                    }
+                    entityManager.merge(facultyToUpdate);
+                } else {
+                    facultyToUpdate.getCourses().forEach(course -> course.getFacultyMembers().remove(facultyToUpdate));
+                    facultyToUpdate.getCourses().clear();
+                    facultyToUpdate.getStudents().forEach(student -> student.getFacultyMembers().remove(facultyToUpdate));
+                    facultyToUpdate.getStudents().clear();
+
+                    entityManager.merge(facultyToUpdate);
+                }
+            }
+
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
+
+    @Transactional
+    public Faculty updateFaculty(Long facultyId, FacultyDto facultyDto) throws Exception {
+        Faculty facultyToUpdate= entityManager.find(Faculty.class,facultyId);
+        if(facultyToUpdate==null)
+        {
+            throw new IllegalArgumentException("Faculty with id "+ facultyId+" not found");
+        }
+        validateAndSaveFacultyForUpdate(facultyDto,facultyToUpdate);
+        return entityManager.merge(facultyToUpdate);
+    }
+
+    public List<Faculty> filterFaculties(String username, Long facultyId, String personalEmail) {
+        StringBuilder queryString = new StringBuilder("SELECT f FROM Faculty f WHERE 1 = 1");
+
+        if (username != null && !username.isEmpty()) {
+            queryString.append(" AND f.userName = :username");
+        }
+        if (facultyId != null) {
+            queryString.append(" AND f.id = :facultyId");
+        }
+        if (personalEmail != null && !personalEmail.isEmpty()) {
+            queryString.append(" AND f.personalEmail = :personalEmail");
+        }
+
+        TypedQuery<Faculty> query = entityManager.createQuery(queryString.toString(), Faculty.class);
+
+        if (username != null && !username.isEmpty()) {
+            query.setParameter("username", username);
+        }
+        if (facultyId != null) {
+            query.setParameter("facultyId", facultyId);
+        }
+        if (personalEmail != null && !personalEmail.isEmpty()) {
+            query.setParameter("personalEmail", personalEmail);
+        }
+
+        List<Faculty> faculties = query.getResultList();
+
+        /*if (faculties.isEmpty()) {
+            throw new UsernameNotFoundException("No faculties found matching the criteria");
+        }*/
+
+        return faculties;
+    }
+
 
 }

@@ -54,10 +54,10 @@ public class AssignmentService {
                 assignmentDto.setAssignmentDescription(assignmentDto.getAssignmentDescription().trim());
             }
 
-            if(assignmentDto.getTopicId() == null || assignmentDto.getTopicId() <= 0) {
+            if (assignmentDto.getTopicId() == null || assignmentDto.getTopicId() <= 0) {
                 throw new IllegalArgumentException(("Topic Id cannot be null or <= 0"));
             }
-            if(assignmentDto.getPriorityLevelId() == null || assignmentDto.getPriorityLevelId() <= 0) {
+            if (assignmentDto.getPriorityLevelId() == null || assignmentDto.getPriorityLevelId() <= 0) {
                 throw new IllegalArgumentException(("Priority Level cannot be null or <= 0"));
             }
 
@@ -129,7 +129,7 @@ public class AssignmentService {
     public void validateAssignmentParameters(Long topicId) throws Exception {
         try {
 
-            if(topicId == null || topicId <= 0) {
+            if (topicId == null || topicId <= 0) {
                 throw new IllegalArgumentException(("Topic Id cannot be null or <= 0"));
             }
 
