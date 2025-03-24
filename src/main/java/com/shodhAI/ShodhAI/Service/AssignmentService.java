@@ -173,17 +173,103 @@ public class AssignmentService {
         }
     }
 
-    public AssignmentStatisticsDto getAssignmentCompletionStatistics(Long assignmentId, Long facultyId) {
+    @Transactional
+    public Assignment assignToAllStudents(Long assignmentId, Long facultyId) {
         // Get the assignment
         Assignment assignment = entityManager.find(Assignment.class, assignmentId);
         if (assignment == null) {
-            throw new RuntimeException("Assignment not found with ID: " + assignmentId);
+            throw new IllegalArgumentException("Assignment not found with ID: " + assignmentId);
         }
 
         // Get the faculty
         Faculty faculty = entityManager.find(Faculty.class, facultyId);
         if (faculty == null) {
-            throw new RuntimeException("Faculty not found with ID: " + facultyId);
+            throw new IllegalArgumentException("Faculty not found with ID: " + facultyId);
+        }
+
+        // Verify faculty has access to this assignment
+        boolean hasAccess = entityManager.createQuery(
+                        "SELECT COUNT(a) FROM Assignment a " +
+                                "JOIN a.topic t " +
+                                "JOIN t.course c " +
+                                "JOIN c.facultyMembers f " +
+                                "WHERE a.assignmentId = :assignmentId " +
+                                "AND f.id = :facultyId", Long.class)
+                .setParameter("assignmentId", assignmentId)
+                .setParameter("facultyId", facultyId)
+                .getSingleResult() > 0;
+
+        if (!hasAccess) {
+            throw new IllegalArgumentException("Faculty does not have access to this assignment");
+        }
+
+        // Get all students associated with the faculty
+        List<Student> students = entityManager.createQuery(
+                        "SELECT s FROM Student s " +
+                                "JOIN s.facultyMembers f " +
+                                "WHERE f.id = :facultyId " +
+                                "AND s.archived = 'N'", Student.class)
+                .setParameter("facultyId", facultyId)
+                .getResultList();
+
+        if (students.isEmpty()) {
+            return null;
+        }
+
+        // Get student IDs
+        List<Long> studentIds = students.stream()
+                .map(Student::getId)
+                .collect(Collectors.toList());
+
+        // Check for existing assignments to avoid duplicates
+        List<StudentAssignment> existingAssignments = entityManager.createQuery(
+                        "SELECT sa FROM StudentAssignment sa " +
+                                "WHERE sa.assignment.assignmentId = :assignmentId " +
+                                "AND sa.student.id IN :studentIds", StudentAssignment.class)
+                .setParameter("assignmentId", assignmentId)
+                .setParameter("studentIds", studentIds)
+                .getResultList();
+
+        // Create a map of student IDs to existing assignments
+        Map<Long, StudentAssignment> existingMap = existingAssignments.stream()
+                .collect(Collectors.toMap(sa -> sa.getStudent().getId(), sa -> sa));
+
+        // Create new StudentAssignment entities
+        int assignedCount = 0;
+        Date now = new Date();
+
+        for (Student student : students) {
+            // Skip if assignment already exists for this student
+            if (existingMap.containsKey(student.getId())) {
+                continue;
+            }
+
+            StudentAssignment studentAssignment = new StudentAssignment();
+            studentAssignment.setStudent(student);
+            studentAssignment.setAssignment(assignment);
+            studentAssignment.setCompletionStatus(false);
+            studentAssignment.setCreatedDate(now);
+            studentAssignment.setUpdatedDate(now);
+
+            entityManager.persist(studentAssignment);
+            assignedCount++;
+        }
+
+        entityManager.flush();
+        return assignment;
+    }
+
+    public AssignmentStatisticsDto getAssignmentCompletionStatistics(Long assignmentId, Long facultyId) {
+        // Get the assignment
+        Assignment assignment = entityManager.find(Assignment.class, assignmentId);
+        if (assignment == null) {
+            throw new IllegalArgumentException("Assignment not found with ID: " + assignmentId);
+        }
+
+        // Get the faculty
+        Faculty faculty = entityManager.find(Faculty.class, facultyId);
+        if (faculty == null) {
+            throw new IllegalArgumentException("Faculty not found with ID: " + facultyId);
         }
 
         // Get all students associated with the faculty
@@ -266,41 +352,5 @@ public class AssignmentService {
         statisticsDTO.setCompletionByDate(completionByDate);
 
         return statisticsDTO;
-    }
-
-    public List<Assignment> getActiveAssignmentsForFaculty(Long facultyId) {
-        // Get current date
-        Date currentDate = new Date();
-
-        // Find all active assignments for the faculty
-        TypedQuery<Assignment> query = entityManager.createQuery(
-                "SELECT DISTINCT a FROM Assignment a " +
-                        "JOIN a.topic t " +
-                        "JOIN t.course c " +
-                        "JOIN c.facultyMembers f " +
-                        "WHERE f.id = :facultyId " +
-                        "AND a.archived = 'N' " +
-                        "AND a.activeStartDate <= :currentDate " +
-                        "AND a.activeEndDate >= :currentDate",
-                Assignment.class);
-        query.setParameter("facultyId", facultyId);
-        query.setParameter("currentDate", currentDate);
-
-        return query.getResultList();
-    }
-
-    /**
-     * Gets completion statistics for all active assignments for a faculty
-     */
-    public List<AssignmentStatisticsDto> getAllActiveAssignmentStatistics(Long facultyId) {
-        List<Assignment> activeAssignments = getActiveAssignmentsForFaculty(facultyId);
-        List<AssignmentStatisticsDto> statisticsList = new ArrayList<>();
-
-        for (Assignment assignment : activeAssignments) {
-            AssignmentStatisticsDto statistics = getAssignmentCompletionStatistics(assignment.getAssignmentId(), facultyId);
-            statisticsList.add(statistics);
-        }
-
-        return statisticsList;
     }
 }

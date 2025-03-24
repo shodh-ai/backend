@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -117,10 +119,25 @@ public class AssignmentController {
         }
     }
 
-    @GetMapping("/{assignmentId}/statistics/faculty/{facultyId}")
-    public ResponseEntity<?> getAssignmentStatistics(
-            @PathVariable Long assignmentId,
-            @PathVariable Long facultyId) {
+    @PostMapping("/assign-to-all/{assignmentId}/{facultyId}")
+    public ResponseEntity<?> assignToAllStudents(@PathVariable Long assignmentId, @PathVariable Long facultyId) {
+        try {
+            Assignment assignment = assignmentService.assignToAllStudents(assignmentId, facultyId);
+            if(assignment==null)
+            {
+                return ResponseService.generateSuccessResponse("No any student is enrolled for the course of current faculty",Collections.emptyList(), HttpStatus.OK);
+            }
+            return ResponseService.generateSuccessResponse("Assignment successfully assigned to all students which are enrolled in course of current faculty ", assignment, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse("Invalid request: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return ResponseService.generateErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/statistics/{assignmentId}/{facultyId}")
+    public ResponseEntity<?> getAssignmentStatistics(@PathVariable Long assignmentId, @PathVariable Long facultyId) {
         try {
             AssignmentStatisticsDto statistics = assignmentService.getAssignmentCompletionStatistics(assignmentId, facultyId);
             return ResponseService.generateSuccessResponse("Assignment is retrieved successfully",statistics, HttpStatus.OK);
@@ -130,18 +147,6 @@ public class AssignmentController {
             return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @GetMapping("/active/statistics/faculty/{facultyId}")
-    public ResponseEntity<List<AssignmentStatisticsDto>> getAllActiveAssignmentStatistics(
-            @PathVariable Long facultyId) {
-        try {
-            List<AssignmentStatisticsDto> statisticsList = ((AssignmentService) assignmentService)
-                    .getAllActiveAssignmentStatistics(facultyId);
-            return new ResponseEntity<>(statisticsList, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

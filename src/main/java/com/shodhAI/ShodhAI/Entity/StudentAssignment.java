@@ -1,15 +1,9 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,12 +23,14 @@ public class StudentAssignment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "student_id")
+    @JoinColumn(name = "student_id", nullable = false)
     @JsonProperty("student")
+    @JsonBackReference("student-assignment")
     private Student student;
 
+    @JsonBackReference("assignment-student")
     @ManyToOne
-    @JoinColumn(name = "assignment_id")
+    @JoinColumn(name = "assignment_id", nullable = false)
     @JsonProperty("assignment")
     private Assignment assignment;
 
@@ -54,6 +50,19 @@ public class StudentAssignment {
     @Column(name = "feedback", columnDefinition = "TEXT")
     @JsonProperty("feedback")
     private String feedback;
+
+    @Lob
+    @Column(name = "submitted_file",nullable = true)
+    @JsonProperty("submitted_file")
+    private byte[] submittedFile;
+
+    @Column(name = "submitted_file_name",nullable = true)
+    @JsonProperty("submitted_file_name")
+    private String submittedFileName;
+
+    @Column(name = "submitted_text", columnDefinition = "TEXT",nullable = true)
+    @JsonProperty("submitted_text")
+    private String submittedText;
 
     @Column(name = "created_date")
     @JsonProperty("created_date")

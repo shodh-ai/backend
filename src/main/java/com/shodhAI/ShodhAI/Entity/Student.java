@@ -204,6 +204,7 @@ public class Student {
     @JsonProperty("weaknesses")
     private List<String> weaknesses;
 
+    @JsonManagedReference("student-assignment")
     @OneToMany(mappedBy = "student")
     @JsonProperty("student_assignments")
     private List<StudentAssignment> studentAssignments = new ArrayList<>();

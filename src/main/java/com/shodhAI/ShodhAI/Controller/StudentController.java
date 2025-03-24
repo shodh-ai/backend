@@ -11,6 +11,7 @@ import com.shodhAI.ShodhAI.Dto.StudentSemesterDto;
 import com.shodhAI.ShodhAI.Dto.StudentWrapper;
 import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Student;
+import com.shodhAI.ShodhAI.Entity.StudentAssignment;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.StudentService;
@@ -252,4 +253,22 @@ public class StudentController {
         }
     }
 
+    @PostMapping("/submit-assignment/{assignmentId}/{studentId}")
+    public ResponseEntity<?> submitAssignment(
+            @PathVariable Long assignmentId,
+            @PathVariable Long studentId,
+            @RequestParam(required = false) MultipartFile file,
+            @RequestParam(required = false) String submissionText) {
+
+        try {
+            StudentAssignment studentAssignment=studentService.submitAssignment(assignmentId, studentId, file, submissionText);
+            return ResponseService.generateSuccessResponse(
+                    "Assignment submitted successfully", studentAssignment, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse("Invalid request: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return ResponseService.generateErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

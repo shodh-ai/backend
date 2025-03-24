@@ -1,6 +1,8 @@
 package com.shodhAI.ShodhAI.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -83,6 +85,8 @@ public class Assignment {
     // TODO (MIGHT HAVE TO CHANGE IN FUTURE) this won't work with instant as instant does not have calendar features like LocalDateTime etc.
     private Date updatedDate;
 
+    @JsonIgnore
+    @JsonManagedReference("assignment-student")
     @OneToMany(mappedBy = "assignment")
     @JsonProperty("student_assignments")
     private List<StudentAssignment> studentAssignments = new ArrayList<>();
