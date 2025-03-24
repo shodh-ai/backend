@@ -3,6 +3,7 @@ package com.shodhAI.ShodhAI.Dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.shodhAI.ShodhAI.Entity.AcademicDegree;
 import com.shodhAI.ShodhAI.Entity.Accuracy;
+import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.CriticalThinking;
 import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.Memory;
@@ -11,7 +12,9 @@ import com.shodhAI.ShodhAI.Entity.Student;
 import com.shodhAI.ShodhAI.Entity.TimeSpent;
 import com.shodhAI.ShodhAI.Entity.Understanding;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class StudentWrapper {
 
@@ -84,6 +87,8 @@ public class StudentWrapper {
     @JsonProperty("time_spent")
     private TimeSpent timeSpent;
 
+    @JsonProperty("courses")
+    private List<Course> courses= new ArrayList<>();
     @JsonProperty("memory")
     private Memory memory;
 
@@ -123,8 +128,8 @@ public class StudentWrapper {
         this.criticalThinking = student.getCriticalThinking();
         this.timeSpent = student.getTimeSpent();
         this.profilePictureUrl = student.getProfilePictureUrl();
+        this.courses=student.getCourses();
         this.memory = student.getMemory();
         this.understanding = student.getUnderstanding();
     }
-
 }

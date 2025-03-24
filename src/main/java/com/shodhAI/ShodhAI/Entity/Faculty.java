@@ -1,16 +1,22 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -22,7 +28,9 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "faculty")
@@ -122,6 +130,28 @@ public class Faculty {
     @Column(name = "profile_picture_url")
     @JsonProperty("profile_picture_url")
     private String profilePictureUrl;
+
+    // Many-to-Many relationship with Course
+    @ManyToMany(mappedBy = "facultyMembers",cascade = CascadeType.ALL)
+    @JsonBackReference("courses-faculty-reference")
+    @JsonProperty("courses")
+    private List<Course> courses = new ArrayList<>();
+
+    // Many-to-Many relationship with Student
+    @ManyToMany
+    @JoinTable(
+            name = "faculty_student",
+            joinColumns = @JoinColumn(name = "faculty_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
+    @JsonProperty("students")
+    @JsonBackReference("students-faculty-reference")
+    private List<Student> students = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "sender")
+    @JsonProperty("notifications")
+    private List<Notification> notifications;
 
 }
 

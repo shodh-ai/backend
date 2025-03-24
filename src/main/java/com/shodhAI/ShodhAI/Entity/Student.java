@@ -1,7 +1,10 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
@@ -10,7 +13,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
@@ -23,6 +28,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -171,6 +177,22 @@ public class Student {
     @JoinColumn(name = "time_spent_id")
     @JsonProperty("time_spent")
     private TimeSpent timeSpent;
+
+    // Many-to-Many relationship with Faculty
+    @ManyToMany(mappedBy = "students")
+    @JsonProperty("faculty_members")
+    @JsonManagedReference("students-faculty-reference")
+    private List<Faculty> facultyMembers = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "students")
+    @JsonIgnoreProperties("students")
+    @JsonProperty("courses")
+    private List<Course> courses = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "recipient")
+    @JsonProperty("notification_recipients")
+    private List<NotificationRecipient> notificationRecipients;
 
     @Column(name = "summary", columnDefinition = "TEXT")
     @JsonProperty("summary")
