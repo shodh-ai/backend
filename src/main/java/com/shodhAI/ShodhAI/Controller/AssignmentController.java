@@ -1,6 +1,7 @@
 package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Dto.AssignmentDto;
+import com.shodhAI.ShodhAI.Dto.AssignmentStatisticsDto;
 import com.shodhAI.ShodhAI.Entity.Assignment;
 import com.shodhAI.ShodhAI.Service.AssignmentService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
@@ -23,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -113,6 +116,37 @@ public class AssignmentController {
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/assign-to-all/{assignmentId}/{facultyId}")
+    public ResponseEntity<?> assignToAllStudents(@PathVariable Long assignmentId, @PathVariable Long facultyId) {
+        try {
+            Assignment assignment = assignmentService.assignToAllStudents(assignmentId, facultyId);
+            if(assignment==null)
+            {
+                return ResponseService.generateSuccessResponse("No any student is enrolled for the course of current faculty",Collections.emptyList(), HttpStatus.OK);
+            }
+            return ResponseService.generateSuccessResponse("Assignment successfully assigned to all students which are enrolled in course of current faculty ", assignment, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse("Invalid request: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return ResponseService.generateErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/statistics/{assignmentId}/{facultyId}")
+    public ResponseEntity<?> getAssignmentStatistics(@PathVariable Long assignmentId, @PathVariable Long facultyId) {
+        try {
+            AssignmentStatisticsDto statistics = assignmentService.getAssignmentCompletionStatistics(assignmentId, facultyId);
+            return ResponseService.generateSuccessResponse("Assignment is retrieved successfully",statistics, HttpStatus.OK);
+
+        }  catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

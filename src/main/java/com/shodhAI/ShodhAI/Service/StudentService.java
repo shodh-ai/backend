@@ -3,13 +3,16 @@ package com.shodhAI.ShodhAI.Service;
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.AcademicDegreeDto;
 import com.shodhAI.ShodhAI.Dto.AccuracyDto;
+import com.shodhAI.ShodhAI.Dto.CourseDto;
 import com.shodhAI.ShodhAI.Dto.CriticalThinkingDto;
+import com.shodhAI.ShodhAI.Dto.FacultyDto;
 import com.shodhAI.ShodhAI.Dto.MemoryDto;
 import com.shodhAI.ShodhAI.Dto.StudentDto;
 import com.shodhAI.ShodhAI.Dto.TimeSpentDto;
 import com.shodhAI.ShodhAI.Dto.UnderstandingDto;
 import com.shodhAI.ShodhAI.Entity.AcademicDegree;
 import com.shodhAI.ShodhAI.Entity.Accuracy;
+import com.shodhAI.ShodhAI.Entity.Assignment;
 import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.CriticalThinking;
 import com.shodhAI.ShodhAI.Entity.Faculty;
@@ -17,6 +20,7 @@ import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.Memory;
 import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.Student;
+import com.shodhAI.ShodhAI.Entity.StudentAssignment;
 import com.shodhAI.ShodhAI.Entity.TimeSpent;
 import com.shodhAI.ShodhAI.Entity.Understanding;
 import jakarta.persistence.EntityManager;
@@ -28,6 +32,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.Date;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -428,4 +434,48 @@ public class StudentService {
         return students;
     }
 
+    @Transactional
+    public StudentAssignment submitAssignment(Long assignmentId, Long studentId, String submissionText) {
+        // Retrieve the student assignment record
+        entityManager.clear();
+        Assignment assignment = entityManager.find(Assignment.class, assignmentId);
+        if (assignment == null) {
+            throw new IllegalArgumentException("Assignment with id " + studentId + " not found");
+        }
+        Student student = entityManager.find(Student.class, studentId);
+        if (student == null) {
+            throw new IllegalArgumentException("Student with id " + studentId + " not found");
+        }
+        List<StudentAssignment> results = entityManager.createQuery(
+                        "SELECT sa FROM StudentAssignment sa " +
+                                "WHERE sa.assignment.assignmentId = :assignmentId " +
+                                "AND sa.student.id = :studentId", StudentAssignment.class)
+                .setParameter("assignmentId", assignmentId)
+                .setParameter("studentId", studentId)
+                .getResultList();
+
+        StudentAssignment studentAssignment = results.isEmpty() ? null : results.get(0);
+
+        if (studentAssignment == null) {
+            throw new IllegalArgumentException("No assignment found for the given student.");
+        }
+
+        // Check if the assignment is already submitted
+        if (Boolean.TRUE.equals(studentAssignment.getCompletionStatus())) {
+            throw new IllegalArgumentException("Assignment has already been submitted.");
+        }
+
+        // Handle text submission if provided
+        if (submissionText != null && !submissionText.isEmpty()) {
+            studentAssignment.setSubmittedText(submissionText);
+        }
+
+        // Update submission details
+        studentAssignment.setCompletionStatus(true);
+        studentAssignment.setSubmissionDate(new Date());
+        studentAssignment.setUpdatedDate(new Date());
+
+        entityManager.merge(studentAssignment);
+        return studentAssignment;
+    }
 }

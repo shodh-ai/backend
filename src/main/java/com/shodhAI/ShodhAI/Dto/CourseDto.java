@@ -2,11 +2,15 @@ package com.shodhAI.ShodhAI.Dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.shodhAI.ShodhAI.Entity.Faculty;
+import com.shodhAI.ShodhAI.Entity.Student;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -30,4 +34,9 @@ public class CourseDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     private Date endDate;
 
+    @JsonProperty("student_ids")
+    private List<Long> studentIds = new ArrayList<>();
+
+    @JsonProperty("faculty_member_ids")
+    private List<Long> facultyMemberIds = new ArrayList<>();
 }
