@@ -44,6 +44,10 @@ public class Assignment {
     @JsonProperty("assignment_description")
     private String assignmentDescription;
 
+    @Column(name = "file_url")
+    @JsonProperty("file_url")
+    private String fileUrl;
+
     @NonNull
     @ManyToOne
     @JoinColumn(name = "priority_level_id")

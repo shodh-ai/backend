@@ -34,9 +34,9 @@ public class CourseDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     private Date endDate;
 
-    @JsonProperty("students")
-    private List<Student> students = new ArrayList<>();
+    @JsonProperty("student_ids")
+    private List<Long> studentIds = new ArrayList<>();
 
-    @JsonProperty("faculty_members")
-    private List<Faculty> facultyMembers = new ArrayList<>();
+    @JsonProperty("faculty_member_ids")
+    private List<Long> facultyMemberIds = new ArrayList<>();
 }

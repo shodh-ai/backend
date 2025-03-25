@@ -435,7 +435,7 @@ public class StudentService {
     }
 
     @Transactional
-    public StudentAssignment submitAssignment(Long assignmentId, Long studentId, MultipartFile file, String submissionText) {
+    public StudentAssignment submitAssignment(Long assignmentId, Long studentId, String submissionText) {
         // Retrieve the student assignment record
         entityManager.clear();
         Assignment assignment = entityManager.find(Assignment.class, assignmentId);
@@ -463,16 +463,6 @@ public class StudentService {
         // Check if the assignment is already submitted
         if (Boolean.TRUE.equals(studentAssignment.getCompletionStatus())) {
             throw new IllegalArgumentException("Assignment has already been submitted.");
-        }
-
-        // Handle file submission if provided
-        if (file != null && !file.isEmpty()) {
-            try {
-                studentAssignment.setSubmittedFile(file.getBytes()); // Assuming you have this field
-                studentAssignment.setSubmittedFileName(file.getOriginalFilename()); // Store file name
-            } catch (Exception e) {
-                throw new RuntimeException("Error processing file: " + e.getMessage());
-            }
         }
 
         // Handle text submission if provided

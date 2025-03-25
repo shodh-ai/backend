@@ -261,7 +261,7 @@ public class StudentController {
             @RequestParam(required = false) String submissionText) {
 
         try {
-            StudentAssignment studentAssignment=studentService.submitAssignment(assignmentId, studentId, file, submissionText);
+            StudentAssignment studentAssignment=studentService.submitAssignment(assignmentId, studentId, submissionText);
             return ResponseService.generateSuccessResponse(
                     "Assignment submitted successfully", studentAssignment, HttpStatus.OK);
         } catch (IllegalArgumentException e) {

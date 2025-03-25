@@ -51,14 +51,9 @@ public class StudentAssignment {
     @JsonProperty("feedback")
     private String feedback;
 
-    @Lob
-    @Column(name = "submitted_file",nullable = true)
-    @JsonProperty("submitted_file")
-    private byte[] submittedFile;
-
-    @Column(name = "submitted_file_name",nullable = true)
-    @JsonProperty("submitted_file_name")
-    private String submittedFileName;
+    @Column(name = "submitted_file_url")
+    @JsonProperty("submitted_file_url")
+    private String submittedFileUrl;
 
     @Column(name = "submitted_text", columnDefinition = "TEXT",nullable = true)
     @JsonProperty("submitted_text")
