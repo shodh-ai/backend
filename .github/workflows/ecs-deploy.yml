@@ -1,4 +1,4 @@
-name: Deploy to Amazon ECS2
+name: Deploy to Amazon ECS
 
 on:
   push:
@@ -53,7 +53,7 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ecs-task-def.json
-          service: backend-servicealb2
+          service: backend-servicealb
           cluster: backend-cluster1
           wait-for-service-stability: true
         env:
