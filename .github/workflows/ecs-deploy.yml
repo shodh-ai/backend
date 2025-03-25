@@ -1,4 +1,4 @@
-name: Deploy to Amazon ECS2
+name: Deploy to Amazon ECS
 
 on:
   push:
