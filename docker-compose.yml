@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: shodhai-app:latest
+    image: shodhai-app:latest1
     ports:
       - "8080:8080"
     networks:
