@@ -1,5 +1,6 @@
 package com.shodhAI.ShodhAI.Service;
 
+import com.shodhAI.ShodhAI.Entity.ClarificationStatus;
 import com.shodhAI.ShodhAI.Entity.ContentType;
 import com.shodhAI.ShodhAI.Entity.DeliveryStatus;
 import com.shodhAI.ShodhAI.Entity.DoubtLevel;
@@ -111,6 +112,12 @@ public class CommandLineService implements CommandLineRunner {
             entityManager.merge(new DeliveryStatus(1L, "PENDING", "Notification is pending delivery", null));
             entityManager.merge(new DeliveryStatus(2L, "DELIVERED", "Notification has been delivered", null));
             entityManager.merge(new DeliveryStatus(3L, "FAILED", "Notification delivery failed", null));
+        }
+
+        if (entityManager.createQuery("SELECT count(ds) FROM ClarificationStatus ds", Long.class).getSingleResult() == 0) {
+            entityManager.merge(new ClarificationStatus(1L, "PENDING"));
+            entityManager.merge(new ClarificationStatus(2L, "RESOLVED"));
+            entityManager.merge(new ClarificationStatus(3L, "ESCALATED"));
         }
 
     }
