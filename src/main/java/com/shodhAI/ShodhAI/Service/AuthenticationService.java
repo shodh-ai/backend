@@ -205,7 +205,7 @@ public class AuthenticationService {
             Map<String, Object> userDetails = new HashMap<>();
             userDetails.put("username", student.getUserName());
             userDetails.put("mobile_number", student.getMobileNumber());
-            userDetails.put("faculty_id", student.getId());
+            userDetails.put("student_id", student.getId());
             AuthController.ApiResponse response = new AuthController.ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
             return response;
         } catch (Exception exception) {
