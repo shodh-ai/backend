@@ -2,12 +2,16 @@ package com.shodhAI.ShodhAI.Controller;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.shodhAI.ShodhAI.Dto.FacultyDto;
+import com.shodhAI.ShodhAI.Dto.FacultyWrapper;
 import com.shodhAI.ShodhAI.Dto.LeaderboardWrapper;
 import com.shodhAI.ShodhAI.Dto.ScoreDto;
 import com.shodhAI.ShodhAI.Dto.StudentDto;
 import com.shodhAI.ShodhAI.Dto.StudentSemesterDto;
 import com.shodhAI.ShodhAI.Dto.StudentWrapper;
+import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Student;
+import com.shodhAI.ShodhAI.Entity.StudentAssignment;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.StudentService;
@@ -20,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -226,4 +231,44 @@ public class StudentController {
 
     }
 
+    @PatchMapping("/update/{studentIdString}")
+    public ResponseEntity<?> updateStudent( @PathVariable String studentIdString,@RequestBody StudentDto studentDto) {
+        try {
+            Long studentId = Long.parseLong(studentIdString);
+            Student student = studentService.updateStudent(studentId,studentDto);
+
+            StudentWrapper studentWrapper = new StudentWrapper();
+            studentWrapper.wrapDetails(student);
+
+            return ResponseService.generateSuccessResponse("Student updated Successfully", studentWrapper, HttpStatus.OK);
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/submit-assignment/{assignmentId}/{studentId}")
+    public ResponseEntity<?> submitAssignment(
+            @PathVariable Long assignmentId,
+            @PathVariable Long studentId,
+            @RequestParam(required = false) MultipartFile file,
+            @RequestParam(required = false) String submissionText) {
+
+        try {
+            StudentAssignment studentAssignment=studentService.submitAssignment(assignmentId, studentId, submissionText);
+            return ResponseService.generateSuccessResponse(
+                    "Assignment submitted successfully", studentAssignment, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse("Invalid request: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return ResponseService.generateErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

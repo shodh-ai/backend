@@ -3,6 +3,7 @@ package com.shodhAI.ShodhAI.Dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.shodhAI.ShodhAI.Entity.Course;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
@@ -10,7 +11,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -65,5 +68,8 @@ public class FacultyDto {
 
     @JsonProperty("profile_picture_url")
     private String profilePictureUrl;
+
+    @JsonProperty("course_ids")
+    private List<Long> courseIds = new ArrayList<>();
 
 }

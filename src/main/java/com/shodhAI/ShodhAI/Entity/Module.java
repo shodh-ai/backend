@@ -1,6 +1,8 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -74,6 +76,7 @@ public class Module {
     @JsonProperty("module_duration")
     private String moduleDuration;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "course_id")
     @JsonProperty("course")

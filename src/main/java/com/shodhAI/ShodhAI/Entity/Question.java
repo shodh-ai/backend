@@ -81,7 +81,7 @@ public class Question {
     @ManyToOne
     @JoinColumn(name = "topic_id")
     @JsonProperty("topic")
-    @JsonBackReference
+    @JsonBackReference("topic-question")
     private Topic topic;
 
     @Column(name = "created_date")
