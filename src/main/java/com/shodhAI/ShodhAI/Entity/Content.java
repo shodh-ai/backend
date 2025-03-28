@@ -41,7 +41,7 @@ public class Content {
     @ManyToOne
     @JoinColumn(name = "topic_id")
     @JsonProperty("topic")
-    @JsonBackReference
+    @JsonBackReference("content-topic")
     private Topic topic;
 
     @ManyToOne

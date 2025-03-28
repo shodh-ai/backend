@@ -31,7 +31,9 @@ public class Constant {
     public static String GET_FILE_TYPE_BY_TYPE = "SELECT f FROM FileType f WHERE LOWER(f.fileTypeName) = LOWER(:fileType)";
 
     public static String GET_ALL_ACADEMIC_DEGREES = "SELECT a FROM AcademicDegree a WHERE a.archived = 'N'";
+    public static String GET_ALL_SEMESTERS = "SELECT a FROM Semester a WHERE a.archived = 'N'";
     public static String GET_ACADEMIC_DEGREE_BY_ID = "SELECT a FROM AcademicDegree a WHERE a.degreeId = :degreeId";
+    public static String GET_SEMESTER_BY_ID = "SELECT a FROM Semester a WHERE a.semesterId = :semesterId";
 
     public static String GET_ALL_FACULTY = "SELECT f FROM Faculty f WHERE f.archived = 'N'";
     public static String GET_FACULTY_BY_ID = "SELECT f FROM Faculty f WHERE f.id = :facultyId";

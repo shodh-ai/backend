@@ -1,13 +1,9 @@
 package com.shodhAI.ShodhAI.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,6 +11,8 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "academic_degree")
@@ -59,4 +57,20 @@ public class AcademicDegree {
     // TODO (MIGHT HAVE TO CHANGE IN FUTURE) this won't work with instant as instant does not have calendar features like LocalDateTime etc.
     private Date updatedDate;
 
+    @JsonIgnore
+    @ManyToMany(mappedBy = "academicDegrees")
+    private List<Semester> semesters;
+
+    @OneToMany(mappedBy = "academicDegree")
+    @JsonIgnore
+    private List<CourseSemesterDegree> courseSemesterDegrees;
+
+    public AcademicDegree(Long degreeId, @NonNull String degreeName, String programName, String institutionName, @NonNull Character archived, Date createdDate) {
+        this.degreeId = degreeId;
+        this.degreeName = degreeName;
+        this.programName = programName;
+        this.institutionName = institutionName;
+        this.archived = archived;
+        this.createdDate = createdDate;
+    }
 }

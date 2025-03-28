@@ -6,6 +6,8 @@ import com.shodhAI.ShodhAI.Dto.FacultyDto;
 import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Gender;
+import com.shodhAI.ShodhAI.Entity.Semester;
+import com.shodhAI.ShodhAI.Entity.Session;
 import com.shodhAI.ShodhAI.Entity.Student;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
@@ -16,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -149,6 +153,16 @@ public class CourseService {
                 courseDto.setCourseDuration(courseDto.getCourseDuration().trim());
                 courseToUpdate.setCourseDuration(courseDto.getCourseDuration());
             }
+
+          /*  if(courseDto.getSemesterId()!=null)
+            {
+                Semester semester = entityManager.find(Semester.class,courseDto.getSemesterId());
+                if(semester==null)
+                {
+                    throw new IllegalArgumentException("Semester with id " + courseDto.getSemesterId()+ " does not exit");
+                }
+                courseToUpdate.setSemester(semester);
+            }*/
 
             if (courseDto.getStartDate() != null && courseDto.getEndDate() != null) {
                 if (!courseDto.getStartDate().before(courseDto.getEndDate())) {
@@ -347,38 +361,59 @@ public class CourseService {
         }
     }
 
-    public List<Faculty> filterFaculties(String username, Long facultyId, String personalEmail) {
-        StringBuilder queryString = new StringBuilder("SELECT f FROM Faculty f WHERE 1 = 1");
+    @Transactional
+    public List<Course> courseFilter(
+            Long courseId,
+            Long userId,
+            Long roleId,
+            Long semesterId,
+            Long degreeId
+    ) throws Exception {
+        try {
+            StringBuilder jpql = new StringBuilder(
+                    "SELECT DISTINCT c FROM Course c " +
+                            "JOIN c.courseSemesterDegrees csd " +
+                            "WHERE 1=1 "
+            );
 
-        if (username != null && !username.isEmpty()) {
-            queryString.append(" AND f.userName = :username");
-        }
-        if (facultyId != null) {
-            queryString.append(" AND f.id = :facultyId");
-        }
-        if (personalEmail != null && !personalEmail.isEmpty()) {
-            queryString.append(" AND f.personalEmail = :personalEmail");
-        }
+            // Prepare parameters map
+            Map<String, Object> params = new HashMap<>();
 
-        TypedQuery<Faculty> query = entityManager.createQuery(queryString.toString(), Faculty.class);
+            // Add filters based on input parameters
+            if (courseId != null) {
+                jpql.append("AND c.courseId = :courseId ");
+                params.put("courseId", courseId);
+            }
 
-        if (username != null && !username.isEmpty()) {
-            query.setParameter("username", username);
+            if (semesterId != null) {
+                jpql.append("AND csd.semester.semesterId = :semesterId ");
+                params.put("semesterId", semesterId);
+            }
+
+            if (degreeId != null) {
+                jpql.append("AND csd.academicDegree.degreeId = :degreeId ");
+                params.put("degreeId", degreeId);
+            }
+
+            // Order by course ID
+            jpql.append("ORDER BY c.courseId ASC");
+
+            // Create the query
+            TypedQuery<Course> query = entityManager.createQuery(jpql.toString(), Course.class);
+
+            // Set parameters
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                query.setParameter(entry.getKey(), entry.getValue());
+            }
+
+            return query.getResultList();
+
+        } catch (PersistenceException persistenceException) {
+            exceptionHandlingService.handleException(persistenceException);
+            throw new PersistenceException(persistenceException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
         }
-        if (facultyId != null) {
-            query.setParameter("facultyId", facultyId);
-        }
-        if (personalEmail != null && !personalEmail.isEmpty()) {
-            query.setParameter("personalEmail", personalEmail);
-        }
-
-        List<Faculty> faculties = query.getResultList();
-
-        /*if (faculties.isEmpty()) {
-            throw new UsernameNotFoundException("No faculties found matching the criteria");
-        }*/
-
-        return faculties;
     }
-
 }

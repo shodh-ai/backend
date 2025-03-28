@@ -3,6 +3,8 @@ package com.shodhAI.ShodhAI.Entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
@@ -133,7 +135,7 @@ public class Faculty {
 
     // Many-to-Many relationship with Course
     @ManyToMany(mappedBy = "facultyMembers",cascade = CascadeType.ALL)
-    @JsonBackReference("courses-faculty-reference")
+    @JsonBackReference(value = "faculty-course")
     @JsonProperty("courses")
     private List<Course> courses = new ArrayList<>();
 
@@ -145,7 +147,7 @@ public class Faculty {
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
     @JsonProperty("students")
-    @JsonBackReference("students-faculty-reference")
+    @JsonManagedReference(value = "faculty-students")
     private List<Student> students = new ArrayList<>();
 
     @JsonIgnore

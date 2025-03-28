@@ -43,7 +43,7 @@ public class Topic {
     @NotNull
     @JoinColumn(name = "course_id")
     @JsonProperty("course_id")
-    @JsonBackReference
+    @JsonBackReference("course-topic")
     private Course course;
 
     @ManyToOne
@@ -99,7 +99,7 @@ public class Topic {
     @ManyToOne
     @JoinColumn(name = "default_parent_topic_id")
     @JsonProperty("default_parent_topic")
-    @JsonBackReference
+    @JsonBackReference("default-parent-topic")
     private Topic defaultParentTopic;
 
     @Column(name = "jsx_code", columnDefinition = "TEXT")
