@@ -16,7 +16,6 @@ import com.shodhAI.ShodhAI.Service.QuestionService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.SessionService;
 import com.shodhAI.ShodhAI.Service.TopicService;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;

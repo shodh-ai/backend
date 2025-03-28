@@ -49,6 +49,11 @@ public class UserSubComponentProgress {
     @JsonProperty("user_subtopic_progress")
     private UserSubTopicProgress userSubTopicProgress;
 
+    @ManyToOne
+    @JoinColumn(name = "subtopic_id", nullable = false)
+    @JsonProperty("subtopic")
+    private Topic subTopic;
+
     @Column(name = "created_date")
     @JsonProperty("created_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
