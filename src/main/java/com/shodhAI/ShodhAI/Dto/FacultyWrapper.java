@@ -1,15 +1,20 @@
 package com.shodhAI.ShodhAI.Dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.shodhAI.ShodhAI.Entity.AcademicDegree;
+import com.shodhAI.ShodhAI.Entity.Accuracy;
+import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.Role;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class FacultyWrapper {
 
-    @JsonProperty("student_id")
+    @JsonProperty("faculty_id")
     private Long id;
 
     @JsonProperty("archived")
@@ -57,6 +62,9 @@ public class FacultyWrapper {
     @JsonProperty("profile_picture_url")
     private String profilePictureUrl;
 
+    @JsonProperty("courses")
+    private List<Course> courses= new ArrayList<>();
+
     public void wrapDetails(Faculty faculty) {
 
         this.id = faculty.getId();
@@ -79,6 +87,7 @@ public class FacultyWrapper {
         this.createdDate = faculty.getCreatedDate();
         this.updatedDate = faculty.getUpdatedDate();
         this.profilePictureUrl = faculty.getProfilePictureUrl();
+        this.courses=faculty.getCourses();
     }
 
 }

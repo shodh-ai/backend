@@ -3,18 +3,24 @@ package com.shodhAI.ShodhAI.Service;
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.AcademicDegreeDto;
 import com.shodhAI.ShodhAI.Dto.AccuracyDto;
+import com.shodhAI.ShodhAI.Dto.CourseDto;
 import com.shodhAI.ShodhAI.Dto.CriticalThinkingDto;
+import com.shodhAI.ShodhAI.Dto.FacultyDto;
 import com.shodhAI.ShodhAI.Dto.MemoryDto;
 import com.shodhAI.ShodhAI.Dto.StudentDto;
 import com.shodhAI.ShodhAI.Dto.TimeSpentDto;
 import com.shodhAI.ShodhAI.Dto.UnderstandingDto;
 import com.shodhAI.ShodhAI.Entity.AcademicDegree;
 import com.shodhAI.ShodhAI.Entity.Accuracy;
+import com.shodhAI.ShodhAI.Entity.Assignment;
+import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.CriticalThinking;
+import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.Memory;
 import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.Student;
+import com.shodhAI.ShodhAI.Entity.StudentAssignment;
 import com.shodhAI.ShodhAI.Entity.TimeSpent;
 import com.shodhAI.ShodhAI.Entity.Understanding;
 import jakarta.persistence.EntityManager;
@@ -26,9 +32,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.Date;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class StudentService {
@@ -260,6 +270,137 @@ public class StudentService {
         return student;
     }
 
+    public void validateAndSaveStudentForUpdate(StudentDto studentDto, Student studentToUpdate) throws Exception {
+        try {
+            if (Objects.nonNull(studentDto.getFirstName())) {
+                if(studentDto.getFirstName().isEmpty()) {
+                    throw new IllegalArgumentException("Student name cannot be empty");
+                }
+                studentDto.setFirstName(studentDto.getFirstName().trim());
+                studentToUpdate.setFirstName(studentDto.getFirstName());
+            }
+            if(studentDto.getLastName() != null) {
+                if(studentDto.getLastName().isEmpty() || studentDto.getLastName().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Last name cannot be empty");
+                }
+                studentDto.setLastName(studentDto.getLastName().trim());
+                studentToUpdate.setFirstName(studentDto.getLastName());
+            }
+
+            if(studentDto.getCountryCode() != null) {
+                if(studentDto.getCountryCode().isEmpty() || studentDto.getCountryCode().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Country code cannot be empty");
+                }
+                studentDto.setCountryCode(studentDto.getCountryCode().trim());
+                studentToUpdate.setCountryCode(studentDto.getCountryCode());
+            }
+
+            if(studentDto.getMobileNumber()!=null)
+            {
+                if(studentDto.getMobileNumber().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Faculty Mobile Number cannot be empty");
+                }
+                studentDto.setMobileNumber(studentDto.getMobileNumber().trim());
+                studentToUpdate.setMobileNumber(studentDto.getMobileNumber());
+            }
+
+            if(studentDto.getUserName()!=null)
+            {
+                if(studentDto.getUserName().trim().isEmpty()) {
+                    throw new IllegalArgumentException("User name cannot be empty");
+                }
+                studentDto.setUserName(studentDto.getUserName().trim());
+                studentToUpdate.setUserName(studentDto.getUserName());
+
+            }
+            if(studentDto.getPassword()!=null)
+            {
+                String hashedPassword = passwordEncoder.encode(studentDto.getPassword());
+                studentDto.setPassword(hashedPassword);
+                studentToUpdate.setPassword(studentDto.getPassword());
+            }
+            if(studentDto.getAcademicDegreeId()!=null)
+            {
+                if(studentDto.getAcademicDegreeId() <= 0) {
+                    throw new IllegalArgumentException(("Academic Degree Id cannot be <= 0"));
+                }
+            }
+            if(studentDto.getGenderId()!=null)
+            {
+                if(studentDto.getGenderId() <= 0) {
+                    throw new IllegalArgumentException(("Gender Id cannot be <= 0"));
+                }
+                Gender gender = genderService.getGenderById(studentDto.getGenderId());
+                studentToUpdate.setGender(gender);
+            }
+            if (studentDto.getCourseIds() != null) {
+                if (!studentDto.getCourseIds().isEmpty()) {
+                    // Fetch all valid courses
+                    List<Course> coursesToAdd = entityManager.createQuery(
+                                    "SELECT c FROM Course c WHERE c.courseId IN :courseIds", Course.class)
+                            .setParameter("courseIds", studentDto.getCourseIds())
+                            .getResultList();
+
+                    if (coursesToAdd.size() != studentDto.getCourseIds().size()) {
+                        throw new IllegalArgumentException("One or more Course IDs are invalid.");
+                    }
+                    studentToUpdate.getCourses().forEach(course -> course.getStudents().remove(studentToUpdate));
+                    studentToUpdate.getCourses().clear();
+                    studentToUpdate.getFacultyMembers().forEach(faculty -> faculty.getStudents().remove(studentToUpdate));
+                    studentToUpdate.getFacultyMembers().clear();
+                    entityManager.merge(studentToUpdate);
+                    studentToUpdate.setCourses(coursesToAdd);
+                    List<Faculty> facultyToAdd = new ArrayList<>();
+                    for (Course course : coursesToAdd) {
+                        for (Faculty faculty : course.getFacultyMembers()) {
+                            if (!facultyToAdd.contains(faculty)) {
+                                facultyToAdd.add(faculty);
+                            }
+                        }
+                    }
+                    studentToUpdate.setFacultyMembers(facultyToAdd);
+                    for (Faculty faculty : facultyToAdd) {
+                        if (!faculty.getStudents().contains(studentToUpdate)) {
+                            faculty.getStudents().add(studentToUpdate);
+                        }
+                    }
+                    for (Course course : coursesToAdd) {
+                        if (!course.getStudents().contains(studentToUpdate)) {
+                            course.getStudents().add(studentToUpdate);
+                        }
+                    }
+                    entityManager.merge(studentToUpdate);
+                }
+                else {
+                    studentToUpdate.getCourses().forEach(course -> course.getStudents().remove(studentToUpdate));
+                    studentToUpdate.getCourses().clear();
+                    studentToUpdate.getFacultyMembers().forEach(faculty -> faculty.getStudents().remove(studentToUpdate));
+                    studentToUpdate.getFacultyMembers().clear();
+                    entityManager.merge(studentToUpdate);
+                }
+
+            }
+
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
+
+    @Transactional
+    public Student updateStudent(Long studentId, StudentDto studentDto) throws Exception {
+        Student studentToUpdate= entityManager.find(Student.class,studentId);
+        if(studentToUpdate==null)
+        {
+            throw new IllegalArgumentException("Student with id "+ studentId+" not found");
+        }
+        validateAndSaveStudentForUpdate(studentDto,studentToUpdate);
+        return entityManager.merge(studentToUpdate);
+    }
+
     public List<Student> filterStudents(String username, Long studentId, String personalEmail) {
         StringBuilder queryString = new StringBuilder("SELECT s FROM Student s WHERE 1 = 1");
 
@@ -293,5 +434,48 @@ public class StudentService {
         return students;
     }
 
+    @Transactional
+    public StudentAssignment submitAssignment(Long assignmentId, Long studentId, String submissionText) {
+        // Retrieve the student assignment record
+        entityManager.clear();
+        Assignment assignment = entityManager.find(Assignment.class, assignmentId);
+        if (assignment == null) {
+            throw new IllegalArgumentException("Assignment with id " + studentId + " not found");
+        }
+        Student student = entityManager.find(Student.class, studentId);
+        if (student == null) {
+            throw new IllegalArgumentException("Student with id " + studentId + " not found");
+        }
+        List<StudentAssignment> results = entityManager.createQuery(
+                        "SELECT sa FROM StudentAssignment sa " +
+                                "WHERE sa.assignment.assignmentId = :assignmentId " +
+                                "AND sa.student.id = :studentId", StudentAssignment.class)
+                .setParameter("assignmentId", assignmentId)
+                .setParameter("studentId", studentId)
+                .getResultList();
 
+        StudentAssignment studentAssignment = results.isEmpty() ? null : results.get(0);
+
+        if (studentAssignment == null) {
+            throw new IllegalArgumentException("No assignment found for the given student.");
+        }
+
+        // Check if the assignment is already submitted
+        if (Boolean.TRUE.equals(studentAssignment.getCompletionStatus())) {
+            throw new IllegalArgumentException("Assignment has already been submitted.");
+        }
+
+        // Handle text submission if provided
+        if (submissionText != null && !submissionText.isEmpty()) {
+            studentAssignment.setSubmittedText(submissionText);
+        }
+
+        // Update submission details
+        studentAssignment.setCompletionStatus(true);
+        studentAssignment.setSubmissionDate(new Date());
+        studentAssignment.setUpdatedDate(new Date());
+
+        entityManager.merge(studentAssignment);
+        return studentAssignment;
+    }
 }
