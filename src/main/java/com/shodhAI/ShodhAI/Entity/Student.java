@@ -181,11 +181,11 @@ public class Student {
     // Many-to-Many relationship with Faculty
     @ManyToMany(mappedBy = "students")
     @JsonProperty("faculty_members")
-    @JsonManagedReference("students-faculty-reference")
+    @JsonBackReference(value = "faculty-students")
     private List<Faculty> facultyMembers = new ArrayList<>();
 
     @ManyToMany(mappedBy = "students")
-    @JsonIgnoreProperties("students")
+    @JsonBackReference(value = "students-course")
     @JsonProperty("courses")
     private List<Course> courses = new ArrayList<>();
 
