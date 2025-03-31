@@ -50,7 +50,7 @@ public class UserTopicProgress {
 
     // 🔹 Linking to UserModuleProgress
     @ManyToOne
-    @JoinColumn(name = "user_module_progress_id", nullable = false)
+    @JoinColumn(name = "user_module_progress_id"/*, nullable = false*/)
     @JsonProperty("user_module_progress")
     private UserModuleProgress userModuleProgress;
 

@@ -42,14 +42,14 @@ public class UserSubTopicProgress {
     @ManyToOne
     @JoinColumn(name = "subtopic_id", nullable = false)
     @JsonProperty("subtopic")
-    private Topic subtopic;
+    private Topic subTopic;
 
     @Column(name = "is_completed")
     @JsonProperty("is_completed")
     private boolean isCompleted = false;
 
     @ManyToOne
-    @JoinColumn(name = "user_topic_progress_id", nullable = false)
+    @JoinColumn(name = "user_topic_progress_id"/*, nullable = false*/)
     @JsonProperty("user_topic_progress")
     private UserTopicProgress userTopicProgress;
 
