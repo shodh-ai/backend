@@ -2,12 +2,13 @@ package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.Role;
+import com.shodhAI.ShodhAI.Entity.Semester;
 import com.shodhAI.ShodhAI.Entity.UserCourseProgress;
-import com.shodhAI.ShodhAI.Entity.UserModuleProgress;
 import com.shodhAI.ShodhAI.Entity.UserSemesterProgress;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class UserCourseProgressService {
+public class UserSemesterProgressService {
 
     @Autowired
     EntityManager entityManager;
@@ -28,13 +29,13 @@ public class UserCourseProgressService {
     RoleService roleService;
 
     @Autowired
-    CourseService courseService;
+    SemesterService semesterService;
 
-    public void validateUserCourseProgress(Long courseId) throws Exception {
+    public void validateUserSemesterProgress(Long semesterId) throws Exception {
         try {
 
-            if (courseId == null || courseId <= 0) {
-                throw new IllegalArgumentException(("Course Id cannot be null or <= 0"));
+            if (semesterId == null ||semesterId <= 0) {
+                throw new IllegalArgumentException(("Semester Id cannot be null or <= 0"));
             }
 
         } catch (IllegalArgumentException illegalArgumentException) {
@@ -47,25 +48,23 @@ public class UserCourseProgressService {
     }
 
     @Transactional
-    public UserCourseProgress saveUserCourseProgress(Long userId, Long roleId, Long courseId, UserSemesterProgress userSemesterProgress) throws Exception {
+    public UserSemesterProgress saveUserSemesterProgress(Long userId, Long roleId, Long semesterId) throws Exception {
         try {
 
-            UserCourseProgress userCourseProgress = new UserCourseProgress();
-            userCourseProgress.setUserId(userId);
+            UserSemesterProgress userSemesterProgress = new UserSemesterProgress();
+            userSemesterProgress.setUserId(userId);
 
             Role role = roleService.getRoleById(roleId);
-            userCourseProgress.setRole(role);
+            userSemesterProgress.setRole(role);
 
-            Course course = courseService.getCourseById(courseId);
-            userCourseProgress.setCourse(course);
-
+            Semester semester = semesterService.getSemesterById(semesterId);
+            userSemesterProgress.setSemester(semester);
 
             Date currentDate = new Date();
-            userCourseProgress.setCreatedDate(currentDate);
-            userCourseProgress.setUpdatedDate(currentDate);
+            userSemesterProgress.setCreatedDate(currentDate);
+            userSemesterProgress.setUpdatedDate(currentDate);
 
-            userCourseProgress.setUserSemesterProgress(userSemesterProgress);
-            return entityManager.merge(userCourseProgress);
+            return entityManager.merge(userSemesterProgress);
 
         } catch (PersistenceException persistenceException) {
             exceptionHandlingService.handleException(persistenceException);
@@ -77,52 +76,36 @@ public class UserCourseProgressService {
     }
 
     @Transactional
-    public List<UserCourseProgress> getUserCourseProgressFilter(Long userCourseProgressId, Long userId, Long roleId, Long courseId) throws Exception {
+    public List<UserSemesterProgress> getUserSemesterProgressFilter(Long userSemesterProgressId, Long userId, Long roleId, Long semesterId) throws Exception {
         try {
 
-            StringBuilder jpql = new StringBuilder("SELECT u FROM UserCourseProgress u WHERE 1=1 ");
+            StringBuilder jpql = new StringBuilder("SELECT u FROM UserSemesterProgress u WHERE 1=1 ");
 
-            if (userCourseProgressId != null) {
-                jpql.append("AND u.id = :userCourseProgressId ");
+            if (userSemesterProgressId != null) {
+                jpql.append("AND u.id = :userSemesterProgressId ");
             }
             if (userId != null && roleId != null) {
                 jpql.append("AND u.userId = :userId ");
                 jpql.append("AND u.role.id = :roleId ");
             }
-            if (courseId != null) {
-                jpql.append("AND u.course.id = :courseId ");
+            if (semesterId != null) {
+                jpql.append("AND u.semester.id = :semesterId ");
             }
 
-            TypedQuery<UserCourseProgress> query = entityManager.createQuery(jpql.toString(), UserCourseProgress.class);
+            TypedQuery<UserSemesterProgress> query = entityManager.createQuery(jpql.toString(), UserSemesterProgress.class);
 
-            if (userCourseProgressId != null) {
-                query.setParameter("userCourseProgressId", userCourseProgressId);
+            if (userSemesterProgressId != null) {
+                query.setParameter("userSemesterProgressId", userSemesterProgressId);
             }
             if (userId != null && roleId != null) {
                 query.setParameter("userId", userId);
                 query.setParameter("roleId", roleId);
             }
-            if (courseId != null) {
-                query.setParameter("courseId", courseId);
+            if (semesterId != null) {
+                query.setParameter("semesterId", semesterId);
             }
 
             return query.getResultList();
-
-        } catch (PersistenceException persistenceException) {
-            exceptionHandlingService.handleException(persistenceException);
-            throw new PersistenceException(persistenceException.getMessage());
-        } catch (Exception exception) {
-            exceptionHandlingService.handleException(exception);
-            throw new Exception(exception.getMessage());
-        }
-    }
-
-    @Transactional
-    public UserCourseProgress updateUserCourseProgress(UserCourseProgress userCourseProgress, Boolean isCompleted) throws Exception {
-        try {
-
-            userCourseProgress.setCompleted(isCompleted);
-            return entityManager.merge(userCourseProgress);
 
         } catch (PersistenceException persistenceException) {
             exceptionHandlingService.handleException(persistenceException);
