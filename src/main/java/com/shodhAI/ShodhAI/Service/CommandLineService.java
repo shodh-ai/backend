@@ -135,6 +135,36 @@ public class CommandLineService implements CommandLineRunner {
           entityManager.merge(new Semester(4L, "Semester 4", new Date(), new Date(), 'N'));
         }
 
+        if (entityManager.createQuery("SELECT count(c) FROM Course c", Long.class).getSingleResult() == 0) {
+            // MBA Courses
+            entityManager.merge(new Course(1L, "Business Fundamentals", "Introduction to Business", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(2L, "Financial Management", "Corporate Finance & Accounting", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(3L, "Marketing Strategies", "Marketing & Brand Management", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(4L, "Organizational Behavior", "Leadership & Team Management", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(5L, "Operations Management", "Logistics & Supply Chain", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(6L, "Strategic Management", "Corporate Strategy & Business Policy", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(7L, "Human Resource Management", "Talent Acquisition & Performance Management", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(8L, "International Business", "Global Business & Trade", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(9L, "Entrepreneurship", "Business Startups & Innovation", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(10L, "Digital Marketing", "SEO, SEM & Social Media Marketing", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(11L, "Business Analytics", "Data Analysis for Business Decisions", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(12L, "E-Commerce Management", "Online Business Strategies", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(13L, "Leadership & Ethics", "Corporate Governance & Ethical Decision-Making", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(14L, "Supply Chain Management", "Inventory & Vendor Management", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(15L, "Corporate Law", "Legal Aspects of Business", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(16L, "Negotiation Skills", "Conflict Resolution & Bargaining", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(17L, "Project Management", "Planning, Execution & Risk Management", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(18L, "Customer Relationship Management", "Client Handling & Service Quality", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(19L, "Business Communication", "Effective Corporate Communication", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(20L, "Financial Risk Management", "Managing Risks in Investments & Business", 'N', new Date(), "6 months", new Date(), new Date()));
+
+            // Other Courses (BSc, MSc, PhD)
+            entityManager.merge(new Course(21L, "Physics 101", "Classical & Quantum Mechanics", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(22L, "Chemistry Basics", "Organic & Inorganic Chemistry", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(23L, "Advanced Data Science", "Machine Learning & AI", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(24L, "Doctoral Research Methods", "Quantitative & Qualitative Research", 'N', new Date(), "6 months", new Date(), new Date()));
+        }
+
         // Check if modules already exist
         if (entityManager.createQuery("SELECT count(m) FROM Module m", Long.class).getSingleResult() == 0) {
             Date currentDate = new Date();
