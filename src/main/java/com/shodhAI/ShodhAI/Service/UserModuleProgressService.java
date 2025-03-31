@@ -30,6 +30,22 @@ public class UserModuleProgressService {
     @Autowired
     ModuleService moduleService;
 
+    public void validateUserModuleProgress(Long moduleId) throws Exception {
+        try {
+
+            if (moduleId == null ||moduleId <= 0) {
+                throw new IllegalArgumentException(("Topic Id cannot be null or <= 0"));
+            }
+
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
+
     @Transactional
     public UserModuleProgress saveUserModuleProgress(Long userId, Long roleId, Long moduleId, UserCourseProgress userCourseProgress) throws Exception {
         try {
@@ -90,6 +106,22 @@ public class UserModuleProgressService {
             }
 
             return query.getResultList();
+
+        } catch (PersistenceException persistenceException) {
+            exceptionHandlingService.handleException(persistenceException);
+            throw new PersistenceException(persistenceException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
+
+    @Transactional
+    public UserModuleProgress updateUserModuleProgress(UserModuleProgress userModuleProgress, Boolean isCompleted) throws Exception {
+        try {
+
+            userModuleProgress.setCompleted(isCompleted);
+            return entityManager.merge(userModuleProgress);
 
         } catch (PersistenceException persistenceException) {
             exceptionHandlingService.handleException(persistenceException);
