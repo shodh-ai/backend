@@ -4,6 +4,7 @@ import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.ModuleDto;
 import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.Module;
+import com.shodhAI.ShodhAI.Entity.Semester;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
@@ -12,6 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ModuleService {
@@ -101,6 +105,46 @@ public class ModuleService {
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             throw new Exception(exception);
+        }
+    }
+
+    @Transactional
+    public List<Module> moduleFilter(Long moduleId, Long userId, Long roleId, Long courseId, Long academicDegreeId) throws Exception {
+        try {
+            StringBuilder jpql = new StringBuilder("SELECT DISTINCT s FROM Module s JOIN s.course.courseSemesterDegrees csd WHERE 1=1 ");
+
+            Map<String, Object> params = new HashMap<>();
+
+            if (moduleId != null) {
+                jpql.append("AND s.moduleId = :moduleId ");
+                params.put("moduleId", moduleId);
+            }
+
+            if (courseId != null) {
+                jpql.append("AND s.course.courseId = :courseId ");
+                params.put("courseId", courseId);
+            }
+
+            if (academicDegreeId != null) {
+                jpql.append("AND csd.academicDegree.degreeId = :academicDegreeId ");
+                params.put("academicDegreeId", academicDegreeId);
+            }
+
+            jpql.append("AND s.archived = 'N' ORDER BY s.moduleId ASC");
+
+            TypedQuery<Module> query = entityManager.createQuery(jpql.toString(), Module.class);
+
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                query.setParameter(entry.getKey(), entry.getValue());
+            }
+
+            return query.getResultList();
+        } catch (PersistenceException persistenceException) {
+            exceptionHandlingService.handleException(persistenceException);
+            throw new PersistenceException(persistenceException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
         }
     }
 

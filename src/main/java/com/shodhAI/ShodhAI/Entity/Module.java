@@ -58,6 +58,15 @@ public class Module {
     @JsonProperty("creator_user_id")
     private Long creatorUserId;
 
+    public Module(Long moduleId, String moduleTitle, String moduleDescription, @NonNull Character archived, Date createdDate, String moduleDuration) {
+        this.moduleId = moduleId;
+        this.moduleTitle = moduleTitle;
+        this.moduleDescription = moduleDescription;
+        this.archived = archived;
+        this.createdDate = createdDate;
+        this.moduleDuration = moduleDuration;
+    }
+
     @ManyToOne
     @JoinColumn(name = "creator_role_id")
     @JsonProperty("creator_role")
