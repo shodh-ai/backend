@@ -30,6 +30,22 @@ public class UserSubTopicProgressService {
     @Autowired
     TopicService topicService;
 
+    public void validateUserSubTopicProgress(Long subtopicId) throws Exception {
+        try {
+
+            if (subtopicId == null || subtopicId <= 0) {
+                throw new IllegalArgumentException(("Sub topic Id cannot be null or <= 0"));
+            }
+
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
+
     @Transactional
     public UserSubTopicProgress saveUserSubTopicProgress(Long userId, Long roleId, Long topicId, UserTopicProgress userTopicProgress) throws Exception {
         try {
@@ -41,7 +57,7 @@ public class UserSubTopicProgressService {
             userSubTopicProgress.setRole(role);
 
             Topic subTopic = topicService.getTopicById(topicId);
-            userSubTopicProgress.setSubtopic(subTopic);
+            userSubTopicProgress.setSubTopic(subTopic);
 
             Date currentDate = new Date();
             userSubTopicProgress.setCreatedDate(currentDate);
@@ -99,4 +115,21 @@ public class UserSubTopicProgressService {
             throw new Exception(exception.getMessage());
         }
     }
+
+    @Transactional
+    public UserSubTopicProgress updateUserSubTopicProgress(UserSubTopicProgress userSubTopicProgress, Boolean isCompleted) throws Exception {
+        try {
+
+            userSubTopicProgress.setCompleted(isCompleted);
+            return entityManager.merge(userSubTopicProgress);
+
+        } catch (PersistenceException persistenceException) {
+            exceptionHandlingService.handleException(persistenceException);
+            throw new PersistenceException(persistenceException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
+
 }
