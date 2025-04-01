@@ -20,11 +20,11 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "user_module_progress")
+@Table(name = "user_semester_progress")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class UserModuleProgress {
+public class UserSemesterProgress {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,20 +43,14 @@ public class UserModuleProgress {
     @JsonProperty("is_completed")
     private boolean isCompleted = false;
 
-    // 🔹 Linking to UserCourseProgress
     @ManyToOne
-    @JoinColumn(name = "user_course_progress_id"/*, nullable = false*/)
-    @JsonProperty("user_course_progress")
-    private UserCourseProgress userCourseProgress;
+    @JoinColumn(name = "semester_id", nullable = false)
+    @JsonProperty("semester")
+    private Semester semester;
 
-    @ManyToOne
-    @JoinColumn(name = "module_id", nullable = false)
-    @JsonProperty("module")
-    private Module module;
-
-    @OneToMany(mappedBy = "userModuleProgress", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonProperty("topic_progress")
-    private List<UserTopicProgress> topicProgress;
+    @OneToMany(mappedBy = "userSemesterProgress", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonProperty("course_progress")
+    private List<UserCourseProgress> courseProgress;
 
     @Column(name = "created_date", nullable = false, updatable = false)
     @JsonProperty("created_date")

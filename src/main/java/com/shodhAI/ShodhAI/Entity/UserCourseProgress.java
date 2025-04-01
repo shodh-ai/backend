@@ -43,6 +43,12 @@ public class UserCourseProgress {
     @JsonProperty("is_completed")
     private boolean isCompleted = false;
 
+    // 🔹 Linking to UserCourseProgress
+    @ManyToOne
+    @JoinColumn(name = "user_semester_progress_id", nullable = false)
+    @JsonProperty("user_semester_progress")
+    private UserSemesterProgress userSemesterProgress;
+
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     @JsonProperty("course")
