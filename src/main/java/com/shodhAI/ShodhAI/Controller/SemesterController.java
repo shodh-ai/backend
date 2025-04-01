@@ -111,7 +111,7 @@ public class SemesterController
             if (semesterToFind == null) {
                 return ResponseService.generateErrorResponse("Semester with id " + semesterId + " does not exist",  HttpStatus.BAD_REQUEST);
             }
-            Semester semesterToUpdate=semesterService.validateAndSaveSemesterForUpdate(semesterDto,semesterToFind);
+            Semester semesterToUpdate=semesterService.updateSemester(semesterId,semesterDto);
             return ResponseService.generateSuccessResponse("Semester is updated successfully", semesterToUpdate,HttpStatus.OK);
 
         }catch (IllegalArgumentException e) {
