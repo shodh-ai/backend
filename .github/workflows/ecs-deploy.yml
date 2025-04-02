@@ -42,7 +42,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: backend-api
-          IMAGE_TAG: latest1
+          IMAGE_TAG: latest
         run: |
           IMAGE_URI="${ECR_REGISTRY}/backend-api:${IMAGE_TAG}"
           echo "Building Docker image..."
