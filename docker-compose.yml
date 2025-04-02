@@ -11,7 +11,7 @@ services:
     environment:
       - PORT=8080
       - POSTGRES_USERNAME=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=shodhAIpostgres
       - ML_URL=https://3m4szz0n9l.execute-api.ap-south-1.amazonaws.com/Prod
       - CLOUDINARY_CLOUD_NAME=damg6iidi
       - CLOUDINARY_CLOUD_API_KEY=554238382312718
@@ -28,8 +28,8 @@ services:
     image: postgres:latest
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: shodhai
+      POSTGRES_PASSWORD: shodhAIpostgres
+      POSTGRES_DB: postgres
     ports:
       - "5432:5432"
     networks:
