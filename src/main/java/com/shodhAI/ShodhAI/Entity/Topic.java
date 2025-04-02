@@ -106,6 +106,10 @@ public class Topic {
     @JsonProperty("jsx_code")
     private String jsxCode;
 
+    @Column(name = "json_code", columnDefinition = "TEXT")
+    @JsonProperty("json_code")
+    private String jsonCode;
+
     @Column(name = "narration", columnDefinition = "TEXT")
     @JsonProperty("narration")
     private String narration;

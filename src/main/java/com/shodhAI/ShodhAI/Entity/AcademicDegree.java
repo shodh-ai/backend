@@ -2,6 +2,8 @@ package com.shodhAI.ShodhAI.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
@@ -22,7 +24,6 @@ import java.util.Set;
 public class AcademicDegree {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "degree_id")
     private Long degreeId;
 
@@ -57,7 +58,7 @@ public class AcademicDegree {
     // TODO (MIGHT HAVE TO CHANGE IN FUTURE) this won't work with instant as instant does not have calendar features like LocalDateTime etc.
     private Date updatedDate;
 
-    @JsonIgnore
+    @JsonManagedReference("semesters-degree")
     @ManyToMany(mappedBy = "academicDegrees")
     private List<Semester> semesters;
 

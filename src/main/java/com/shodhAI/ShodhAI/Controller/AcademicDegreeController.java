@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -102,5 +103,27 @@ public class AcademicDegreeController {
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PatchMapping("/update/{academicDegreeIdString}")
+    public ResponseEntity<?> updateAcademicDegree(@RequestBody AcademicDegreeDto academicDegreeDto,@PathVariable String academicDegreeIdString)
+    {
+        try {
+            Long academicDegreeId = Long.parseLong(academicDegreeIdString);
+            AcademicDegree academicDegree = academicDegreeService.getAcademicDegreeById(academicDegreeId);
+            if (academicDegree == null) {
+                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
+            }
+            AcademicDegree updatedAcademicDegree=  academicDegreeService.updateAcademicDegree(academicDegreeId,academicDegreeDto);
+            return ResponseService.generateSuccessResponse("Academic Degree is updated successfully", updatedAcademicDegree,HttpStatus.OK);
+
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
 }
