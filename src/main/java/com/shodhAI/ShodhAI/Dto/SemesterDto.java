@@ -22,8 +22,8 @@ public class SemesterDto
     @JsonProperty("semester_name")
     private String semesterName;
 
-    @JsonProperty("academic_degree_id")
-    private Long academicDegreeId;
+    @JsonProperty("academic_degree_ids")
+    private List<Long> academicDegreeIds;
 
     @JsonProperty("course_ids")
     private List<Long> courseIds;
@@ -33,4 +33,7 @@ public class SemesterDto
 
     @JsonProperty("end_date")
     private String endDate;
+
+    @JsonProperty("course_associations")
+    private List<CourseSemesterDegreeDto> courseAssociations;
 }
