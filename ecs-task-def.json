@@ -8,7 +8,7 @@
   "containerDefinitions": [
     {
       "name": "backend-container",
-      "image": "302263050318.dkr.ecr.ap-south-1.amazonaws.com/backend-api:latest1",
+      "image": "302263050318.dkr.ecr.ap-south-1.amazonaws.com/backend-api:latest",
       "portMappings": [
         {
           "containerPort": 8080,
