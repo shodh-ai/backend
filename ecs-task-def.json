@@ -18,10 +18,88 @@
       "essential": true,
       "environment": [
         {
-          "name": "SERVER_PORT",
+          "name": "PORT",
           "value": "8080"
+        },
+        {
+          "name": "POSTGRES_USERNAME",
+          "value": "postgres"
+        },
+        {
+          "name": "POSTGRES_PASSWORD",
+          "value": "shodhAIpostgres"
+        },
+        {
+          "name": "ML_URL",
+          "value": "https://3m4szz0n9l.execute-api.ap-south-1.amazonaws.com/Prod"
+        },
+        {
+          "name": "DDL_AUTO",
+          "value": "update"
+        },
+        {
+          "name": "SHOW_SQL",
+          "value": "false"
+        },
+        {
+          "name": "CLOUDINARY_CLOUD_NAME",
+          "value": "damg6iidi"
+        },
+        {
+          "name": "CLOUDINARY_CLOUD_API_KEY",
+          "value": "554238382312718"
+        },
+        {
+          "name": "CLOUDINARY_CLOUD_SECRET",
+          "value": "WLS-smwAXQUupVHlI1q-15L0mCo"
+        },
+        {
+          "name": "MAX_FILE_SIZE",
+          "value": "20MB"
+        },
+        {
+          "name": "MAX_REQUEST_SIZE",
+          "value": "20MB"
+        },
+        {
+          "name": "MAIL_HOST",
+          "value": "smtp.gmail.com"
+        },
+        {
+          "name": "MAIL_PORT",
+          "value": "587"
+        },
+        {
+          "name": "MAIL_USERNAME",
+          "value": "raman6165128@gmail.com"
+        },
+        {
+          "name": "MAIL_PASSWORD",
+          "value": "tljwpnuluwpjmvcm"
+        },
+        {
+          "name": "MAIL_REPLY_TO",
+          "value": "support@shodhai.com"
         }
-      ]
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/backend-task",
+          "awslogs-region": "ap-south-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:8080/api/v1/actuator/health || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
     }
   ]
 }

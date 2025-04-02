@@ -2,14 +2,17 @@ package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Dto.SemesterDto;
-import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.Semester;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.SemesterService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/semester")
+@RequestMapping(value = "/semester", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 public class SemesterController
 {
 
@@ -123,13 +126,16 @@ public class SemesterController
         }
     }
 
+    @CrossOrigin(origins = "*")
     @GetMapping("/get-filter-semester")
     public ResponseEntity<?> getFilterSemester(
             @RequestParam(required = false)Long  semesterId,
             @RequestParam(required = false) Long  academicDegreeId,
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int limit,
-            @RequestHeader(value = "Authorization") String authHeader) {
+            @RequestHeader(value = "Authorization") String authHeader,
+            HttpSession session, HttpServletRequest request) {
+
 
         try {
             if (offset < 0) {

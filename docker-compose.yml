@@ -9,10 +9,17 @@ services:
     networks:
       - app-network
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/shodhai
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - PORT=8080
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=postgres
+      - ML_URL=https://3m4szz0n9l.execute-api.ap-south-1.amazonaws.com/Prod
+      - CLOUDINARY_CLOUD_NAME=damg6iidi
+      - CLOUDINARY_CLOUD_API_KEY=554238382312718
+      - CLOUDINARY_CLOUD_SECRET=WLS-smwAXQUupVHlI1q-15L0mCo
+      - MAX_FILE_SIZE=20MB
+      - MAX_REQUEST_SIZE=20MB
+      - DDL_AUTO=update
+      - SHOW_SQL=true
     depends_on:
       - db
     restart: unless-stopped
