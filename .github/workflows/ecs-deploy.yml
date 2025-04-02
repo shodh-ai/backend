@@ -14,49 +14,59 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # New Step: Set execute permission for mvnw
+      # Step 2: Set execute permission for mvnw
       - name: Set Maven Wrapper Permissions
         run: chmod +x mvnw
 
-      # Step 2: Build the application to generate the JAR file
+      # Step 3: Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      # Step 4: Build the application with proper environment variables
       - name: Build Application with Maven
         run: |
-          ./mvnw package -Dspring.server.port=8080
+          ./mvnw package -DskipTests
           echo "server.port=8080" >> src/main/resources/application.properties
 
-      # Step 3: Log in to Amazon ECR
+      # Step 5: Log in to Amazon ECR
       - name: Log in to Amazon ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ap-south-1
 
-      # Step 4: Build, tag, and push the Docker image to ECR
+      # Step 6: Build, tag, and push the Docker image to ECR
       - name: Build, Tag, and Push Docker Image
         env:
-          AWS_ACCOUNT_ID: 302263050318
-          AWS_REGION: ap-south-1
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: backend-api
           IMAGE_TAG: latest1
         run: |
-          IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/backend-api:${IMAGE_TAG}"
+          IMAGE_URI="${ECR_REGISTRY}/backend-api:${IMAGE_TAG}"
           echo "Building Docker image..."
-          docker build -t backend-api .
+          docker build -t ${ECR_REPOSITORY}:${IMAGE_TAG} .
           echo "Tagging image as ${IMAGE_URI}..."
-          docker tag backend-api:latest $IMAGE_URI
+          docker tag ${ECR_REPOSITORY}:${IMAGE_TAG} ${IMAGE_URI}
           echo "Pushing image to ECR..."
-          docker push $IMAGE_URI
-          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+          docker push ${IMAGE_URI}
+          echo "IMAGE_URI=${IMAGE_URI}" >> $GITHUB_ENV
 
-      # Step 5: Update ECS Task Definition and Deploy the service
-      - name: Update ECS Task Definition and Deploy
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      # Step 7: Fill in the new image ID in the Amazon ECS task definition
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ecs-task-def.json
+          container-name: backend-container
+          image: ${{ env.IMAGE_URI }}
+
+      # Step 8: Deploy Amazon ECS task definition and update service
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: backend-servicealb
           cluster: backend-cluster1
           wait-for-service-stability: true
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ap-south-1
