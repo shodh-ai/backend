@@ -1,12 +1,17 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
+import com.shodhAI.ShodhAI.Dto.CourseSemesterDegreeDto;
 import com.shodhAI.ShodhAI.Dto.SemesterDto;
 import com.shodhAI.ShodhAI.Entity.AcademicDegree;
 import com.shodhAI.ShodhAI.Entity.Course;
+import com.shodhAI.ShodhAI.Entity.CourseSemesterDegree;
 import com.shodhAI.ShodhAI.Entity.Semester;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceException;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,8 +21,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 @Service
 public class SemesterService {
@@ -61,8 +69,10 @@ public class SemesterService {
     }
 
     @Transactional
-    public Semester saveSemester(SemesterDto semesterDto) throws ParseException {
+    public Semester saveSemester(SemesterDto semesterDto) throws Exception {
         Semester semesterToAdd = new Semester();
+       long semesterCount= findSemesterCount();
+        semesterToAdd.setSemesterId(semesterCount+1);
         semesterToAdd.setSemesterName(semesterDto.getSemesterName());
 
         semesterToAdd.setStartDate(convertStringToDate(semesterDto.getStartDate(), DATE_FORMAT));
@@ -168,38 +178,155 @@ public class SemesterService {
             sharedUtilityService.compareTwoDates(startDate, endDate, "Semester");
 
         }
-
-       /* if (semesterDto.getAcademicDegreeId() != null) {
-            AcademicDegree academicDegree = entityManager.find(AcademicDegree.class, semesterDto.getAcademicDegreeId());
-            if (academicDegree == null) {
-                throw new IllegalArgumentException("Academic degree with id " + semesterDto.getAcademicDegreeId() + " does not found");
+        if(semesterDto.getAcademicDegreeIds()!=null)
+        {
+            List<AcademicDegree> academicDegrees = new ArrayList<>();
+            for (Long degreeId : semesterDto.getAcademicDegreeIds()) {
+                AcademicDegree degree = entityManager.find(AcademicDegree.class, degreeId);
+                if (degree == null) {
+                    throw new IllegalArgumentException("Academic degree not found with id: " + degreeId);
+                }
+                academicDegrees.add(degree);
             }
-            semesterToUpdate.setAcademicDegree(academicDegree);
+
+            // Clear existing degrees first to avoid duplicates
+            for (AcademicDegree existingDegree : semesterToUpdate.getAcademicDegrees()) {
+                existingDegree.getSemesters().remove(semesterToUpdate);
+                entityManager.merge(existingDegree);
+            }
+
+            semesterToUpdate.getAcademicDegrees().clear();
+
+            // Add new degrees
+            for (AcademicDegree academicDegree : academicDegrees) {
+                semesterToUpdate.getAcademicDegrees().add(academicDegree);
+                academicDegree.getSemesters().add(semesterToUpdate);
+                entityManager.merge(academicDegree);
+            }
+
+        }
+        return entityManager.merge(semesterToUpdate);
+    }
+
+    @Transactional
+    public Semester updateSemester(Long semesterId, SemesterDto semesterDto) throws Exception {
+        Semester semesterToUpdate = entityManager.find(Semester.class, semesterId);
+        if (semesterToUpdate == null) {
+            throw new IllegalArgumentException("Semester with id " + semesterId + " does not exist");
         }
 
-        if (semesterDto.getCourseIds() != null) {
-            // Clear existing courses
-            List<Course> existingCourses = new ArrayList<>(semesterToUpdate.getCourses());
-            for (Course course : existingCourses) {
-                course.setSemester(null);  // Detach previous semester association
-                semesterToUpdate.getCourses().remove(course);
+        // Store the original degree associations before updating
+        Set<Long> originalDegreeIds = semesterToUpdate.getAcademicDegrees().stream()
+                .map(AcademicDegree::getDegreeId)
+                .collect(Collectors.toSet());
+
+        // Update the semester
+        Semester updatedSemester = validateAndSaveSemesterForUpdate(semesterDto, semesterToUpdate);
+
+        // Now handle the cascading effect on course associations
+        if (semesterDto.getAcademicDegreeIds() != null) {
+            Set<Long> newDegreeIds = new HashSet<>(semesterDto.getAcademicDegreeIds());
+
+            // Find degree associations that were removed
+            Set<Long> removedDegreeIds = new HashSet<>(originalDegreeIds);
+            removedDegreeIds.removeAll(newDegreeIds);
+
+            if (!removedDegreeIds.isEmpty()) {
+                // Remove course associations for removed degree-semester pairs
+                deleteCourseSemesterDegreeAssociations(semesterId, removedDegreeIds);
+            }
+        }
+
+        // Handle course associations - checking if the field exists in the request
+        if (semesterDto.getCourseAssociations() != null) {
+            // If course_associations is explicitly set to an empty list, clear all existing associations
+            if (semesterDto.getCourseAssociations().isEmpty()) {
+                // Delete all course associations for this semester
+                deleteAllCourseSemesterDegreeAssociations(semesterId);
+            } else {
+                // First remove all existing associations to avoid duplicates and stale data
+                deleteAllCourseSemesterDegreeAssociations(semesterId);
+                // Then add the new associations
+                addCoursesToSemester(semesterId, semesterDto.getCourseAssociations());
+            }
+        }
+
+        return updatedSemester;
+    }
+
+    @Transactional
+    private void deleteAllCourseSemesterDegreeAssociations(Long semesterId) {
+        entityManager.createQuery(
+                        "DELETE FROM CourseSemesterDegree csd WHERE csd.semester.semesterId = :semesterId")
+                .setParameter("semesterId", semesterId)
+                .executeUpdate();
+    }
+
+    @Transactional
+    private void deleteCourseSemesterDegreeAssociations(Long semesterId, Set<Long> degreeIds) {
+        Query query = entityManager.createQuery(
+                "DELETE FROM CourseSemesterDegree csd WHERE csd.semester.semesterId = :semesterId " +
+                        "AND csd.academicDegree.degreeId IN :degreeIds");
+
+        query.setParameter("semesterId", semesterId);
+        query.setParameter("degreeIds", degreeIds);
+        query.executeUpdate();
+    }
+
+    @Transactional
+    public void addCoursesToSemester(Long semesterId, List<CourseSemesterDegreeDto> courseAssociations) throws Exception {
+        Semester semester = entityManager.find(Semester.class, semesterId);
+        if (semester == null) {
+            throw new IllegalArgumentException("Semester with id " + semesterId + " does not exist");
+        }
+
+        for (CourseSemesterDegreeDto association : courseAssociations) {
+            Course course = entityManager.find(Course.class, association.getCourseId());
+            if (course == null) {
+                throw new IllegalArgumentException("Course not found with id: " + association.getCourseId());
             }
 
-            // Add new courses
-            List<Course> courseListToAdd = new ArrayList<>();
-            for (Long courseId : semesterDto.getCourseIds()) {
-                Course course = entityManager.find(Course.class, courseId);
-                if (course == null) {
-                    throw new IllegalArgumentException("Course with id " + courseId + " does not exist");
-                }
-                course.setSemester(semesterToUpdate); // Set semester reference in Course entity
-                courseListToAdd.add(course);
+            AcademicDegree degree = entityManager.find(AcademicDegree.class, association.getAcademicDegreeId());
+            if (degree == null) {
+                throw new IllegalArgumentException("Academic degree not found with id: " + association.getAcademicDegreeId());
             }
 
-            semesterToUpdate.getCourses().addAll(courseListToAdd);
-        }*/
+            // Verify the semester is associated with the degree
+            boolean isAssociated = semester.getAcademicDegrees().stream()
+                    .anyMatch(ad -> ad.getDegreeId().equals(degree.getDegreeId()));
 
-        return entityManager.merge(semesterToUpdate);
+            if (!isAssociated) {
+                throw new IllegalArgumentException(
+                        "Semester " + semester.getSemesterName() + " is not associated with degree " +
+                                degree.getDegreeName());
+            }
+
+            // Check if association already exists
+            List<CourseSemesterDegree> existingAssociations = entityManager.createQuery(
+                            "SELECT csd FROM CourseSemesterDegree csd " +
+                                    "WHERE csd.course.courseId = :courseId " +
+                                    "AND csd.semester.semesterId = :semesterId " +
+                                    "AND csd.academicDegree.degreeId = :degreeId", CourseSemesterDegree.class)
+                    .setParameter("courseId", course.getCourseId())
+                    .setParameter("semesterId", semesterId)
+                    .setParameter("degreeId", degree.getDegreeId())
+                    .getResultList();
+
+            if (existingAssociations.isEmpty()) {
+                // Create new association
+                CourseSemesterDegree newAssociation = new CourseSemesterDegree();
+                long courseDegreeSemesterCount=findCourseDegreeSemesterCount();
+                newAssociation.setId( (courseDegreeSemesterCount+1));
+                newAssociation.setCourse(course);
+                newAssociation.setSemester(semester);
+                newAssociation.setAcademicDegree(degree);
+                newAssociation.setCreatedDate(new Date());
+                newAssociation.setUpdatedDate(new Date());
+
+                // Don't set the ID manually, let JPA/Hibernate generate it
+                entityManager.persist(newAssociation);
+            }
+        }
     }
 
     @Transactional
@@ -247,4 +374,37 @@ public class SemesterService {
             throw new Exception(exception.getMessage());
         }
     }
+
+    public long findCourseDegreeSemesterCount() throws Exception {
+        try {
+            String queryString = "SELECT MAX(c.id) FROM CourseSemesterDegree c";
+            TypedQuery<Long> query = entityManager.createQuery(queryString, Long.class);
+            Long maxId = query.getSingleResult();
+
+            return (maxId != null) ? maxId : 0;  // If no records exist, return 0
+        } catch (NoResultException e) {
+            exceptionHandlingService.handleException(e);
+            throw new NoResultException("No course_semester_degree association is found");
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception("SOMETHING WENT WRONG: " + exception.getMessage());
+        }
+    }
+
+    public long findSemesterCount() throws Exception {
+        try {
+            String queryString = "SELECT MAX(c.id) FROM Semester c";
+            TypedQuery<Long> query = entityManager.createQuery(queryString, Long.class);
+            Long maxId = query.getSingleResult();
+
+            return (maxId != null) ? maxId : 0;  // If no records exist, return 0
+        } catch (NoResultException e) {
+            exceptionHandlingService.handleException(e);
+            throw new NoResultException("No semester is found");
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception("SOMETHING WENT WRONG: " + exception.getMessage());
+        }
+    }
+
 }

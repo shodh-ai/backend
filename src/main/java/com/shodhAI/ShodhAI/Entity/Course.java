@@ -40,7 +40,6 @@ import java.util.List;
 public class Course {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "course_id")
     private Long courseId;
 
@@ -139,13 +138,5 @@ public class Course {
         this.courseDuration = courseDuration;
         this.startDate = startDate;
         this.endDate = endDate;
-    }
-    // Helper method to add course to a specific semester and degree
-    public void addToSemesterAndDegree(Semester semester, AcademicDegree academicDegree) {
-        CourseSemesterDegree mapping = new CourseSemesterDegree();
-        mapping.setCourse(this);
-        mapping.setSemester(semester);
-        mapping.setAcademicDegree(academicDegree);
-        this.courseSemesterDegrees.add(mapping);
     }
 }

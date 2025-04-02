@@ -1,6 +1,8 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -21,7 +23,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class Semester {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty("semester_id")
     private Long semesterId;
 
@@ -30,6 +31,7 @@ public class Semester {
     private String semesterName;
 
     // Change to Many-to-Many to allow a semester to belong to multiple degrees
+    @JsonBackReference("semesters-degree")
     @ManyToMany
     @JoinTable(
             name = "academic_degree_semester",

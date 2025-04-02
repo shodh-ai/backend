@@ -2,14 +2,18 @@ package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.CourseDto;
+import com.shodhAI.ShodhAI.Dto.CourseSemesterDegreeDto;
 import com.shodhAI.ShodhAI.Dto.FacultyDto;
+import com.shodhAI.ShodhAI.Entity.AcademicDegree;
 import com.shodhAI.ShodhAI.Entity.Course;
+import com.shodhAI.ShodhAI.Entity.CourseSemesterDegree;
 import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Gender;
 import com.shodhAI.ShodhAI.Entity.Semester;
 import com.shodhAI.ShodhAI.Entity.Session;
 import com.shodhAI.ShodhAI.Entity.Student;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,7 +84,8 @@ public class CourseService {
             Course course = new Course();
 
             Date currentDate = new Date();
-
+            long courseCount=findCourseCount();
+            course.setCourseId(courseCount+1);
             course.setCreatedDate(currentDate);
             course.setUpdatedDate(currentDate);
             course.setCourseTitle(courseDto.getCourseTitle());
@@ -154,16 +160,6 @@ public class CourseService {
                 courseToUpdate.setCourseDuration(courseDto.getCourseDuration());
             }
 
-          /*  if(courseDto.getSemesterId()!=null)
-            {
-                Semester semester = entityManager.find(Semester.class,courseDto.getSemesterId());
-                if(semester==null)
-                {
-                    throw new IllegalArgumentException("Semester with id " + courseDto.getSemesterId()+ " does not exit");
-                }
-                courseToUpdate.setSemester(semester);
-            }*/
-
             if (courseDto.getStartDate() != null && courseDto.getEndDate() != null) {
                 if (!courseDto.getStartDate().before(courseDto.getEndDate())) {
                     throw new IllegalArgumentException("Course Start date must be before of end date");
@@ -201,7 +197,87 @@ public class CourseService {
             throw new IllegalArgumentException("Course with id " + courseId+ " does not found");
         }
         validateAndSaveCourseForUpdate(courseDto,courseToUpdate);
+        if (courseDto.getCourseSemesterDegreeAssociations() != null) {
+            updateCourseSemesterDegreeAssociations(courseToUpdate, courseDto.getCourseSemesterDegreeAssociations());
+        }
         return entityManager.merge(courseToUpdate);
+    }
+
+
+    @Transactional
+    private void updateCourseSemesterDegreeAssociations(Course course, List<CourseSemesterDegreeDto> associations) throws Exception {
+        // Fetch existing associations for this course
+        List<CourseSemesterDegree> currentAssociations = entityManager.createQuery(
+                        "SELECT csd FROM CourseSemesterDegree csd WHERE csd.course.courseId = :courseId",
+                        CourseSemesterDegree.class)
+                .setParameter("courseId", course.getCourseId())
+                .getResultList();
+
+        // Create a map of current associations for easy lookup (semesterId_degreeId -> CourseSemesterDegree)
+        Map<String, CourseSemesterDegree> currentAssociationsMap = currentAssociations.stream()
+                .collect(Collectors.toMap(
+                        csd -> csd.getSemester().getSemesterId() + "_" + csd.getAcademicDegree().getDegreeId(),
+                        csd -> csd
+                ));
+
+        // Create a set of new association keys for comparison
+        Set<String> newAssociationKeys = associations.stream()
+                .map(dto -> dto.getSemesterId() + "_" + dto.getAcademicDegreeId())
+                .collect(Collectors.toSet());
+
+        // Find associations to remove (in current but not in new)
+        List<CourseSemesterDegree> associationsToRemove = currentAssociations.stream()
+                .filter(csd -> !newAssociationKeys.contains(
+                        csd.getSemester().getSemesterId() + "_" + csd.getAcademicDegree().getDegreeId()))
+                .collect(Collectors.toList());
+
+        // Remove associations that are no longer needed
+        for (CourseSemesterDegree csdToRemove : associationsToRemove) {
+            entityManager.remove(csdToRemove);
+        }
+
+        // Add new associations or keep existing ones
+        for (CourseSemesterDegreeDto dto : associations) {
+            String key = dto.getSemesterId() + "_" + dto.getAcademicDegreeId();
+
+            // Validate that semester exists and is associated with degree
+            Semester semester = entityManager.find(Semester.class, dto.getSemesterId());
+            if (semester == null) {
+                throw new IllegalArgumentException("Semester not found with id: " + dto.getSemesterId());
+            }
+
+            AcademicDegree degree = entityManager.find(AcademicDegree.class, dto.getAcademicDegreeId());
+            if (degree == null) {
+                throw new IllegalArgumentException("Academic degree not found with id: " + dto.getAcademicDegreeId());
+            }
+
+            // Verify the semester is associated with the degree
+            boolean isAssociated = semester.getAcademicDegrees().stream()
+                    .anyMatch(ad -> ad.getDegreeId().equals(degree.getDegreeId()));
+
+            if (!isAssociated) {
+                throw new IllegalArgumentException(
+                        "Semester " + semester.getSemesterName() + " is not associated with degree " +
+                                degree.getDegreeName());
+            }
+
+            // If association already exists, skip it
+            if (currentAssociationsMap.containsKey(key)) {
+                continue;
+            }
+
+            // Create new association
+            CourseSemesterDegree newAssociation = new CourseSemesterDegree();
+            long courseDegreeSemesterCount=findCourseDegreeSemesterCount();
+            newAssociation.setId(courseDegreeSemesterCount+1);
+            newAssociation.setCourse(course);
+            newAssociation.setSemester(semester);
+            newAssociation.setAcademicDegree(degree);
+            newAssociation.setCreatedDate(new Date());
+            newAssociation.setUpdatedDate(new Date());
+
+            entityManager.persist(newAssociation);
+        }
     }
 
     @Transactional
@@ -416,4 +492,36 @@ public class CourseService {
             throw new Exception(exception.getMessage());
         }
     }
+
+    public long findCourseDegreeSemesterCount() throws Exception {
+        try {
+            String queryString = "SELECT MAX(c.id) FROM CourseSemesterDegree c";
+            TypedQuery<Long> query = entityManager.createQuery(queryString, Long.class);
+            Long maxId = query.getSingleResult();
+
+            return (maxId != null) ? maxId : 0;  // If no records exist, return 0
+        } catch (NoResultException e) {
+            exceptionHandlingService.handleException(e);
+            throw new NoResultException("No course_semester_degree association is found");
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception("SOMETHING WENT WRONG: " + exception.getMessage());
+        }
+    }
+    public long findCourseCount() throws Exception {
+        try {
+            String queryString = "SELECT MAX(c.id) FROM Course c";
+            TypedQuery<Long> query = entityManager.createQuery(queryString, Long.class);
+            Long maxId = query.getSingleResult();
+
+            return (maxId != null) ? maxId : 0;  // If no records exist, return 0
+        } catch (NoResultException e) {
+            exceptionHandlingService.handleException(e);
+            throw new NoResultException("No course  is found");
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception("SOMETHING WENT WRONG: " + exception.getMessage());
+        }
+    }
+
 }
