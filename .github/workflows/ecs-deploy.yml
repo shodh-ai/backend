@@ -30,7 +30,6 @@ jobs:
       - name: Build Application with Maven
         run: |
           ./mvnw package -DskipTests
-          echo "server.port=8080" >> src/main/resources/application.properties
 
       # Step 5: Log in to Amazon ECR
       - name: Log in to Amazon ECR
@@ -42,15 +41,18 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: backend-api
-          IMAGE_TAG: latest
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          IMAGE_URI="${ECR_REGISTRY}/backend-api:${IMAGE_TAG}"
+          IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+          LATEST_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}:latest"
           echo "Building Docker image..."
           docker build -t ${ECR_REPOSITORY}:${IMAGE_TAG} .
-          echo "Tagging image as ${IMAGE_URI}..."
+          echo "Tagging images..."
           docker tag ${ECR_REPOSITORY}:${IMAGE_TAG} ${IMAGE_URI}
-          echo "Pushing image to ECR..."
+          docker tag ${ECR_REPOSITORY}:${IMAGE_TAG} ${LATEST_URI}
+          echo "Pushing images to ECR..."
           docker push ${IMAGE_URI}
+          docker push ${LATEST_URI}
           echo "IMAGE_URI=${IMAGE_URI}" >> $GITHUB_ENV
 
       # Step 7: Fill in the new image ID in the Amazon ECS task definition
