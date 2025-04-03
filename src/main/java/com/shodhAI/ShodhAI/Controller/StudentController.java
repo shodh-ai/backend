@@ -2,18 +2,16 @@ package com.shodhAI.ShodhAI.Controller;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.shodhAI.ShodhAI.Dto.FacultyDto;
-import com.shodhAI.ShodhAI.Dto.FacultyWrapper;
 import com.shodhAI.ShodhAI.Dto.LeaderboardWrapper;
 import com.shodhAI.ShodhAI.Dto.ScoreDto;
 import com.shodhAI.ShodhAI.Dto.StudentDto;
 import com.shodhAI.ShodhAI.Dto.StudentSemesterDto;
 import com.shodhAI.ShodhAI.Dto.StudentWrapper;
-import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Student;
 import com.shodhAI.ShodhAI.Entity.StudentAssignment;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.S3StorageService;
 import com.shodhAI.ShodhAI.Service.StudentService;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +48,9 @@ public class StudentController {
 
     @Autowired
     private Cloudinary cloudinary;
+
+    @Autowired
+    private S3StorageService s3StorageService;
 
     @PostMapping(value = "/add")
     public ResponseEntity<?> addStudent(HttpServletRequest request, @RequestBody StudentDto studentDto) {
@@ -91,9 +93,18 @@ public class StudentController {
             // Upload profile picture to Cloudinary
             Map<String, Object> uploadResult = cloudinary.uploader().upload(profilePicture.getBytes(), ObjectUtils.emptyMap());
 
-            // Set the profile picture URL in the student DTO
-            String profilePictureUrl = uploadResult.get("url").toString();
-            student.setProfilePictureUrl(profilePictureUrl);
+            // upload profile picture to S3
+            File tempFile = File.createTempFile("upload", profilePicture.getOriginalFilename());
+            profilePicture.transferTo(tempFile);
+
+            String fileUrl = s3StorageService.uploadFile(tempFile, profilePicture.getOriginalFilename());
+
+//            // Set the profile picture URL in the student DTO using Cloudinary.
+//            String profilePictureUrl = uploadResult.get("url").toString();
+//            student.setProfilePictureUrl(profilePictureUrl);
+
+            // In case of aws s3
+            student.setProfilePictureUrl(fileUrl);
 
             student = studentService.uploadProfilePicture(student);
 
@@ -180,6 +191,9 @@ public class StudentController {
             semesterScoreDto.add(timeSpentScoreDto);
 
             studentSemesterDto.wrapDetails(semesterScoreDto);
+
+            // change the profile picture url with pre-signed one
+            student.setProfilePictureUrl(s3StorageService.getPresignedUrl(student.getProfilePictureUrl()).toString());
 
             StudentWrapper studentWrapper = new StudentWrapper();
             studentWrapper.wrapDetails(student);
