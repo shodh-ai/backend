@@ -4,7 +4,6 @@ import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.RoleService;
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

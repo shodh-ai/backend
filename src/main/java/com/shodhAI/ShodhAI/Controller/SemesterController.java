@@ -2,13 +2,13 @@ package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Dto.SemesterDto;
-import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.Semester;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.SemesterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/semester")
+@RequestMapping(value = "/semester", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 public class SemesterController
 {
 
