@@ -20,9 +20,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/doubt", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -93,14 +96,40 @@ public class DoubtController {
     }
 
     @GetMapping("/get-all-doubt-level")
-    public ResponseEntity<?> retrieveDoubtLevel(HttpServletRequest request) {
+    public ResponseEntity<?> retrieveDoubtLevel(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit, HttpServletRequest request) {
         try {
-
+            if (offset < 0) {
+                throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
+            }
+            if (limit <= 0) {
+                throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
+            }
             List<DoubtLevel> doubtLevelList = doubtService.getAllDoubtLevels();
             if (doubtLevelList.isEmpty()) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            return ResponseService.generateSuccessResponse("Doubt Level Retrieved Successfully", doubtLevelList, HttpStatus.OK);
+            int totalItems = doubtLevelList.size();
+            int totalPages = (int) Math.ceil((double) totalItems / limit);
+            int fromIndex = offset * limit;
+            int toIndex = Math.min(fromIndex + limit, totalItems);
+
+            if (offset >= totalPages && offset != 0) {
+                throw new IllegalArgumentException("No more doubts available");
+            }
+
+            if (fromIndex >= totalItems) {
+                return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
+            }
+
+            List<DoubtLevel> doubtLevels = doubtLevelList.subList(fromIndex, toIndex);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("doubtLevels", doubtLevels);
+            response.put("totalItems", totalItems);
+            response.put("totalPages", totalPages);
+            response.put("currentPage", offset);
+
+            return ResponseService.generateSuccessResponse("Doubt Level Retrieved Successfully", response, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);

@@ -1,5 +1,6 @@
 package com.shodhAI.ShodhAI.Controller;
 
+import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Dto.ParentTopicWrapper;
 import com.shodhAI.ShodhAI.Dto.ReportWrapper;
@@ -16,6 +17,7 @@ import com.shodhAI.ShodhAI.Service.QuestionService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.SessionService;
 import com.shodhAI.ShodhAI.Service.TopicService;
+import com.shodhAI.ShodhAI.annotation.Authorize;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,7 @@ public class TopicController {
     @Autowired
     ConversationService conversationService;
 
+    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping(value = "/add")
     public ResponseEntity<?> addTopic(@RequestBody TopicDto topicDto) {
         try {
@@ -90,16 +93,35 @@ public class TopicController {
     // TODO We have to make this filter api for topic in future. (based on title, course , module etc).
 
     @GetMapping("/get-all")
-    public ResponseEntity<?> retrieveTableOfTopics(HttpServletRequest request,
+    public ResponseEntity<?> retrieveTableOfTopics(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit,HttpServletRequest request,
                                                    @RequestParam(value = "courseId", required = false) Long courseId,
                                                    @RequestParam("moduleId") Long moduleId) {
         try {
-
+            if (offset < 0) {
+                throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
+            }
+            if (limit <= 0) {
+                throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
+            }
             List<Topic> parentTopicList = topicService.getParentTopicListByModuleId(moduleId);
 
             if (parentTopicList.isEmpty()) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
+            int totalItems = parentTopicList.size();
+            int totalPages = (int) Math.ceil((double) totalItems / limit);
+            int fromIndex = offset * limit;
+            int toIndex = Math.min(fromIndex + limit, totalItems);
+
+            if (offset >= totalPages && offset != 0) {
+                throw new IllegalArgumentException("No more topics available");
+            }
+            // Validate offset request
+            if (fromIndex >= totalItems) {
+                return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
+            }
+
+            List<Topic> paginatedList = parentTopicList.subList(fromIndex, toIndex);
 
             List<ParentTopicWrapper> wrapper = new ArrayList<>();
             for (Topic parentTopic : parentTopicList) {
@@ -110,7 +132,14 @@ public class TopicController {
                 wrapper.add(topicWrapper);
 
             }
-            return ResponseService.generateSuccessResponse("Topic Retrieved Successfully", wrapper, HttpStatus.OK);
+
+            // Construct paginated response
+            Map<String, Object> response = new HashMap<>();
+            response.put("topics", wrapper);
+            response.put("totalItems", totalItems);
+            response.put("totalPages", totalPages);
+            response.put("currentPage", offset);
+            return ResponseService.generateSuccessResponse("Topic Retrieved Successfully", response, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
@@ -180,14 +209,39 @@ public class TopicController {
     }
 
     @GetMapping("/get-all-topic-type")
-    public ResponseEntity<?> retrieveTopicTypes(HttpServletRequest request) {
+    public ResponseEntity<?> retrieveTopicTypes(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit,HttpServletRequest request) {
         try {
-
+            if (offset < 0) {
+                throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
+            }
+            if (limit <= 0) {
+                throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
+            }
             List<TopicType> topicTypeList = topicService.getAllTopicTypes();
             if (topicTypeList.isEmpty()) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            return ResponseService.generateSuccessResponse("Topic Type Retrieved Successfully", topicTypeList, HttpStatus.OK);
+            int totalItems = topicTypeList.size();
+            int totalPages = (int) Math.ceil((double) totalItems / limit);
+            int fromIndex = offset * limit;
+            int toIndex = Math.min(fromIndex + limit, totalItems);
+
+            if (offset >= totalPages && offset != 0) {
+                throw new IllegalArgumentException("No more topic types available");
+            }
+
+            if (fromIndex >= totalItems) {
+                return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
+            }
+
+            List<TopicType> topicTypes = topicTypeList.subList(fromIndex, toIndex);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("topicTypes", topicTypes);
+            response.put("totalItems", totalItems);
+            response.put("totalPages", totalPages);
+            response.put("currentPage", offset);
+            return ResponseService.generateSuccessResponse("Topic Type Retrieved Successfully", response, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);

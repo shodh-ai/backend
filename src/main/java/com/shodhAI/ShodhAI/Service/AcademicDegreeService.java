@@ -178,6 +178,37 @@ public class AcademicDegreeService {
     }
 
     @Transactional
+    public List<AcademicDegree> academicDegreeFilter(Long academicDegreeId, Long userId, Long roleId) throws Exception {
+        try {
+            StringBuilder jpql = new StringBuilder("SELECT DISTINCT s FROM AcademicDegree s ");
+
+            if (academicDegreeId != null) {
+                jpql.append("AND s.academicDegreeId = :academicDegreeId ");
+            }
+
+            // Add ORDER BY clause to sort by academicDegreeId
+            jpql.append("ORDER BY s.academicDegreeId ASC");
+
+            // Create the query
+            TypedQuery<AcademicDegree> query = entityManager.createQuery(jpql.toString(), AcademicDegree.class);
+
+            // Set parameters
+            if (academicDegreeId != null) {
+                query.setParameter("academicDegreeId", academicDegreeId);
+            }
+
+            return query.getResultList();
+
+        } catch (PersistenceException persistenceException) {
+            exceptionHandlingService.handleException(persistenceException);
+            throw new PersistenceException(persistenceException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
+
+    @Transactional
     public AcademicDegree updateAcademicDegree(Long degreeId, AcademicDegreeDto academicDegreeDto) throws Exception {
         AcademicDegree academicDegreeToUpdate = entityManager.find(AcademicDegree.class, degreeId);
         if (academicDegreeToUpdate == null) {
