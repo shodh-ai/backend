@@ -1,13 +1,13 @@
 package com.shodhAI.ShodhAI.Controller;
 
+import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Dto.ModuleDto;
 import com.shodhAI.ShodhAI.Entity.Module;
-import com.shodhAI.ShodhAI.Entity.Semester;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ModuleService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
-import jakarta.persistence.EntityManager;
+import com.shodhAI.ShodhAI.annotation.Authorize;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +42,7 @@ public class ModuleController {
     @Autowired
     ModuleService moduleService;
 
+    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping(value = "/add")
     public ResponseEntity<?> addModule(@RequestBody ModuleDto moduleDto) {
         try {

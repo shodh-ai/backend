@@ -249,14 +249,39 @@ public class ContentController {
     }
 
     @GetMapping("/get-all-content-type")
-    public ResponseEntity<?> retrieveContentTypes(HttpServletRequest request) {
+    public ResponseEntity<?> retrieveContentTypes(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit,HttpServletRequest request) {
         try {
-
+            if (offset < 0) {
+                throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
+            }
+            if (limit <= 0) {
+                throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
+            }
             List<ContentType> contentTypeList = contentService.getAllContentTypes();
             if (contentTypeList.isEmpty()) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            return ResponseService.generateSuccessResponse("Content Type Retrieved Successfully", contentTypeList, HttpStatus.OK);
+            int totalItems = contentTypeList.size();
+            int totalPages = (int) Math.ceil((double) totalItems / limit);
+            int fromIndex = offset * limit;
+            int toIndex = Math.min(fromIndex + limit, totalItems);
+
+            if (offset >= totalPages && offset != 0) {
+                throw new IllegalArgumentException("No more content types available");
+            }
+
+            if (fromIndex >= totalItems) {
+                return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
+            }
+
+            List<ContentType> contentTypes = contentTypeList.subList(fromIndex, toIndex);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("contentTypes", contentTypes);
+            response.put("totalItems", totalItems);
+            response.put("totalPages", totalPages);
+            response.put("currentPage", offset);
+            return ResponseService.generateSuccessResponse("Content Type Retrieved Successfully", response, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);

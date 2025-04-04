@@ -160,22 +160,53 @@ public class QuestionController {
     }
 
     @GetMapping(value = "/get-filter-question")
-    public ResponseEntity<?> getQuestion(@RequestParam(value = "topic_id", required = false) Long topicId,
+    public ResponseEntity<?> getQuestion(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit,@RequestParam(value = "topic_id", required = false) Long topicId,
                                          @RequestParam(value = "question_type_id", required = false) Long questionTypeId) {
 
         try {
-            if (topicId <= 0) {
-                throw new IllegalArgumentException("Topic Id cannot be <= 0");
+            if (offset < 0) {
+                throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
             }
-            Topic topic = topicService.getTopicById(topicId);
-
-            if (questionTypeId <= 0) {
-                throw new IllegalArgumentException("Question Type Id cannot be <= 0");
+            if (limit <= 0) {
+                throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
             }
-            QuestionType questionType = questionTypeService.getQuestionTypeById(questionTypeId);
+            Topic topic=null;
+            if(topicId!=null)
+            {
+                if (topicId <= 0) {
+                    throw new IllegalArgumentException("Topic Id cannot be <= 0");
+                }
+                 topic = topicService.getTopicById(topicId);
+            }
+            QuestionType questionType=null;
+            if(questionTypeId!=null)
+            {
+                if (questionTypeId <= 0) {
+                    throw new IllegalArgumentException("Question Type Id cannot be <= 0");
+                }
+                questionType = questionTypeService.getQuestionTypeById(questionTypeId);
+            }
 
+            assert questionType != null;
             List<Question> questions = questionService.questionFilter(topic, questionType.getQuestionTypeId());
-            return ResponseService.generateSuccessResponse("Questions fetched Successfully", questions, HttpStatus.OK);
+
+            int totalItems = questions.size();
+            int totalPages = (int) Math.ceil((double) totalItems / limit);
+            int fromIndex = offset * limit;
+            int toIndex = Math.min(fromIndex + limit, totalItems);
+
+            if (offset >= totalPages && offset != 0) {
+                throw new IllegalArgumentException("No more questions available");
+            }
+
+            List<Question> questionList = questions.subList(fromIndex, toIndex);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("questionList", questionList);
+            response.put("totalItems", totalItems);
+            response.put("totalPages", totalPages);
+            response.put("currentPage", offset);
+            return ResponseService.generateSuccessResponse("Questions fetched Successfully", response, HttpStatus.OK);
 
         } catch (DataIntegrityViolationException dataIntegrityViolationException) {
             exceptionHandlingService.handleException(dataIntegrityViolationException);

@@ -81,4 +81,8 @@ public class Constant {
 
     public static String GET_ALL_QUESTION_TYPE = "SELECT q FROM QuestionType q WHERE q.archived = 'N'";
     public static String GET_QUESTION_TYPE_BY_ID = "SELECT q FROM QuestionType q WHERE q.archived = 'N' AND q.questionTypeId = :questionTypeId";
+    public static final String BEARER_CONST= "Bearer ";
+
+    public static String SUPER_ADMIN_ROLE= "SUPER_ADMIN";
+    public static String ADMIN_ROLE= "ADMIN";
 }
