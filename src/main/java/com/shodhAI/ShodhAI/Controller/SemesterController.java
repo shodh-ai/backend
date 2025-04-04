@@ -1,11 +1,13 @@
 package com.shodhAI.ShodhAI.Controller;
 
+import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Dto.SemesterDto;
 import com.shodhAI.ShodhAI.Entity.Semester;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.SemesterService;
+import com.shodhAI.ShodhAI.annotation.Authorize;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,7 @@ public class SemesterController
     @Autowired
     JwtUtil jwtTokenUtil;
 
+    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping("/add")
     public ResponseEntity<?> createSemester(@RequestBody SemesterDto semesterDto) throws ParseException {
         try
@@ -103,6 +106,7 @@ public class SemesterController
         }
     }
 
+    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PatchMapping("/update/{semesterIdString}")
     public ResponseEntity<?> updateSemester(@RequestBody SemesterDto semesterDto, @PathVariable String semesterIdString)
     {
@@ -156,7 +160,6 @@ public class SemesterController
                 return ResponseService.generateSuccessResponse("No semesters found with the given criteria", new ArrayList<>(), HttpStatus.OK);
             }
 
-            // Pagination logic
             int totalItems = semesters.size();
             int totalPages = (int) Math.ceil((double) totalItems / limit);
             int fromIndex = offset * limit;
@@ -165,16 +168,15 @@ public class SemesterController
             if (offset >= totalPages && offset != 0) {
                 throw new IllegalArgumentException("No more semesters available");
             }
-            // Validate offset request
+
             if (fromIndex >= totalItems) {
                 return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
             }
 
-            List<Semester> paginatedList = semesters.subList(fromIndex, toIndex);
+            List<Semester> semesterList = semesters.subList(fromIndex, toIndex);
 
-            // Construct paginated response
             Map<String, Object> response = new HashMap<>();
-            response.put("semesters", semesters);
+            response.put("semesterList", semesterList);
             response.put("totalItems", totalItems);
             response.put("totalPages", totalPages);
             response.put("currentPage", offset);

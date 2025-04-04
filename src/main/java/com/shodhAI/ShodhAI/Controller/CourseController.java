@@ -1,13 +1,13 @@
 package com.shodhAI.ShodhAI.Controller;
 
+import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Dto.CourseDto;
-import com.shodhAI.ShodhAI.Dto.SessionFilterDto;
 import com.shodhAI.ShodhAI.Entity.Course;
-import com.shodhAI.ShodhAI.Entity.Session;
 import com.shodhAI.ShodhAI.Service.CourseService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.annotation.Authorize;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +43,7 @@ public class CourseController {
     @Autowired
     JwtUtil jwtTokenUtil;
 
+    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping(value = "/add")
     public ResponseEntity<?> addStudent(@RequestBody CourseDto courseDto) {
         try {
@@ -115,6 +116,7 @@ public class CourseController {
         }
     }
 
+    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PatchMapping("/update/{courseIdString}")
     public ResponseEntity<?> updateFaculty( @PathVariable String courseIdString,@RequestBody CourseDto courseDto) {
         try {
