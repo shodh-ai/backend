@@ -4,7 +4,6 @@ import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.RoleService;
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,9 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/role", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -30,13 +32,39 @@ public class RoleController {
 
     @Transactional
     @GetMapping("/get-all")
-    public ResponseEntity<?> retrieveAllRoles(HttpServletRequest request) {
+    public ResponseEntity<?> retrieveAllRoles(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit, HttpServletRequest request) {
         try {
+            if (offset < 0) {
+                throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
+            }
+            if (limit <= 0) {
+                throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
+            }
             List<Role> roleList = roleService.getAllRole();
             if (roleList.isEmpty()) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            return ResponseService.generateSuccessResponse("Role Retrieved Successfully", roleList, HttpStatus.OK);
+            int totalItems = roleList.size();
+            int totalPages = (int) Math.ceil((double) totalItems / limit);
+            int fromIndex = offset * limit;
+            int toIndex = Math.min(fromIndex + limit, totalItems);
+
+            if (offset >= totalPages && offset != 0) {
+                throw new IllegalArgumentException("No more roles available");
+            }
+
+            if (fromIndex >= totalItems) {
+                return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
+            }
+
+            List<Role> roles = roleList.subList(fromIndex, toIndex);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("roles", roles);
+            response.put("totalItems", totalItems);
+            response.put("totalPages", totalPages);
+            response.put("currentPage", offset);
+            return ResponseService.generateSuccessResponse("Role Retrieved Successfully", response, HttpStatus.OK);
 
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
