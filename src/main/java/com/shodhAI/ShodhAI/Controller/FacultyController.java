@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.shodhAI.ShodhAI.Dto.FacultyDto;
 import com.shodhAI.ShodhAI.Dto.FacultyWrapper;
+import com.shodhAI.ShodhAI.Dto.StudentWrapper;
 import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -112,8 +114,17 @@ public class FacultyController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<?> retrieveAllFaculty(HttpServletRequest request) {
+    public ResponseEntity<?> retrieveAllFaculty(HttpServletRequest request,
+                                                @RequestParam(defaultValue = "0") int offset,
+                                                @RequestParam(defaultValue = "10") int limit) {
         try {
+
+            if (offset < 0) {
+                throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
+            }
+            if (limit <= 0) {
+                throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
+            }
 
             List<Faculty> facultyList = facultyService.getAllFaculty();
             if (facultyList.isEmpty()) {
@@ -127,7 +138,31 @@ public class FacultyController {
 
                 facultyWrapperList.add(facultyWrapper);
             }
-            return ResponseService.generateSuccessResponse("Faculty Data Retrieved Successfully", facultyWrapperList, HttpStatus.OK);
+
+            int totalItems = facultyWrapperList.size();
+            int totalPages = (int) Math.ceil((double) totalItems / limit);
+            int fromIndex = offset * limit;
+            int toIndex = Math.min(fromIndex + limit, totalItems);
+
+            if (offset >= totalPages && offset != 0) {
+                throw new IllegalArgumentException("No more Academic Degree available");
+            }
+
+            // Validate offset request
+            if (fromIndex >= totalItems) {
+                return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
+            }
+
+            List<FacultyWrapper> paginatedList = facultyWrapperList.subList(fromIndex, toIndex);
+
+            // Construct paginated response
+            Map<String, Object> response = new HashMap<>();
+            response.put("faculty", paginatedList);
+            response.put("totalItems", totalItems);
+            response.put("totalPages", totalPages);
+            response.put("currentPage", offset);
+
+            return ResponseService.generateSuccessResponse("Faculty Data Retrieved Successfully", response, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
