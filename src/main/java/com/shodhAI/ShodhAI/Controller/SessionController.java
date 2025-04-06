@@ -116,7 +116,7 @@ public class SessionController {
 
             // Construct paginated response
             Map<String, Object> response = new HashMap<>();
-            response.put("session", sessions);
+            response.put("session", paginatedList);
             response.put("totalItems", totalItems);
             response.put("totalPages", totalPages);
             response.put("currentPage", offset);

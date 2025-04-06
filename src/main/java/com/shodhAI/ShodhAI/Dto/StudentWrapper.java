@@ -89,6 +89,7 @@ public class StudentWrapper {
 
     @JsonProperty("courses")
     private List<Course> courses= new ArrayList<>();
+
     @JsonProperty("memory")
     private Memory memory;
 
