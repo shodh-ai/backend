@@ -2,18 +2,17 @@ package com.shodhAI.ShodhAI.Controller;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.shodhAI.ShodhAI.Dto.FacultyDto;
-import com.shodhAI.ShodhAI.Dto.FacultyWrapper;
 import com.shodhAI.ShodhAI.Dto.LeaderboardWrapper;
 import com.shodhAI.ShodhAI.Dto.ScoreDto;
 import com.shodhAI.ShodhAI.Dto.StudentDto;
 import com.shodhAI.ShodhAI.Dto.StudentSemesterDto;
 import com.shodhAI.ShodhAI.Dto.StudentWrapper;
-import com.shodhAI.ShodhAI.Entity.Faculty;
+import com.shodhAI.ShodhAI.Entity.AcademicDegree;
 import com.shodhAI.ShodhAI.Entity.Student;
 import com.shodhAI.ShodhAI.Entity.StudentAssignment;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.S3StorageService;
 import com.shodhAI.ShodhAI.Service.StudentService;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,7 +32,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +50,9 @@ public class StudentController {
 
     @Autowired
     private Cloudinary cloudinary;
+
+    @Autowired
+    private S3StorageService s3StorageService;
 
     @PostMapping(value = "/add")
     public ResponseEntity<?> addStudent(HttpServletRequest request, @RequestBody StudentDto studentDto) {
@@ -91,9 +95,18 @@ public class StudentController {
             // Upload profile picture to Cloudinary
             Map<String, Object> uploadResult = cloudinary.uploader().upload(profilePicture.getBytes(), ObjectUtils.emptyMap());
 
-            // Set the profile picture URL in the student DTO
-            String profilePictureUrl = uploadResult.get("url").toString();
-            student.setProfilePictureUrl(profilePictureUrl);
+            // upload profile picture to S3
+            File tempFile = File.createTempFile("upload", profilePicture.getOriginalFilename());
+            profilePicture.transferTo(tempFile);
+
+            String fileUrl = s3StorageService.uploadFile(tempFile, profilePicture.getOriginalFilename());
+
+//            // Set the profile picture URL in the student DTO using Cloudinary.
+//            String profilePictureUrl = uploadResult.get("url").toString();
+//            student.setProfilePictureUrl(profilePictureUrl);
+
+            // In case of aws s3
+            student.setProfilePictureUrl(fileUrl);
 
             student = studentService.uploadProfilePicture(student);
 
@@ -118,8 +131,17 @@ public class StudentController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<?> retrieveAllStudent(HttpServletRequest request) {
+    public ResponseEntity<?> retrieveAllStudent(HttpServletRequest request,
+                                                @RequestParam(defaultValue = "0") int offset,
+                                                @RequestParam(defaultValue = "10") int limit) {
         try {
+
+            if (offset < 0) {
+                throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
+            }
+            if (limit <= 0) {
+                throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
+            }
 
             List<Student> studentList = studentService.getAllStudent();
             if (studentList.isEmpty()) {
@@ -133,7 +155,32 @@ public class StudentController {
 
                 studentWrapperList.add(studentWrapper);
             }
-            return ResponseService.generateSuccessResponse("Student Data Retrieved Successfully", studentWrapperList, HttpStatus.OK);
+
+            // Pagination logic
+            int totalItems = studentWrapperList.size();
+            int totalPages = (int) Math.ceil((double) totalItems / limit);
+            int fromIndex = offset * limit;
+            int toIndex = Math.min(fromIndex + limit, totalItems);
+
+            if (offset >= totalPages && offset != 0) {
+                throw new IllegalArgumentException("No more Academic Degree available");
+            }
+
+            // Validate offset request
+            if (fromIndex >= totalItems) {
+                return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
+            }
+
+            List<StudentWrapper> paginatedList = studentWrapperList.subList(fromIndex, toIndex);
+
+            // Construct paginated response
+            Map<String, Object> response = new HashMap<>();
+            response.put("student", paginatedList);
+            response.put("totalItems", totalItems);
+            response.put("totalPages", totalPages);
+            response.put("currentPage", offset);
+
+            return ResponseService.generateSuccessResponse("Student Data Retrieved Successfully", response, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
@@ -180,6 +227,9 @@ public class StudentController {
             semesterScoreDto.add(timeSpentScoreDto);
 
             studentSemesterDto.wrapDetails(semesterScoreDto);
+
+            // change the profile picture url with pre-signed one
+            student.setProfilePictureUrl(s3StorageService.getPresignedUrl(student.getProfilePictureUrl()).toString());
 
             StudentWrapper studentWrapper = new StudentWrapper();
             studentWrapper.wrapDetails(student);
