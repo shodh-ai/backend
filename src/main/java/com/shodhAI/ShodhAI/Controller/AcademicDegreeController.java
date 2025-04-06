@@ -1,7 +1,6 @@
 package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Component.Constant;
-import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Dto.AcademicDegreeDto;
 import com.shodhAI.ShodhAI.Entity.AcademicDegree;
 import com.shodhAI.ShodhAI.Service.AcademicDegreeService;
@@ -67,37 +66,47 @@ public class AcademicDegreeController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<?> retrieveAllAcademicDegree(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit,HttpServletRequest request) {
+    public ResponseEntity<?> retrieveAllAcademicDegree(HttpServletRequest request,
+                                                        @RequestParam(defaultValue = "0") int offset,
+                                                        @RequestParam(defaultValue = "10") int limit) {
         try {
+
             if (offset < 0) {
                 throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
             }
             if (limit <= 0) {
                 throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
             }
+
             List<AcademicDegree> academicDegreeList = academicDegreeService.getAllAcademicDegree();
             if (academicDegreeList.isEmpty()) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
 
+            // Pagination logic
             int totalItems = academicDegreeList.size();
             int totalPages = (int) Math.ceil((double) totalItems / limit);
             int fromIndex = offset * limit;
             int toIndex = Math.min(fromIndex + limit, totalItems);
 
             if (offset >= totalPages && offset != 0) {
-                throw new IllegalArgumentException("No more academic degrees available");
+                throw new IllegalArgumentException("No more Academic Degree available");
             }
+
+            // Validate offset request
             if (fromIndex >= totalItems) {
                 return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
             }
 
-            List<AcademicDegree> academicDegrees = academicDegreeList.subList(fromIndex, toIndex);
+            List<AcademicDegree> paginatedList = academicDegreeList.subList(fromIndex, toIndex);
+
+            // Construct paginated response
             Map<String, Object> response = new HashMap<>();
-            response.put("academicDegrees", academicDegrees);
+            response.put("academicDegree", paginatedList);
             response.put("totalItems", totalItems);
             response.put("totalPages", totalPages);
             response.put("currentPage", offset);
+
             return ResponseService.generateSuccessResponse("Academic Degree Retrieved Successfully", response, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {

@@ -115,7 +115,7 @@ public class ConversationController {
 
             // Construct paginated response
             Map<String, Object> response = new HashMap<>();
-            response.put("conversation", conversations);
+            response.put("conversation", paginatedList);
             response.put("totalItems", totalItems);
             response.put("totalPages", totalPages);
             response.put("currentPage", offset);

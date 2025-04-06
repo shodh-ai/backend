@@ -111,15 +111,16 @@ public class FacultyController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<?> retrieveAllFaculty(@RequestParam(defaultValue = "0") int offset,
-                                                @RequestParam(defaultValue = "10") int limit,
-                                                HttpServletRequest request) {
+    public ResponseEntity<?> retrieveAllFaculty(HttpServletRequest request,
+                                                @RequestParam(defaultValue = "0") int offset,
+                                                @RequestParam(defaultValue = "10") int limit) {
         try {
+
             if (offset < 0) {
                 throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
             }
             if (limit <= 0) {
-                throw new IllegalArgumentException("Limit for pagination cannot be zero or negative");
+                throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
             }
 
             List<Faculty> facultyList = facultyService.getAllFaculty();
@@ -131,6 +132,7 @@ public class FacultyController {
             for (Faculty faculty : facultyList) {
                 FacultyWrapper facultyWrapper = new FacultyWrapper();
                 facultyWrapper.wrapDetails(faculty);
+
                 facultyWrapperList.add(facultyWrapper);
             }
 
@@ -140,17 +142,19 @@ public class FacultyController {
             int toIndex = Math.min(fromIndex + limit, totalItems);
 
             if (offset >= totalPages && offset != 0) {
-                throw new IllegalArgumentException("No more faculties available");
+                throw new IllegalArgumentException("No more Academic Degree available");
             }
 
+            // Validate offset request
             if (fromIndex >= totalItems) {
                 return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
             }
 
-            List<FacultyWrapper> paginatedFacultyList = facultyWrapperList.subList(fromIndex, toIndex);
+            List<FacultyWrapper> paginatedList = facultyWrapperList.subList(fromIndex, toIndex);
 
+            // Construct paginated response
             Map<String, Object> response = new HashMap<>();
-            response.put("facultyList", paginatedFacultyList);
+            response.put("faculty", paginatedList);
             response.put("totalItems", totalItems);
             response.put("totalPages", totalPages);
             response.put("currentPage", offset);
@@ -168,7 +172,6 @@ public class FacultyController {
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     @GetMapping("/get-faculty-by-id/{facultyIdString}")
     public ResponseEntity<?> retrieveFacultyById(HttpServletRequest request, @PathVariable String facultyIdString) {
