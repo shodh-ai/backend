@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: shodhai-app:latest
+    image: shodhai-app:stable
     ports:
       - "8080:8080"
     networks:
@@ -29,7 +29,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: shodhAIpostgres
-      POSTGRES_DB: postgres
+      POSTGRES_DB: shodhai
     ports:
       - "5432:5432"
     networks:
