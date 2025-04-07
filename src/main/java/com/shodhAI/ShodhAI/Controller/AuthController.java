@@ -2,6 +2,7 @@ package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Component.ApiConstants;
 import com.shodhAI.ShodhAI.Component.Constant;
+import com.shodhAI.ShodhAI.Dto.ChangePasswordDto;
 import com.shodhAI.ShodhAI.Dto.ForgotPasswordDto;
 import com.shodhAI.ShodhAI.Dto.SignUpDto;
 import com.shodhAI.ShodhAI.Dto.VerifyOtpDto;
@@ -268,18 +269,14 @@ public class AuthController {
 
     @Transactional
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> verifyOtp(@RequestBody ForgotPasswordDto forgotPasswordDto, HttpSession session, HttpServletRequest request,
-                                       @RequestHeader(value = "Authorization") String authHeader) {
+    public ResponseEntity<?> verifyOtp(@RequestBody ForgotPasswordDto forgotPasswordDto, HttpSession session, HttpServletRequest request) {
         try {
 
             authenticationService.validateForgotPasswordDto(forgotPasswordDto);
-            String jwtToken = authHeader.substring(7);
-            Long roleId = jwtTokenUtil.extractRoleId(jwtToken);
-            Long userId = jwtTokenUtil.extractId(jwtToken);
-            Role role = roleService.getRoleById(roleId);
+            Role role = roleService.getRoleById(forgotPasswordDto.getRoleId());
             if (role.getRoleName().equals(Constant.ROLE_USER)) {
 
-                List<Student> students = studentService.filterStudents(null, userId, null);
+                List<Student> students = studentService.filterStudents(null, forgotPasswordDto.getUserId(), null);
                 if (students.isEmpty()) {
                     throw new IllegalArgumentException("Student does not exists with this studentId");
                 }
@@ -294,13 +291,65 @@ public class AuthController {
 
             } else if (role.getRoleName().equals(Constant.ROLE_FACULTY)) {
 
-                List<Faculty> faculties = facultyService.filterFaculties(null, userId, null);
+                List<Faculty> faculties = facultyService.filterFaculties(null, forgotPasswordDto.getUserId(), null);
                 if (faculties.isEmpty()) {
                     throw new IllegalArgumentException("Faculty does not exists with this userId");
                 }
 
                 Faculty faculty = faculties.get(0);
                 String hashedPassword = passwordEncoder.encode(forgotPasswordDto.getNewPassword());
+                faculty.setPassword(hashedPassword);
+                entityManager.merge(faculty);
+
+                return ResponseEntity.ok(faculty);
+
+            } else {
+                throw new IllegalArgumentException("Unable to recognize the role");
+            }
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return responseService.generateErrorResponse(ApiConstants.SOME_EXCEPTION_OCCURRED + exception.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Transactional
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDto changePasswordDto, HttpSession session, HttpServletRequest request,
+                                            @RequestHeader(value = "Authorization") String authHeader) {
+        try {
+
+            authenticationService.validateChangePasswordDto(changePasswordDto);
+            String jwtToken = authHeader.substring(7);
+            Long roleId = jwtTokenUtil.extractRoleId(jwtToken);
+            Long userId = jwtTokenUtil.extractId(jwtToken);
+            Role role = roleService.getRoleById(roleId);
+            if (role.getRoleName().equals(Constant.ROLE_USER)) {
+
+                List<Student> students = studentService.filterStudents(null, userId, null);
+                if (students.isEmpty()) {
+                    throw new IllegalArgumentException("Student does not exists with this studentId");
+                }
+
+                Student student = students.get(0);
+                // set new bcrypt password
+                String hashedPassword = passwordEncoder.encode(changePasswordDto.getNewPassword());
+                student.setPassword(hashedPassword);
+                entityManager.merge(student);
+
+                return ResponseEntity.ok(student);
+
+            } else if (role.getRoleName().equals(Constant.ROLE_FACULTY)) {
+
+                List<Faculty> faculties = facultyService.filterFaculties(null, userId, null);
+                if (faculties.isEmpty()) {
+                    throw new IllegalArgumentException("Faculty does not exists with this userId");
+                }
+
+                Faculty faculty = faculties.get(0);
+                String hashedPassword = passwordEncoder.encode(changePasswordDto.getNewPassword());
                 faculty.setPassword(hashedPassword);
                 entityManager.merge(faculty);
 
