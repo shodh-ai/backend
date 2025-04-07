@@ -1,12 +1,16 @@
 package com.shodhAI.ShodhAI.Configuration;
 
 import com.shodhAI.ShodhAI.Component.JwtAuthenticationFilter;
+import com.shodhAI.ShodhAI.Component.OAuth2AuthenticationSuccessHandler;
+import com.shodhAI.ShodhAI.Service.CustomOAuth2UserService;
+import com.shodhAI.ShodhAI.Service.OAuth2AuthenticationFailureHandler;
 import com.shodhAI.ShodhAI.Service.StudentService;
 import jakarta.servlet.Filter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,27 +31,36 @@ public class SecurityConfig {
 
     private final StudentService studentService;
 
-    public SecurityConfig(StudentService studentService) {
+    // Use @Lazy annotation to break the circular dependency
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+    private JwtAuthenticationEntryPoint point;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    // Inject dependencies via constructor with @Lazy annotation
+    public SecurityConfig(
+            StudentService studentService,
+            @Lazy CustomOAuth2UserService customOAuth2UserService,
+            @Lazy OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
+            @Lazy OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler) {
         this.studentService = studentService;
+        this.customOAuth2UserService = customOAuth2UserService;
+        this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
+        this.oAuth2AuthenticationFailureHandler = oAuth2AuthenticationFailureHandler;
     }
 
     @Autowired
-    private JwtAuthenticationEntryPoint point;
+    public void setJwtAuthenticationEntryPoint(JwtAuthenticationEntryPoint point) {
+        this.point = point;
+    }
 
-    /*@Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;*/
+    @Autowired
+    public void setJwtAuthenticationFilter(@Lazy JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
-    /*@Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/login", "/register").permitAll()  // Allow public access to login & register
-                        .anyRequest().authenticated()  // Require authentication for all other routes
-                )
-                .addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);  // Add JWT filter after the login route
 
-        return http.build();
-    }*/
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -58,12 +71,22 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth ->
                                 auth.requestMatchers("/content/get-all-content-type", "/upload").authenticated()
-                                        .requestMatchers("/auth/login-with-username-password", "/student/add", "/faculty/add", "/", "/auth/sign-up", "/auth/verify-otp", "/auth/forgot-password")
+                                        .requestMatchers("/auth/**", "/oauth2/**", "/auth/login-with-username-password",
+                                                "/student/add", "/faculty/add", "/", "/auth/sign-up",
+                                                "/auth/verify-otp", "/auth/forgot-password")
                                         .permitAll()
                                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(auth -> auth.baseUri("/oauth2/authorize"))
+                        .redirectionEndpoint(redirect -> redirect.baseUri("/oauth2/callback/*"))
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
+                        .failureHandler(oAuth2AuthenticationFailureHandler)
+                );
+
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -111,22 +134,21 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        // Instead of "*", specify the exact origins you want to allow
-        corsConfiguration.addAllowedOrigin("http://localhost:3000"); // Add your client URL here
-        corsConfiguration.addAllowedOrigin("https://release.shodhlab.ai"); // If needed for another origin
-
-        corsConfiguration.addAllowedMethod("*"); // Allow all methods (GET, POST, etc.)
-        corsConfiguration.addAllowedHeader("*"); // Allow all headers
-        corsConfiguration.setAllowCredentials(true); // Allow cookies/credentials if necessary
-        corsConfiguration.setMaxAge(3600L); // Cache preflight response for 1 hour
+        corsConfiguration.addAllowedOrigin("http://localhost:3000");
+        corsConfiguration.addAllowedOrigin("https://release.shodhlab.ai");
+        corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.addAllowedHeader("*");
+        corsConfiguration.setAllowedOrigins(corsConfiguration.getAllowedOrigins());
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfiguration); // Apply CORS configuration globally
+        source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
     }
 
     @Bean
-    public Filter jwtAuthenticationFilter() {
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter();
     }
 

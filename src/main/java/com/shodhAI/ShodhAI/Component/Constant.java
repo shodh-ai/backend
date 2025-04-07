@@ -8,6 +8,7 @@ public class Constant {
     public static final String ROLE_SUPER_ADMIN = "SUPER_ADMIN";
     public static final String ROLE_ADMIN = "ADMIN";
     public static final String ROLE_FACULTY = "FACULTY";
+    public static final String GET_ROLE_BY_NAME = "SELECT r FROM Role r WHERE r.roleName = :roleName";
 
     public static final String BEARER = "Bearer ";
     public static HttpServletRequest request = null;

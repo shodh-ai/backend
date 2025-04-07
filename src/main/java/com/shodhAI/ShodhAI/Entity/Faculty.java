@@ -67,6 +67,9 @@ public class Faculty {
     @JsonProperty("college_email")
     private String collegeEmail;
 
+    @Column(name = "auth_provider")
+    private String authProvider; // Values: NULL (for regular auth), "GOOGLE"
+
     @Email
     @NotNull
     @Column(name = "personal_email")
