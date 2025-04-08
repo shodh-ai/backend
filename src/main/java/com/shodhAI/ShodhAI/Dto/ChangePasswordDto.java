@@ -8,13 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ForgotPasswordDto {
-
-    @JsonProperty("user_id")
-    private Long userId;
-
-    @JsonProperty("role_id")
-    private Long roleId;
+public class ChangePasswordDto {
 
     @JsonProperty("new_password")
     private String newPassword;
