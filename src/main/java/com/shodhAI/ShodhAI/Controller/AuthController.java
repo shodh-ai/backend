@@ -400,9 +400,13 @@ public class AuthController {
             Map<String, String> result = new HashMap<>();
             result.put("authUrl", authUrl);
 
-            return ResponseEntity.ok(result);
+            return ResponseService.generateSuccessResponse("Login is successfully done",result, HttpStatus.OK);
 
-        } catch (Exception e) {
+        }catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e) {
             exceptionHandlingService.handleException(e);
             return responseService.generateErrorResponse(ApiConstants.SOME_EXCEPTION_OCCURRED + e.getMessage(), HttpStatus.BAD_REQUEST);
         }

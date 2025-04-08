@@ -67,9 +67,13 @@ public class RoleSelectionController {
                     .queryParam("state", session.getId())
                     .build().toUriString();
             
-            return ResponseEntity.ok(authorizationUrl);
+            return ResponseService.generateSuccessResponse("Url is generated for performing google authentication",authorizationUrl,HttpStatus.OK);
             
-        } catch (Exception e) {
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e) {
             exceptionHandlingService.handleException(e);
             return responseService.generateErrorResponse(ApiConstants.SOME_EXCEPTION_OCCURRED + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

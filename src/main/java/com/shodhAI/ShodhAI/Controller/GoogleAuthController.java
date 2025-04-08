@@ -88,12 +88,12 @@ public class GoogleAuthController {
                     // New user - auto-register them
                     Faculty faculty = googleAuthService.registerFacultyWithGoogle(email, role.getRoleId());
                     AuthController.ApiResponse response = authenticationService.facultyLoginResponse(faculty, role.getRoleId(), session, request);
-                    return ResponseEntity.ok(response);
+                    return ResponseService.generateSuccessResponse("Registration is done ",response,HttpStatus.OK);
                 } else {
                     // Returning user
                     Faculty faculty = faculties.get(0);
                     AuthController.ApiResponse response = authenticationService.facultyLoginResponse(faculty, role.getRoleId(), session, request);
-                    return ResponseEntity.ok(response);
+                    return ResponseService.generateSuccessResponse("Successfully login done",response,HttpStatus.OK);
                 }
             } else {
                 return responseService.generateErrorResponse("Unable to recognize the role", HttpStatus.BAD_REQUEST);
