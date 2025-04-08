@@ -58,7 +58,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth ->
                                 auth.requestMatchers("/content/get-all-content-type", "/upload").authenticated()
-                                        .requestMatchers("/auth/login-with-username-password", "/student/add", "/faculty/add", "/", "/auth/sign-up", "/auth/verify-otp", "/auth/forgot-password")
+                                        .requestMatchers("/auth/login-with-username-password", "/student/add", "/faculty/add", "/", "/auth/send-otp", "/auth/verify-otp", "/auth/forgot-password")
                                         .permitAll()
                                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))

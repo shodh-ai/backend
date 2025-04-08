@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ForgotPasswordDto {
 
-    @JsonProperty("user_id")
-    private Long userId;
+    @JsonProperty("email")
+    private String email;
 
     @JsonProperty("role_id")
     private Long roleId;
