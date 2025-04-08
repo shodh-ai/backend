@@ -400,7 +400,7 @@ public class AuthController {
             Map<String, String> result = new HashMap<>();
             result.put("authUrl", authUrl);
 
-            return ResponseService.generateSuccessResponse("Login is successfully done",result, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Auth url is generated for google authentication",result, HttpStatus.OK);
 
         }catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
