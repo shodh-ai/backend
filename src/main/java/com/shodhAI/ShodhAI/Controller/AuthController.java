@@ -3,7 +3,6 @@ package com.shodhAI.ShodhAI.Controller;
 import com.shodhAI.ShodhAI.Component.ApiConstants;
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.ChangePasswordDto;
-import com.shodhAI.ShodhAI.Dto.ForgotPasswordDto;
 import com.shodhAI.ShodhAI.Dto.SignUpDto;
 import com.shodhAI.ShodhAI.Dto.VerifyOtpDto;
 import com.shodhAI.ShodhAI.Entity.Faculty;
@@ -31,7 +30,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -79,7 +77,7 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @PostMapping("/login-with-password")
+    /*@PostMapping("/login-with-password")
     @ResponseBody
     public ResponseEntity<?> loginWithPassword(@RequestBody Map<String, Object> loginDetails, HttpSession session, HttpServletRequest request) {
         try {
@@ -89,7 +87,7 @@ public class AuthController {
 
 //            String mobileNumber = (String) loginDetails.get("mobileNumber");
             String username = (String) loginDetails.get("username");
-/*            if (mobileNumber != null) {
+*//*            if (mobileNumber != null) {
                 if (mobileNumber.startsWith("0"))
                     mobileNumber = mobileNumber.substring(1);
                 if (studentService.isValidMobileNumber(mobileNumber) && isNumeric(mobileNumber)) {
@@ -97,7 +95,7 @@ public class AuthController {
                 } else {
                     return responseService.generateErrorResponse(ApiConstants.INVALID_MOBILE_NUMBER, HttpStatus.BAD_REQUEST);
                 }
-            } else*/
+            } else*//*
             if (username != null) {
                 return loginWithUsername(loginDetails, session, request);
             } else {
@@ -109,7 +107,7 @@ public class AuthController {
             return responseService.generateErrorResponse(ApiConstants.SOME_EXCEPTION_OCCURRED + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
-    }
+    }*/
 
     // Login endpoint to authenticate user and return JWT token
     @PostMapping("/login-with-username-password")
@@ -120,11 +118,11 @@ public class AuthController {
                 return responseService.generateErrorResponse(ApiConstants.INVALID_DATA, HttpStatus.BAD_REQUEST);
             }
 
-            String username = (String) loginDetails.get("username");
+            String email = (String) loginDetails.get("email");
             String password = (String) loginDetails.get("password");
-            Long roleId = Long.parseLong(loginDetails.get("role").toString());
+            Long roleId = Long.parseLong(loginDetails.get("role_id").toString());
 
-            if (username == null || password == null || roleId == null) {
+            if (email == null || password == null || roleId == null) {
                 return responseService.generateErrorResponse("Username or Password or Role cannot be empty", HttpStatus.BAD_REQUEST);
             }
             if (studentService == null) {
@@ -136,7 +134,7 @@ public class AuthController {
 
             if (roleService.findRoleNameById(roleId).equals(Constant.ROLE_USER)) {
 
-                List<Student> students = studentService.filterStudents(null, null, username);
+                List<Student> students = studentService.filterStudents(null, null, email);
                 if (students.isEmpty()) {
                     return responseService.generateErrorResponse(ApiConstants.NO_RECORDS_FOUND, HttpStatus.NOT_FOUND);
                 }
@@ -147,7 +145,7 @@ public class AuthController {
                     String existingToken = student.getToken();
                     if (existingToken != null && jwtUtil.validateToken(existingToken, ipAddress, userAgent)) {
                         Map<String, Object> userDetails = new HashMap<>();
-                        userDetails.put("username", student.getUserName());
+                        userDetails.put("email", student.getPersonalEmail());
                         userDetails.put("mobile_number", student.getMobileNumber());
                         userDetails.put("student_id", student.getId());
                         ApiResponse response = new ApiResponse(existingToken, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
@@ -162,7 +160,7 @@ public class AuthController {
                 }
             } else if (roleService.findRoleNameById(roleId).equals(Constant.ROLE_FACULTY)) {
 
-                List<Faculty> faculties = facultyService.filterFaculties(null, null, username);
+                List<Faculty> faculties = facultyService.filterFaculties(null, null, email);
                 if (faculties.isEmpty()) {
                     return responseService.generateErrorResponse(ApiConstants.NO_RECORDS_FOUND, HttpStatus.NOT_FOUND);
                 }
@@ -173,7 +171,7 @@ public class AuthController {
                     String existingToken = faculty.getToken();
                     if (existingToken != null && jwtUtil.validateToken(existingToken, ipAddress, userAgent)) {
                         Map<String, Object> userDetails = new HashMap<>();
-                        userDetails.put("username", faculty.getUserName());
+                        userDetails.put("email", faculty.getPersonalEmail());
                         userDetails.put("mobile_number", faculty.getMobileNumber());
                         userDetails.put("faculty_id", faculty.getId());
                         ApiResponse response = new ApiResponse(existingToken, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
@@ -199,8 +197,8 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/sign-up")
-    public ResponseEntity<?> signUp(@RequestBody SignUpDto signUp) {
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sentOtp(@RequestBody SignUpDto signUp) {
         try {
 
             authenticationService.validateSignUp(signUp);
@@ -267,8 +265,7 @@ public class AuthController {
         }
     }
 
-    @Transactional
-    @PostMapping("/forgot-password")
+    /*@PostMapping("/forgot-password")
     public ResponseEntity<?> verifyOtp(@RequestBody ForgotPasswordDto forgotPasswordDto, HttpSession session, HttpServletRequest request) {
         try {
 
@@ -276,7 +273,7 @@ public class AuthController {
             Role role = roleService.getRoleById(forgotPasswordDto.getRoleId());
             if (role.getRoleName().equals(Constant.ROLE_USER)) {
 
-                List<Student> students = studentService.filterStudents(null, forgotPasswordDto.getUserId(), null);
+                List<Student> students = studentService.filterStudents(null, null, forgotPasswordDto.getEmail());
                 if (students.isEmpty()) {
                     throw new IllegalArgumentException("Student does not exists with this studentId");
                 }
@@ -291,7 +288,7 @@ public class AuthController {
 
             } else if (role.getRoleName().equals(Constant.ROLE_FACULTY)) {
 
-                List<Faculty> faculties = facultyService.filterFaculties(null, forgotPasswordDto.getUserId(), null);
+                List<Faculty> faculties = facultyService.filterFaculties(null, null, forgotPasswordDto.getEmail());
                 if (faculties.isEmpty()) {
                     throw new IllegalArgumentException("Faculty does not exists with this userId");
                 }
@@ -313,10 +310,10 @@ public class AuthController {
             exceptionHandlingService.handleException(exception);
             return responseService.generateErrorResponse(ApiConstants.SOME_EXCEPTION_OCCURRED + exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
-    }
+    }*/
 
     @Transactional
-    @PostMapping("/change-password")
+    @PostMapping("/forgot-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDto changePasswordDto, HttpSession session, HttpServletRequest request,
                                             @RequestHeader(value = "Authorization") String authHeader) {
         try {

@@ -96,8 +96,9 @@ public class AuthenticationService {
     public void validateForgotPasswordDto(ForgotPasswordDto forgotPasswordDto) throws Exception {
         try {
 
-            if(forgotPasswordDto.getUserId() == null || forgotPasswordDto.getUserId() <= 0) {
-                throw new IllegalArgumentException("User Id cannot be null or empty");
+            forgotPasswordDto.setEmail(forgotPasswordDto.getEmail().trim());
+            if (forgotPasswordDto.getEmail() == null || forgotPasswordDto.getEmail().isEmpty() || !forgotPasswordDto.getEmail().endsWith(".com")) {
+                throw new IllegalArgumentException("Email cannot be null or empty or having invalid format(***@**.com)");
             }
             if(forgotPasswordDto.getRoleId() == null || forgotPasswordDto.getRoleId() <= 0) {
                 throw new IllegalArgumentException("Role Id cannot be null or empty");
@@ -156,7 +157,6 @@ public class AuthenticationService {
 
                 List<Student> students = studentService.filterStudents(null, null, signUpDto.getEmail());
                 if (!students.isEmpty()) {
-//                    throw new IllegalArgumentException("Student already exists with this email");
                     Student student = students.get(0);
 
                     String otp = otpService.generateOtp(signUpDto.getEmail());
@@ -216,7 +216,7 @@ public class AuthenticationService {
             entityManager.persist(faculty);
             session.setAttribute(tokenKey, token);
             Map<String, Object> userDetails = new HashMap<>();
-            userDetails.put("username", faculty.getUserName());
+            userDetails.put("email", faculty.getPersonalEmail());
             userDetails.put("mobile_number", faculty.getMobileNumber());
             userDetails.put("faculty_id", faculty.getId());
             AuthController.ApiResponse response = new AuthController.ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
@@ -243,7 +243,7 @@ public class AuthenticationService {
             entityManager.persist(student);
             session.setAttribute(tokenKey, token);
             Map<String, Object> userDetails = new HashMap<>();
-            userDetails.put("username", student.getUserName());
+            userDetails.put("email", student.getPersonalEmail());
             userDetails.put("mobile_number", student.getMobileNumber());
             userDetails.put("student_id", student.getId());
             AuthController.ApiResponse response = new AuthController.ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
