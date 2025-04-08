@@ -361,42 +361,6 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/oauth2/google/signup")
-    public ResponseEntity<?> googleSignup(@RequestParam("roleId") Long roleId,
-                                          HttpServletRequest request,
-                                          HttpServletResponse response,
-                                          HttpSession session) {
-        try {
-            // Validate role
-            Role role = roleService.getRoleById(roleId);
-            if (role == null) {
-                return responseService.generateErrorResponse(ApiConstants.INVALID_ROLE, HttpStatus.BAD_REQUEST);
-            }
-
-            // Store role in session for later use
-            session.setAttribute("selected_role_id", roleId);
-            session.setAttribute("is_signup", true);
-
-            // Set redirect cookie
-            Cookie redirectUriCookie = new Cookie("redirect_uri", authorizedRedirectUri);
-            redirectUriCookie.setPath("/");
-            redirectUriCookie.setMaxAge(300); // 5 minutes
-            response.addCookie(redirectUriCookie);
-
-            // Generate OAuth2 authorization URL
-            String authUrl = "/oauth2/authorize/google";
-
-            Map<String, String> result = new HashMap<>();
-            result.put("authUrl", authUrl);
-
-            return ResponseEntity.ok(result);
-
-        } catch (Exception e) {
-            exceptionHandlingService.handleException(e);
-            return responseService.generateErrorResponse(ApiConstants.SOME_EXCEPTION_OCCURRED + e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
     public static class ApiResponse {
         private Data data;
         private int status_code;

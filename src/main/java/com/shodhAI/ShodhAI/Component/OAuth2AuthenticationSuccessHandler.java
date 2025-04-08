@@ -15,6 +15,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -27,34 +29,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        String targetUrl = determineTargetUrl(request, response, authentication);
-
-        if (response.isCommitted()) {
-            logger.debug("Response has already been committed. Unable to redirect to " + targetUrl);
-            return;
-        }
-
-        clearAuthenticationAttributes(request, response);
-        getRedirectStrategy().sendRedirect(request, response, targetUrl);
-    }
-
-    protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        Optional<String> redirectUri = getCookieValue(request, "redirect_uri");
-
-        String targetUrl = redirectUri.orElse(defaultRedirectUri);
-
         // Get user details from the authentication
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-
-        // Check if this was a signup or login
-        HttpSession session = request.getSession(false);
-        boolean isSignup = session != null && Boolean.TRUE.equals(session.getAttribute("is_signup"));
-
-        // Clear the signup attribute
-        if (session != null) {
-            session.removeAttribute("is_signup");
-            session.removeAttribute("selected_role_id");
-        }
 
         // Generate JWT token
         String token = jwtUtil.generateToken(userPrincipal.getId(),
@@ -62,28 +38,24 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 request.getRemoteAddr(),
                 request.getHeader("User-Agent"));
 
-        // Add parameters to the redirect URL
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(targetUrl)
+        // Get additional user information to pass in the URL
+        Long userId = userPrincipal.getId();
+        String email = userPrincipal.getEmail();
+        String name = userPrincipal.getName() != null ? userPrincipal.getName() : userId.toString();
+
+        // Build redirect URL with token and user info as query parameters
+        String targetUrl = UriComponentsBuilder.fromUriString(defaultRedirectUri)
                 .queryParam("token", token)
-                .queryParam("userId", userPrincipal.getId());
+                .queryParam("userId", userId)
+                .queryParam("email", URLEncoder.encode(email, StandardCharsets.UTF_8))
+                .queryParam("name", URLEncoder.encode(name, StandardCharsets.UTF_8))
+                .build().toUriString();
 
-        // Add email if available
-        if (userPrincipal.getEmail() != null) {
-            builder.queryParam("email", userPrincipal.getEmail());
-        }
+        // Clear cookies
+        clearAuthenticationAttributes(request, response);
 
-        // Add name if available
-        String name = (String) userPrincipal.getAttributes().get("name");
-        if (name != null) {
-            builder.queryParam("name", name);
-        }
-
-        // Add signup flag if applicable
-        if (isSignup) {
-            builder.queryParam("isNewUser", "true");
-        }
-
-        return builder.build().toUriString();
+        // Redirect to frontend
+        getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
     private Long getRoleId(String roleName) {
