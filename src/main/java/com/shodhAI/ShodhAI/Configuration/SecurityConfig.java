@@ -71,6 +71,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth ->
                                 auth.requestMatchers("/content/get-all-content-type", "/upload").authenticated()
+
                                         .requestMatchers("/auth/**", "/oauth2/**", "/auth/login-with-username-password",
                                                 "/student/add", "/faculty/add", "/", "/auth/sign-up",
                                                 "/auth/verify-otp", "/auth/forgot-password")

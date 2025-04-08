@@ -204,6 +204,21 @@
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
+
+			<!-- ✅ Spring Boot Plugin (to create executable jar) -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>3.2.3</version> <!-- Or your version -->
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<!--<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

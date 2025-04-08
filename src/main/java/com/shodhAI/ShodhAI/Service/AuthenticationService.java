@@ -3,6 +3,7 @@ package com.shodhAI.ShodhAI.Service;
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Controller.AuthController;
+import com.shodhAI.ShodhAI.Dto.ChangePasswordDto;
 import com.shodhAI.ShodhAI.Dto.FacultyDto;
 import com.shodhAI.ShodhAI.Dto.ForgotPasswordDto;
 import com.shodhAI.ShodhAI.Dto.SignUpDto;
@@ -95,6 +96,13 @@ public class AuthenticationService {
     public void validateForgotPasswordDto(ForgotPasswordDto forgotPasswordDto) throws Exception {
         try {
 
+            forgotPasswordDto.setEmail(forgotPasswordDto.getEmail().trim());
+            if (forgotPasswordDto.getEmail() == null || forgotPasswordDto.getEmail().isEmpty() || !forgotPasswordDto.getEmail().endsWith(".com")) {
+                throw new IllegalArgumentException("Email cannot be null or empty or having invalid format(***@**.com)");
+            }
+            if(forgotPasswordDto.getRoleId() == null || forgotPasswordDto.getRoleId() <= 0) {
+                throw new IllegalArgumentException("Role Id cannot be null or empty");
+            }
             if (forgotPasswordDto.getNewPassword() == null || forgotPasswordDto.getNewPassword().isEmpty()) {
                 throw new IllegalArgumentException("Password cannot be null or empty and length must be > 8");
             }
@@ -117,23 +125,55 @@ public class AuthenticationService {
         }
     }
 
+    public void validateChangePasswordDto(ChangePasswordDto changePasswordDto) throws Exception {
+        try {
+
+            if (changePasswordDto.getNewPassword() == null || changePasswordDto.getNewPassword().isEmpty()) {
+                throw new IllegalArgumentException("Password cannot be null or empty and length must be > 8");
+            }
+
+            /*if(changePasswordDto.getConfirmPassword() == null || changePasswordDto.getConfirmPassword().isEmpty() || changePasswordDto.getConfirmPassword().trim().length() <= 8) {
+                throw new IllegalArgumentException("Confirm Password cannot be null or empty and length must be > 8");
+            }
+            changePasswordDto.setConfirmPassword(changePasswordDto.getConfirmPassword().trim());*/
+
+            if (!changePasswordDto.getNewPassword().equals(changePasswordDto.getConfirmPassword())) {
+                throw new IllegalArgumentException("Passwords must match each other");
+            }
+
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
+
+    @Transactional
     public void saveSignUpDetails(Role role, SignUpDto signUpDto) {
         try {
             if (role.getRoleName().equals(Constant.ROLE_USER)) {
 
                 List<Student> students = studentService.filterStudents(null, null, signUpDto.getEmail());
                 if (!students.isEmpty()) {
-                    throw new IllegalArgumentException("Student already exists with this email");
+                    Student student = students.get(0);
+
+                    String otp = otpService.generateOtp(signUpDto.getEmail());
+                    emailService.sendOtp(signUpDto.getEmail(), otp);
+                    student.setOtp(otp);
+
+                    entityManager.merge(student);
+                } else {
+                    String otp = otpService.generateOtp(signUpDto.getEmail());
+                    emailService.sendOtp(signUpDto.getEmail(), otp);
+
+                    StudentDto studentDto = new StudentDto();
+
+                    Student student = new Student();
+                    studentDto.setPersonalEmail(signUpDto.getEmail());
+                    studentService.saveStudent(studentDto, otp, 'Y');
                 }
-
-                String otp = otpService.generateOtp(signUpDto.getEmail());
-                emailService.sendOtp(signUpDto.getEmail(), otp);
-
-                StudentDto studentDto = new StudentDto();
-
-                Student student = new Student();
-                studentDto.setPersonalEmail(signUpDto.getEmail());
-                studentService.saveStudent(studentDto, otp, 'Y');
 
             } else if (role.getRoleName().equals(Constant.ROLE_FACULTY)) {
 
@@ -176,7 +216,7 @@ public class AuthenticationService {
             entityManager.persist(faculty);
             session.setAttribute(tokenKey, token);
             Map<String, Object> userDetails = new HashMap<>();
-            userDetails.put("username", faculty.getUserName());
+            userDetails.put("email", faculty.getPersonalEmail());
             userDetails.put("mobile_number", faculty.getMobileNumber());
             userDetails.put("faculty_id", faculty.getId());
             AuthController.ApiResponse response = new AuthController.ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
@@ -203,7 +243,7 @@ public class AuthenticationService {
             entityManager.persist(student);
             session.setAttribute(tokenKey, token);
             Map<String, Object> userDetails = new HashMap<>();
-            userDetails.put("username", student.getUserName());
+            userDetails.put("email", student.getPersonalEmail());
             userDetails.put("mobile_number", student.getMobileNumber());
             userDetails.put("student_id", student.getId());
             AuthController.ApiResponse response = new AuthController.ApiResponse(token, userDetails, HttpStatus.OK.value(), HttpStatus.OK.name(), "User has been Logged in Successfully");
