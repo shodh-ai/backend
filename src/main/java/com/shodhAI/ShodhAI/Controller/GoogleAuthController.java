@@ -74,12 +74,12 @@ public class GoogleAuthController {
                     // New user - auto-register them
                     Student student = googleAuthService.registerStudentWithGoogle(email, role.getRoleId());
                     AuthController.ApiResponse response = authenticationService.studentLoginResponse(student, role.getRoleId(), session, request);
-                    return ResponseEntity.ok(response);
+                    return ResponseService.generateSuccessResponse("Student Registration is done", response,HttpStatus.OK);
                 } else {
                     // Returning user
                     Student student = students.get(0);
                     AuthController.ApiResponse response = authenticationService.studentLoginResponse(student, role.getRoleId(), session, request);
-                    return ResponseEntity.ok(response);
+                    return ResponseService.generateSuccessResponse("Login is successfully done for the student", response,HttpStatus.OK);
                 }
             } else if (role.getRoleName().equals(Constant.ROLE_FACULTY)) {
                 List<Faculty> faculties = facultyService.filterFaculties(null, null, email);
@@ -88,12 +88,12 @@ public class GoogleAuthController {
                     // New user - auto-register them
                     Faculty faculty = googleAuthService.registerFacultyWithGoogle(email, role.getRoleId());
                     AuthController.ApiResponse response = authenticationService.facultyLoginResponse(faculty, role.getRoleId(), session, request);
-                    return ResponseService.generateSuccessResponse("Registration is done ",response,HttpStatus.OK);
+                    return ResponseService.generateSuccessResponse("Faculty Registration is done ",response,HttpStatus.OK);
                 } else {
                     // Returning user
                     Faculty faculty = faculties.get(0);
                     AuthController.ApiResponse response = authenticationService.facultyLoginResponse(faculty, role.getRoleId(), session, request);
-                    return ResponseService.generateSuccessResponse("Successfully login done",response,HttpStatus.OK);
+                    return ResponseService.generateSuccessResponse("Login is successfully done for the faculty",response,HttpStatus.OK);
                 }
             } else {
                 return responseService.generateErrorResponse("Unable to recognize the role", HttpStatus.BAD_REQUEST);
