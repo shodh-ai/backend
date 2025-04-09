@@ -209,4 +209,8 @@ public class Student {
     @JsonProperty("student_assignments")
     private List<StudentAssignment> studentAssignments = new ArrayList<>();
 
+    @Column(name = "auth_provider")
+    private String authProvider;
+
+
 }
