@@ -33,6 +33,19 @@ public class RoleService {
     }
 
     @Transactional
+    public Role getRoleByName(String roleName) throws Exception {
+        try {
+            TypedQuery<Role> query = entityManager.createQuery(Constant.GET_ROLE_BY_NAME, Role.class);
+            query.setParameter("roleName", roleName);
+            return query.getResultStream().findFirst().orElse(null);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception);
+        }
+    }
+
+
+    @Transactional
     public Role getRoleById(Long roleId) throws Exception {
         try {
 
