@@ -30,7 +30,7 @@ public class AuthorizeAspect {
     private RoleService roleService;
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String BEARER_PREFIX = Constant.BEARER_CONST;;
+    private static final String BEARER_PREFIX = Constant.BEARER;
     private static final int BEARER_PREFIX_LENGTH = BEARER_PREFIX.length();
 
     // Pointcut to match methods annotated with @Authorize
