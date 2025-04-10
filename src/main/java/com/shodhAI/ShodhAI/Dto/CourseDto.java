@@ -49,4 +49,8 @@ public class CourseDto {
 
     @JsonProperty("course_semester_degree_associations")
     private List<CourseSemesterDegreeDto> courseSemesterDegreeAssociations;
+
+    @JsonProperty("academic_degree_id")
+    private Long academicDegreeId;
+
 }
