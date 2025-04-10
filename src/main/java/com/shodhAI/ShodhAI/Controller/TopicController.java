@@ -95,7 +95,7 @@ public class TopicController {
     @GetMapping("/get-all")
     public ResponseEntity<?> retrieveTableOfTopics(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit,HttpServletRequest request,
                                                    @RequestParam(value = "courseId", required = false) Long courseId,
-                                                   @RequestParam("moduleId") Long moduleId) {
+                                                   @RequestParam(value = "moduleId", required = false) Long moduleId) {
         try {
             if (offset < 0) {
                 throw new IllegalArgumentException("Offset for pagination cannot be a negative number");

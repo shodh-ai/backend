@@ -94,8 +94,8 @@ public class CommandLineService implements CommandLineRunner {
             Date currentDate = new Date();
 
             entityManager.merge(new DoubtLevel(1L, "BASIC", 'N', currentDate, currentDate));
-            entityManager.merge(new ContentType(2L, "MEDIATE", 'N', currentDate, currentDate));
-            entityManager.merge(new ContentType(3L, "ADVANCED", 'N', currentDate, currentDate));
+            entityManager.merge(new DoubtLevel(2L, "MEDIATE", 'N', currentDate, currentDate));
+            entityManager.merge(new DoubtLevel(3L, "ADVANCED", 'N', currentDate, currentDate));
         }
 
         if (entityManager.createQuery("SELECT COUNT(p) FROM PriorityLevel p", Long.class).getSingleResult() == 0) {
@@ -489,7 +489,6 @@ public class CommandLineService implements CommandLineRunner {
             module72.setCourse(courses.get(24L));
             entityManager.merge(module72);
         }
-
 
     }
 }
