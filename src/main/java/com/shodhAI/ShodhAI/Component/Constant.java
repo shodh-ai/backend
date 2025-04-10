@@ -83,6 +83,6 @@ public class Constant {
     public static String GET_QUESTION_TYPE_BY_ID = "SELECT q FROM QuestionType q WHERE q.archived = 'N' AND q.questionTypeId = :questionTypeId";
 
 
-    public static String GET_INSTITUTE_BY_ID = "SELECT i FROM Institute i WHERE i.instituteId = :instituteId";
+    public static String GET_INSTITUTE_BY_ID = "SELECT i FROM Institute i WHERE i.instituteId = :instituteId AND i.archived = 'N'";
 
 }
