@@ -111,17 +111,18 @@ public class ModuleService {
     @Transactional
     public List<Module> moduleFilter(Long moduleId, Long userId, Long roleId, Long courseId, Long academicDegreeId) throws Exception {
         try {
-            StringBuilder jpql = new StringBuilder("SELECT DISTINCT s FROM Module s JOIN s.course.courseSemesterDegrees csd WHERE 1=1 ");
 
+//            StringBuilder jpql = new StringBuilder("SELECT DISTINCT s FROM Module s JOIN s.course.courseSemesterDegrees csd WHERE 1=1 ");
+            StringBuilder jpql = new StringBuilder("SELECT DISTINCT m FROM Module m WHERE 1=1 ");
             Map<String, Object> params = new HashMap<>();
 
             if (moduleId != null) {
-                jpql.append("AND s.moduleId = :moduleId ");
+                jpql.append("AND m.moduleId = :moduleId ");
                 params.put("moduleId", moduleId);
             }
 
             if (courseId != null) {
-                jpql.append("AND s.course.courseId = :courseId ");
+                jpql.append("AND m.course.courseId = :courseId ");
                 params.put("courseId", courseId);
             }
 
@@ -130,7 +131,7 @@ public class ModuleService {
                 params.put("academicDegreeId", academicDegreeId);
             }
 
-            jpql.append("AND s.archived = 'N' ORDER BY s.moduleId ASC");
+            jpql.append("AND m.archived = 'N'");
 
             TypedQuery<Module> query = entityManager.createQuery(jpql.toString(), Module.class);
 
