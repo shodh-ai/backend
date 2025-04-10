@@ -62,7 +62,7 @@ public class TopicController {
     @Autowired
     ConversationService conversationService;
 
-    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
+//    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping(value = "/add")
     public ResponseEntity<?> addTopic(@RequestBody TopicDto topicDto) {
         try {
