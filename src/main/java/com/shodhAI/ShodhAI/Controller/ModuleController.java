@@ -10,6 +10,7 @@ import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.annotation.Authorize;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "/module", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 public class ModuleController {
@@ -117,7 +119,7 @@ public class ModuleController {
             Long userId = jwtTokenUtil.extractId(jwtToken);
 
             List<Module> modules = moduleService.moduleFilter(moduleId, userId, roleId, courseId, academicDegreeId);
-
+            log.info("Course Id is: " + courseId);
             if (modules.isEmpty()) {
                 return ResponseService.generateSuccessResponse("No modules found with the given criteria", new ArrayList<>(), HttpStatus.OK);
             }

@@ -80,6 +80,7 @@ public class Module {
     @JoinColumn(name = "course_id")
     @JsonProperty("course")
     private Course course;
+
     public Module(Long moduleId, String moduleTitle, String moduleDescription, @NonNull Character archived, Date createdDate, String moduleDuration) {
         this.moduleId = moduleId;
         this.moduleTitle = moduleTitle;
