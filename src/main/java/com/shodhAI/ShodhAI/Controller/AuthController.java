@@ -18,18 +18,24 @@ import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.RoleService;
 import com.shodhAI.ShodhAI.Service.StudentService;
 import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -76,6 +82,9 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Value("${app.oauth2.authorized-redirect-uri}")
+    public String authorizedRedirectUri;
 
     /*@PostMapping("/login-with-password")
     @ResponseBody
@@ -364,6 +373,45 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/oauth2/google/login")
+    public ResponseEntity<?> googleLogin(@RequestParam("roleId") Long roleId,
+                                         HttpServletRequest request,
+                                         HttpServletResponse response,
+                                         HttpSession session) {
+        try {
+            // Validate role
+            Role role = roleService.getRoleById(roleId);
+            if (role == null) {
+                return responseService.generateErrorResponse(ApiConstants.INVALID_ROLE, HttpStatus.BAD_REQUEST);
+            }
+
+            // Store role in session for later use
+            session.setAttribute("selected_role_id", roleId);
+
+            // Set redirect cookie
+            Cookie redirectUriCookie = new Cookie("redirect_uri", authorizedRedirectUri);
+            redirectUriCookie.setPath("/");
+            redirectUriCookie.setMaxAge(300); // 5 minutes
+            response.addCookie(redirectUriCookie);
+
+            // Generate OAuth2 authorization URL
+            String authUrl = "/oauth2/authorize/google";
+
+            Map<String, String> result = new HashMap<>();
+            result.put("authUrl", authUrl);
+
+            return ResponseService.generateSuccessResponse("Auth url is generated for google authentication",result, HttpStatus.OK);
+
+        }catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e) {
+            exceptionHandlingService.handleException(e);
+            return responseService.generateErrorResponse(ApiConstants.SOME_EXCEPTION_OCCURRED + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     public static class ApiResponse {
         private Data data;
         private int status_code;
@@ -412,5 +460,7 @@ public class AuthController {
             }
         }
     }
+
+
 
 }
