@@ -442,14 +442,11 @@ public class CourseService {
             Long courseId,
             Long userId,
             Long roleId,
-            Long semesterId,
             Long degreeId
     ) throws Exception {
         try {
             StringBuilder jpql = new StringBuilder(
-                    "SELECT DISTINCT c FROM Course c " +
-                            "JOIN c.courseSemesterDegrees csd " +
-                            "WHERE 1=1 "
+                    "SELECT DISTINCT c FROM Course c WHERE 1=1 "
             );
 
             // Prepare parameters map
@@ -461,13 +458,8 @@ public class CourseService {
                 params.put("courseId", courseId);
             }
 
-            if (semesterId != null) {
-                jpql.append("AND csd.semester.semesterId = :semesterId ");
-                params.put("semesterId", semesterId);
-            }
-
             if (degreeId != null) {
-                jpql.append("AND csd.academicDegree.degreeId = :degreeId ");
+                jpql.append("AND c.academicDegree.degreeId = :degreeId ");
                 params.put("degreeId", degreeId);
             }
 
