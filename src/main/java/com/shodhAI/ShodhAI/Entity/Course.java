@@ -128,6 +128,10 @@ public class Course {
     @JsonIgnore
     private List<CourseSemesterDegree> courseSemesterDegrees = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "academic_degree_id")
+    @JsonProperty("academic_degree")
+    private AcademicDegree academicDegree;
 
     public Course(Long courseId, String courseTitle, String courseDescription, @NonNull Character archived, Date createdDate, String courseDuration, Date startDate, Date endDate) {
         this.courseId = courseId;
