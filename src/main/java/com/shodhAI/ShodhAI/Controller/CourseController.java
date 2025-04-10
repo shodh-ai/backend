@@ -43,9 +43,9 @@ public class CourseController {
     @Autowired
     JwtUtil jwtTokenUtil;
 
-    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
+//    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping(value = "/add")
-    public ResponseEntity<?> addStudent(@RequestBody CourseDto courseDto) {
+    public ResponseEntity<?> addCourse(@RequestBody CourseDto courseDto) {
         try {
 
             courseService.validateCourse(courseDto);

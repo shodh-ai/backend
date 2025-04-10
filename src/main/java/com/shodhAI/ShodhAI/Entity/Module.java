@@ -27,6 +27,7 @@ import java.util.Date;
 public class Module {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "module_id")
     private Long moduleId;
 
