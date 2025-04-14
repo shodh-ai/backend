@@ -267,4 +267,22 @@ public class AcademicDegreeService {
         }
     }
 
+    @Transactional
+    public AcademicDegree deleteAcademicDegreeById(Long academicDegreeId) throws Exception {
+        try {
+            AcademicDegree academicDegreeToDelete = entityManager.find(AcademicDegree.class, academicDegreeId);
+            if (academicDegreeToDelete == null)
+            {
+                throw new IllegalArgumentException("Academic Degree with id " + academicDegreeId + " not found");
+            }
+            academicDegreeToDelete.setArchived('Y');
+            entityManager.merge(academicDegreeToDelete);
+            return academicDegreeToDelete;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        } catch (Exception e) {
+           throw new Exception(e.getMessage());
+        }
+    }
+
 }

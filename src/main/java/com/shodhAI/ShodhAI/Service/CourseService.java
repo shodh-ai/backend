@@ -460,20 +460,21 @@ public class CourseService {
     ) throws Exception {
         try {
             StringBuilder jpql = new StringBuilder(
-                    "SELECT DISTINCT c FROM Course c WHERE 1=1 "
+                    "SELECT DISTINCT c FROM Course c " +
+                            "LEFT JOIN c.courseSemesterDegrees csd " +
+                            "LEFT JOIN csd.academicDegree ad " +
+                            "WHERE c.archived = 'N' "
             );
 
-            // Prepare parameters map
             Map<String, Object> params = new HashMap<>();
 
-            // Add filters based on input parameters
             if (courseId != null) {
                 jpql.append("AND c.courseId = :courseId ");
                 params.put("courseId", courseId);
             }
 
             if (degreeId != null) {
-                jpql.append("AND c.academicDegree.degreeId = :degreeId ");
+                jpql.append("AND ad.archived = 'N' AND ad.degreeId = :degreeId ");
                 params.put("degreeId", degreeId);
             }
 
@@ -527,6 +528,24 @@ public class CourseService {
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             throw new Exception("SOMETHING WENT WRONG: " + exception.getMessage());
+        }
+    }
+
+    @Transactional
+    public Course deleteCourseById(Long courseId) throws Exception {
+        try {
+            Course courseToDelete = entityManager.find(Course.class, courseId);
+            if (courseToDelete == null)
+            {
+                throw new IllegalArgumentException("Course with id " + courseId + " not found");
+            }
+            courseToDelete.setArchived('Y');
+            entityManager.merge(courseToDelete);
+            return courseToDelete;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
         }
     }
 

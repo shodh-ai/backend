@@ -13,6 +13,7 @@ import jakarta.persistence.FetchType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.util.List;
 
@@ -36,6 +37,11 @@ public class  DeliveryStatus {
     @Column(name = "description")
     @JsonProperty("description")
     private String description;
+
+    @NonNull
+    @Column(name = "archived")
+    @JsonProperty("archived")
+    private Character archived = 'N';
 
     @JsonIgnore
     @OneToMany(mappedBy = "deliveryStatus", fetch = FetchType.LAZY)
