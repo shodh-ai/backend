@@ -58,6 +58,9 @@ public class Constant {
     public static String GET_ALL_CONTENT_TYPE = "SELECT c FROM ContentType c WHERE c.archived = 'N'";
     public static String GET_CONTENT_TYPE_BY_ID = "SELECT c FROM ContentType c WHERE c.archived = 'N' AND c.contentTypeId = :contentTypeId";
 
+    public static String GET_NOTIFICATION_TYPE_BY_ID = "SELECT c FROM NotificationType c WHERE c.archived = 'N' AND c.id = :notificationTypeId";
+    public static String GET_DELIVERY_STATUS_BY_ID = "SELECT c FROM DeliveryStatus c WHERE c.archived = 'N' AND c.id = :deliveryStatusId";
+
     public static String GET_ALL_COURSES = "SELECT c FROM Course c WHERE c.archived = 'N'";
     public static String GET_COURSE_BY_ID = "SELECT c FROM Course c WHERE c.courseId = :courseId";
 

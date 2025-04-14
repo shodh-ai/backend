@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.util.List;
 
@@ -29,6 +30,11 @@ public class NotificationType {
     @Column(name = "description")
     @JsonProperty("description")
     private String description;
+
+    @NonNull
+    @Column(name = "archived")
+    @JsonProperty("archived")
+    private Character archived = 'N';
 
     @JsonIgnore
     @ManyToMany(mappedBy = "notificationTypes")

@@ -1,8 +1,8 @@
 package com.shodhAI.ShodhAI.Controller;
 
-import com.shodhAI.ShodhAI.Entity.FileType;
+import com.shodhAI.ShodhAI.Entity.QuestionType;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
-import com.shodhAI.ShodhAI.Service.FileTypeService;
+import com.shodhAI.ShodhAI.Service.QuestionTypeService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,21 +26,21 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/file-type", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-public class FileTypeController {
+@RequestMapping(value = "/question-type", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+public class QuestionTypeController {
 
     @Autowired
     EntityManager entityManager;
 
     @Autowired
-    FileTypeService fileTypeService;
+    QuestionTypeService questionTypeService;
 
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
     @Transactional
     @GetMapping("/get-all")
-    public ResponseEntity<?> retrieveAllFileType(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit, HttpServletRequest request) {
+    public ResponseEntity<?> retrieveAllQuestionType(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit, HttpServletRequest request) {
         try {
             if (offset < 0) {
                 throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
@@ -48,31 +48,31 @@ public class FileTypeController {
             if (limit <= 0) {
                 throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
             }
-            List<FileType> fileTypeList = fileTypeService.getAllFileType();
-            if (fileTypeList.isEmpty()) {
+            List<QuestionType> questionTypeList = questionTypeService.getAllQuestionTypes()                                           ;
+            if (questionTypeList.isEmpty()) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            int totalItems = fileTypeList.size();
+            int totalItems = questionTypeList.size();
             int totalPages = (int) Math.ceil((double) totalItems / limit);
             int fromIndex = offset * limit;
             int toIndex = Math.min(fromIndex + limit, totalItems);
 
             if (offset >= totalPages && offset != 0) {
-                throw new IllegalArgumentException("No more file types available");
+                throw new IllegalArgumentException("No more question types available");
             }
 
             if (fromIndex >= totalItems) {
                 return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
             }
 
-            List<FileType> fileTypes = fileTypeList.subList(fromIndex, toIndex);
+            List<QuestionType> questionTypes = questionTypeList.subList(fromIndex, toIndex);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("fileTypes", fileTypes);
+            response.put("questionTypes", questionTypes);
             response.put("totalItems", totalItems);
             response.put("totalPages", totalPages);
             response.put("currentPage", offset);
-            return ResponseService.generateSuccessResponse("File Type Retrieved Successfully", response, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Question Type Retrieved Successfully", response, HttpStatus.OK);
 
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
@@ -81,16 +81,16 @@ public class FileTypeController {
     }
 
     @Transactional
-    @GetMapping("/get-file-type-by-id/{fileTypeIdString}")
-    public ResponseEntity<?> retrieveFileTypeById(HttpServletRequest request, @PathVariable String fileTypeIdString) {
+    @GetMapping("/get-question-type-by-id/{questionTypeIdString}")
+    public ResponseEntity<?> retrieveQuestionTypeById(HttpServletRequest request, @PathVariable String questionTypeIdString) {
         try {
 
-            Long genderId = Long.parseLong(fileTypeIdString);
-            FileType fileType = fileTypeService.getFileTypeById(genderId);
-            if (fileType == null) {
+            Long genderId = Long.parseLong(questionTypeIdString);
+            QuestionType questionType = questionTypeService.getQuestionTypeById(genderId);
+            if (questionType == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            return ResponseService.generateSuccessResponse("File Type Retrieved Successfully", fileType, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Question Type Retrieved Successfully", questionType, HttpStatus.OK);
 
         } catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
@@ -105,12 +105,12 @@ public class FileTypeController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addFileType(@RequestBody FileType fileType)
+    public ResponseEntity<?> addQuestionType(@RequestBody QuestionType questionType)
     {
         try
         {
-            FileType fileTypeToSave=fileTypeService.addFileType(fileType);
-            return ResponseService.generateSuccessResponse("File type is successfully added",fileTypeToSave, HttpStatus.CREATED);
+            QuestionType questionTypeToSave=questionTypeService.addQuestionType(questionType);
+            return ResponseService.generateSuccessResponse("Question type is successfully added",questionTypeToSave, HttpStatus.CREATED);
         }
         catch (IllegalArgumentException illegalArgumentException)
         {
@@ -123,18 +123,18 @@ public class FileTypeController {
         }
     }
 
-    @DeleteMapping("/delete/{fileTypeIdString}")
-    public ResponseEntity<?> deleteFileTpe (@PathVariable String fileTypeIdString)
+    @DeleteMapping("/delete/{questionTypeIdString}")
+    public ResponseEntity<?> deleteQuestionTpe (@PathVariable String questionTypeIdString)
     {
         try
         {
-            Long fileTypeId = Long.parseLong(fileTypeIdString);
-            FileType fileType = fileTypeService.getFileTypeById(fileTypeId);
-            if (fileType == null) {
+            Long questionTypeId = Long.parseLong(questionTypeIdString);
+            QuestionType questionType = questionTypeService.getQuestionTypeById(questionTypeId);
+            if (questionType == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            FileType deletedFileType =fileTypeService.deleteFileTypeById(fileTypeId);
-            return ResponseService.generateSuccessResponse("File type is archived successfully",deletedFileType ,HttpStatus.OK);
+            QuestionType deletedQuestionType =questionTypeService.deleteQuestionTypeById(questionTypeId);
+            return ResponseService.generateSuccessResponse("Question type is archived successfully",deletedQuestionType ,HttpStatus.OK);
         }
         catch (IllegalArgumentException illegalArgumentException)
         {
@@ -147,8 +147,8 @@ public class FileTypeController {
         }
     }
 
-    @GetMapping("/get-filter-file-types")
-    public ResponseEntity<?> getFilterFileTypes(
+    @GetMapping("/get-filter-question-types")
+    public ResponseEntity<?> getFilterQuestionTypes(
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int limit) {
 
@@ -160,35 +160,35 @@ public class FileTypeController {
                 throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
             }
 
-            List<FileType> fileTypes = fileTypeService.fileTypeFilter();
+            List<QuestionType> questionTypes = questionTypeService.questionTypeFilter();
 
-            if (fileTypes.isEmpty()) {
-                return ResponseService.generateSuccessResponse("No file types found", new ArrayList<>(), HttpStatus.OK);
+            if (questionTypes.isEmpty()) {
+                return ResponseService.generateSuccessResponse("No question types found", new ArrayList<>(), HttpStatus.OK);
             }
 
             // Pagination logic
-            int totalItems = fileTypes.size();
+            int totalItems = questionTypes.size();
             int totalPages = (int) Math.ceil((double) totalItems / limit);
             int fromIndex = offset * limit;
             int toIndex = Math.min(fromIndex + limit, totalItems);
 
             if (offset >= totalPages && offset != 0) {
-                throw new IllegalArgumentException("No more file types available");
+                throw new IllegalArgumentException("No more question types available");
             }
             if (fromIndex >= totalItems) {
                 return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
             }
 
-            List<FileType> paginatedList = fileTypes.subList(fromIndex, toIndex);
+            List<QuestionType> paginatedList = questionTypes.subList(fromIndex, toIndex);
 
             // Construct response
             Map<String, Object> response = new HashMap<>();
-            response.put("fileTypes", paginatedList);
+            response.put("questionTypes", paginatedList);
             response.put("totalItems", totalItems);
             response.put("totalPages", totalPages);
             response.put("currentPage", offset);
 
-            return ResponseService.generateSuccessResponse("File Types Retrieved Successfully", response, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Question Types Retrieved Successfully", response, HttpStatus.OK);
 
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);

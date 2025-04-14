@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -97,6 +98,30 @@ public class PriorityLevelController {
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/delete/{priorityLevelIdString}")
+    public ResponseEntity<?> deleteFileTpe (@PathVariable String priorityLevelIdString)
+    {
+        try
+        {
+            Long priorityLevelId = Long.parseLong(priorityLevelIdString);
+            PriorityLevel priorityLevel = priorityLevelService.getPriorityLevelById(priorityLevelId);
+            if (priorityLevel == null) {
+                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
+            }
+            PriorityLevel deletedPriorityLevel =priorityLevelService.deletePriorityLevelById(priorityLevelId);
+            return ResponseService.generateSuccessResponse("Priority level is archived successfully",deletedPriorityLevel ,HttpStatus.OK);
+        }
+        catch (IllegalArgumentException illegalArgumentException)
+        {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -46,6 +47,24 @@ public class PriorityLevelService {
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             throw new Exception(exception);
+        }
+    }
+
+    @Transactional
+    public PriorityLevel deletePriorityLevelById(Long priorityLevelId) throws Exception {
+        try {
+            PriorityLevel priorityLevelToDelete = entityManager.find(PriorityLevel.class, priorityLevelId);
+            if (priorityLevelToDelete == null)
+            {
+                throw new IllegalArgumentException("Priority Level with id " + priorityLevelId + " not found");
+            }
+            priorityLevelToDelete.setArchived('Y');
+            entityManager.merge(priorityLevelToDelete);
+            return priorityLevelToDelete;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
         }
     }
 }
