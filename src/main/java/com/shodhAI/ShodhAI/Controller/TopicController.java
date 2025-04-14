@@ -62,7 +62,7 @@ public class TopicController {
     @Autowired
     ConversationService conversationService;
 
-    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
+//    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping(value = "/add")
     public ResponseEntity<?> addTopic(@RequestBody TopicDto topicDto) {
         try {
@@ -95,7 +95,7 @@ public class TopicController {
     @GetMapping("/get-all")
     public ResponseEntity<?> retrieveTableOfTopics(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit,HttpServletRequest request,
                                                    @RequestParam(value = "courseId", required = false) Long courseId,
-                                                   @RequestParam("moduleId") Long moduleId) {
+                                                   @RequestParam(value = "moduleId", required = false) Long moduleId) {
         try {
             if (offset < 0) {
                 throw new IllegalArgumentException("Offset for pagination cannot be a negative number");

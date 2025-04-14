@@ -27,6 +27,7 @@ import java.util.Date;
 public class Module {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "module_id")
     private Long moduleId;
 
@@ -80,6 +81,7 @@ public class Module {
     @JoinColumn(name = "course_id")
     @JsonProperty("course")
     private Course course;
+
     public Module(Long moduleId, String moduleTitle, String moduleDescription, @NonNull Character archived, Date createdDate, String moduleDuration) {
         this.moduleId = moduleId;
         this.moduleTitle = moduleTitle;

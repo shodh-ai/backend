@@ -1,13 +1,10 @@
 package com.shodhAI.ShodhAI.Controller;
 
-import com.shodhAI.ShodhAI.Component.Constant;
-import com.shodhAI.ShodhAI.Dto.AcademicDegreeDto;
-import com.shodhAI.ShodhAI.Entity.AcademicDegree;
-import com.shodhAI.ShodhAI.Service.AcademicDegreeService;
+import com.shodhAI.ShodhAI.Dto.InstituteDto;
+import com.shodhAI.ShodhAI.Entity.Institute;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
+import com.shodhAI.ShodhAI.Service.InstituteService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
-import com.shodhAI.ShodhAI.annotation.Authorize;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,27 +26,24 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/academic-degree", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-public class AcademicDegreeController {
-
-    @Autowired
-    EntityManager entityManager;
-
-    @Autowired
-    AcademicDegreeService academicDegreeService;
+@RequestMapping(value = "/institute", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+public class InstituteController {
 
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
+    @Autowired
+    InstituteService instituteService;
+
 //    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping("/add")
-    public ResponseEntity<?> addAcademicDegree(@RequestBody AcademicDegreeDto academicDegreeDto) {
+    public ResponseEntity<?> addInstitute(@RequestBody InstituteDto instituteDto) {
         try {
 
-            academicDegreeService.validateAcademicDegree(academicDegreeDto);
-            AcademicDegree academicDegree = academicDegreeService.saveAcademicDegree(academicDegreeDto);
+            instituteService.validateInstitute(instituteDto);
+            Institute institute = instituteService.saveInstitute(instituteDto);
 
-            return ResponseService.generateSuccessResponse("Academic Degree Created Successfully", academicDegree, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Institute Created Successfully", institute, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
@@ -66,10 +60,10 @@ public class AcademicDegreeController {
         }
     }
 
-    @GetMapping("/get-all")
-    public ResponseEntity<?> retrieveAllAcademicDegree(HttpServletRequest request,
-                                                        @RequestParam(defaultValue = "0") int offset,
-                                                        @RequestParam(defaultValue = "10") int limit) {
+    @GetMapping("/filter-institute")
+    public ResponseEntity<?> retrieveAllInstitute(HttpServletRequest request,
+                                                       @RequestParam(defaultValue = "0") int offset,
+                                                       @RequestParam(defaultValue = "10") int limit) {
         try {
 
             if (offset < 0) {
@@ -79,19 +73,19 @@ public class AcademicDegreeController {
                 throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
             }
 
-            List<AcademicDegree> academicDegreeList = academicDegreeService.getAllAcademicDegree();
-            if (academicDegreeList.isEmpty()) {
+            List<Institute> instituteList = instituteService.filterInstitute(null, null);
+            if (instituteList.isEmpty()) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
 
             // Pagination logic
-            int totalItems = academicDegreeList.size();
+            int totalItems = instituteList.size();
             int totalPages = (int) Math.ceil((double) totalItems / limit);
             int fromIndex = offset * limit;
             int toIndex = Math.min(fromIndex + limit, totalItems);
 
             if (offset >= totalPages && offset != 0) {
-                throw new IllegalArgumentException("No more Academic Degree available");
+                throw new IllegalArgumentException("No more Institute available");
             }
 
             // Validate offset request
@@ -99,16 +93,16 @@ public class AcademicDegreeController {
                 return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
             }
 
-            List<AcademicDegree> paginatedList = academicDegreeList.subList(fromIndex, toIndex);
+            List<Institute> paginatedList = instituteList.subList(fromIndex, toIndex);
 
             // Construct paginated response
             Map<String, Object> response = new HashMap<>();
-            response.put("academicDegree", paginatedList);
+            response.put("institute", paginatedList);
             response.put("totalItems", totalItems);
             response.put("totalPages", totalPages);
             response.put("currentPage", offset);
 
-            return ResponseService.generateSuccessResponse("Academic Degree Retrieved Successfully", response, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Institute Retrieved Successfully", response, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
@@ -122,16 +116,16 @@ public class AcademicDegreeController {
         }
     }
 
-    @GetMapping("/get-academic-degree-by-id/{academicDegreeIdString}")
-    public ResponseEntity<?> retrieveAcademicDegreeById(HttpServletRequest request, @PathVariable String academicDegreeIdString) {
+    @GetMapping("/get-institute-by-id/{instituteIdString}")
+    public ResponseEntity<?> retrieveInstituteById(HttpServletRequest request, @PathVariable String instituteIdString) {
         try {
 
-            Long academicDegreeId = Long.parseLong(academicDegreeIdString);
-            AcademicDegree academicDegree = academicDegreeService.getAcademicDegreeById(academicDegreeId);
-            if (academicDegree == null) {
+            Long instituteId = Long.parseLong(instituteIdString);
+            Institute institute = instituteService.getInstituteById(instituteId);
+            if (institute == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            return ResponseService.generateSuccessResponse("Academic Degree Retrieved Successfully", academicDegree, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Institute Retrieved Successfully", institute, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
@@ -145,19 +139,22 @@ public class AcademicDegreeController {
         }
     }
 
-    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
-    @PatchMapping("/update/{academicDegreeIdString}")
-    public ResponseEntity<?> updateAcademicDegree(@RequestBody AcademicDegreeDto academicDegreeDto,@PathVariable String academicDegreeIdString)
-    {
+    @DeleteMapping("/delete-institute-by-id/{instituteIdString}")
+    public ResponseEntity<?> removeInstituteById(HttpServletRequest request, @PathVariable String instituteIdString) {
         try {
-            Long academicDegreeId = Long.parseLong(academicDegreeIdString);
-            AcademicDegree academicDegree = academicDegreeService.getAcademicDegreeById(academicDegreeId);
-            if (academicDegree == null) {
+
+            Long instituteId = Long.parseLong(instituteIdString);
+            Institute institute = instituteService.getInstituteById(instituteId);
+
+            institute = instituteService.removeInstituteById(institute);
+            if (institute == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            AcademicDegree updatedAcademicDegree=  academicDegreeService.updateAcademicDegree(academicDegreeId,academicDegreeDto);
-            return ResponseService.generateSuccessResponse("Academic Degree is updated successfully", updatedAcademicDegree,HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Institute Archived Successfully", institute, HttpStatus.OK);
 
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
             return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
@@ -167,27 +164,29 @@ public class AcademicDegreeController {
         }
     }
 
-    @DeleteMapping("/delete/{academicDegreeIdString}")
-    public ResponseEntity<?> deleteAcademicDegree(@PathVariable String academicDegreeIdString)
-    {
-        try
-        {
-            Long academicDegreeId = Long.parseLong(academicDegreeIdString);
-            AcademicDegree academicDegree = academicDegreeService.getAcademicDegreeById(academicDegreeId);
-            if (academicDegree == null) {
+    @PutMapping("/update-institute-by-id/{instituteIdString}")
+    public ResponseEntity<?> updateInstituteById(HttpServletRequest request, @RequestBody InstituteDto instituteDto, @PathVariable String instituteIdString) {
+        try {
+
+            Long instituteId = Long.parseLong(instituteIdString);
+            Institute institute = instituteService.getInstituteById(instituteId);
+
+            instituteService.validateUpdateInstitute(instituteDto);
+            institute = instituteService.updateInstituteById(institute, instituteDto);
+            if (institute == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            AcademicDegree deletedAcademicDegree=academicDegreeService.deleteAcademicDegreeById(academicDegreeId);
-            return ResponseService.generateSuccessResponse("Academic degree is archived successfully",deletedAcademicDegree,HttpStatus.OK);
-        }
-        catch (IllegalArgumentException illegalArgumentException)
-        {
+            return ResponseService.generateSuccessResponse("Institute Archived Successfully", institute, HttpStatus.OK);
+
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            exceptionHandlingService.handleException(indexOutOfBoundsException);
+            return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
-            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
-        }
-        catch (Exception e) {
-            exceptionHandlingService.handleException(e);
-            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

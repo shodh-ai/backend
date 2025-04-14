@@ -1,10 +1,7 @@
 package com.shodhAI.ShodhAI.Entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -13,8 +10,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -27,31 +25,23 @@ import java.util.List;
 
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "degreeId")
+        property = "instituteId")
 @Entity
-@Table(name = "academic_degree")
+@Table(name = "institute")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AcademicDegree {
+public class Institute {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "degree_id")
-    private Long degreeId;
+    @Column(name = "institute_id")
+    private Long instituteId;
 
     @NonNull
-    @Column(name = "degree_name")
-    @JsonProperty("degree_name")
-    @Pattern(regexp = "^[A-Za-z].*", message = "Degree name must start with an alphabet.")
-    private String degreeName;
-
-    @Column(name = "program_name")
-    @JsonProperty("program_name")
-    private String programName;
-
-    @Column(name = "institution_name")
+    @Column(name = "institution_name", unique = true)
     @JsonProperty("institution_name")
+    @Pattern(regexp = "^[A-Za-z].*", message = "Institute name must start with an alphabet.")
     private String institutionName;
 
     @NonNull
@@ -71,24 +61,13 @@ public class AcademicDegree {
     // TODO (MIGHT HAVE TO CHANGE IN FUTURE) this won't work with instant as instant does not have calendar features like LocalDateTime etc.
     private Date updatedDate;
 
-    @JsonManagedReference("semesters-degree")
-    @ManyToMany(mappedBy = "academicDegrees")
-    private List<Semester> semesters;
-
-    @OneToMany(mappedBy = "academicDegree")
-    @JsonIgnore
-    private List<CourseSemesterDegree> courseSemesterDegrees;
-
-    @ManyToMany(mappedBy = "degrees")
+    @ManyToMany
+    @JoinTable(
+            name = "institute_degree", // Name of the join table
+            joinColumns = @JoinColumn(name = "institute_id"), // FK to Institute
+            inverseJoinColumns = @JoinColumn(name = "degree_id") // FK to AcademicDegree
+    )
     @JsonManagedReference("institute-degree")
-    private List<Institute> institutes;
+    private List<AcademicDegree> degrees;
 
-    public AcademicDegree(Long degreeId, @NonNull String degreeName, String programName, String institutionName, @NonNull Character archived, Date createdDate) {
-        this.degreeId = degreeId;
-        this.degreeName = degreeName;
-        this.programName = programName;
-        this.institutionName = institutionName;
-        this.archived = archived;
-        this.createdDate = createdDate;
-    }
 }

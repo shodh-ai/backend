@@ -1,6 +1,7 @@
 package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
+import com.shodhAI.ShodhAI.Dto.AcademicDegreeDto;
 import com.shodhAI.ShodhAI.Dto.CourseDto;
 import com.shodhAI.ShodhAI.Dto.CourseSemesterDegreeDto;
 import com.shodhAI.ShodhAI.Dto.FacultyDto;
@@ -16,6 +17,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +36,9 @@ public class CourseService {
 
     @Autowired
     EntityManager entityManager;
+
+    @Autowired
+    AcademicDegreeService academicDegreeService;
 
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
@@ -68,6 +73,12 @@ public class CourseService {
                 throw new IllegalArgumentException("Course Start date cannot be null if Course End date is passed");
             }
 
+            if(courseDto.getAcademicDegreeId() != null) {
+                if(courseDto.getAcademicDegreeId() <= 0) {
+                    throw new IllegalArgumentException("Academic Degree Id cannot be <= 0");
+                }
+            }
+
         } catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
             throw new IllegalArgumentException(illegalArgumentException.getMessage());
@@ -93,6 +104,9 @@ public class CourseService {
             course.setCourseDuration(courseDto.getCourseDuration());
             course.setStartDate(courseDto.getStartDate());
             course.setEndDate(courseDto.getEndDate());
+
+            AcademicDegree academicDegree = academicDegreeService.getAcademicDegreeById(courseDto.getAcademicDegreeId());
+            course.setAcademicDegree(academicDegree);
 
             return entityManager.merge(course);
 
@@ -442,32 +456,25 @@ public class CourseService {
             Long courseId,
             Long userId,
             Long roleId,
-            Long semesterId,
             Long degreeId
     ) throws Exception {
         try {
             StringBuilder jpql = new StringBuilder(
                     "SELECT DISTINCT c FROM Course c " +
                             "LEFT JOIN c.courseSemesterDegrees csd " +
+                            "LEFT JOIN csd.academicDegree ad " +
                             "WHERE c.archived = 'N' "
             );
 
-            // Prepare parameters map
             Map<String, Object> params = new HashMap<>();
 
-            // Add filters based on input parameters
             if (courseId != null) {
-                jpql.append("AND c.courseId = :courseId AND c.archived = 'N'");
+                jpql.append("AND c.courseId = :courseId ");
                 params.put("courseId", courseId);
             }
 
-            if (semesterId != null) {
-                jpql.append("AND csd.semester.archived = 'N' AND csd.semester.semesterId = :semesterId ");
-                params.put("semesterId", semesterId);
-            }
-
             if (degreeId != null) {
-                jpql.append("AND csd.academicDegree.archived = 'N' AND csd.academicDegree.degreeId = :degreeId ");
+                jpql.append("AND ad.archived = 'N' AND ad.degreeId = :degreeId ");
                 params.put("degreeId", degreeId);
             }
 

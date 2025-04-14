@@ -44,9 +44,9 @@ public class CourseController {
     @Autowired
     JwtUtil jwtTokenUtil;
 
-    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
+//    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping(value = "/add")
-    public ResponseEntity<?> addStudent(@RequestBody CourseDto courseDto) {
+    public ResponseEntity<?> addCourse(@RequestBody CourseDto courseDto) {
         try {
 
             courseService.validateCourse(courseDto);
@@ -72,7 +72,7 @@ public class CourseController {
         }
     }
 
-    @GetMapping("/get-all")
+    /*@GetMapping("/get-all")
     public ResponseEntity<?> retrieveAllCourse(HttpServletRequest request) {
         try {
 
@@ -92,7 +92,7 @@ public class CourseController {
             exceptionHandlingService.handleException(exception);
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
+    }*/
 
     @GetMapping("/get-course-by-id/{courseIdString}")
     public ResponseEntity<?> retrieveCourseById(HttpServletRequest request, @PathVariable String courseIdString) {
@@ -139,7 +139,6 @@ public class CourseController {
     @GetMapping("/get-filter-course")
     public ResponseEntity<?> getFilterCourse(
             @RequestParam(required = false) Long courseId,
-            @RequestParam(required = false) Long semesterId,
             @RequestParam(required = false) Long degreeId,
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int limit,
@@ -157,7 +156,7 @@ public class CourseController {
             Long roleId = jwtTokenUtil.extractRoleId(jwtToken);
             Long userId = jwtTokenUtil.extractId(jwtToken);
 
-            List<Course> courses = courseService.courseFilter(courseId, userId, roleId, semesterId, degreeId);
+            List<Course> courses = courseService.courseFilter(courseId, userId, roleId, degreeId);
 
             if (courses.isEmpty()) {
                 return ResponseService.generateSuccessResponse("No courses found with the given criteria", new ArrayList<>(), HttpStatus.OK);
