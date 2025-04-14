@@ -1,8 +1,8 @@
 package com.shodhAI.ShodhAI.Controller;
 
-import com.shodhAI.ShodhAI.Entity.FileType;
+import com.shodhAI.ShodhAI.Entity.ContentType;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
-import com.shodhAI.ShodhAI.Service.FileTypeService;
+import com.shodhAI.ShodhAI.Service.ContentTypeService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,21 +26,21 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/file-type", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-public class FileTypeController {
+@RequestMapping(value = "/content-type", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+public class ContentTypeController {
 
     @Autowired
     EntityManager entityManager;
 
     @Autowired
-    FileTypeService fileTypeService;
+    ContentTypeService contentTypeService;
 
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
     @Transactional
     @GetMapping("/get-all")
-    public ResponseEntity<?> retrieveAllFileType(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit, HttpServletRequest request) {
+    public ResponseEntity<?> retrieveAllContentType(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit, HttpServletRequest request) {
         try {
             if (offset < 0) {
                 throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
@@ -48,31 +48,31 @@ public class FileTypeController {
             if (limit <= 0) {
                 throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
             }
-            List<FileType> fileTypeList = fileTypeService.getAllFileType();
-            if (fileTypeList.isEmpty()) {
+            List<ContentType> contentTypeList = contentTypeService.getAllContentType();
+            if (contentTypeList.isEmpty()) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            int totalItems = fileTypeList.size();
+            int totalItems = contentTypeList.size();
             int totalPages = (int) Math.ceil((double) totalItems / limit);
             int fromIndex = offset * limit;
             int toIndex = Math.min(fromIndex + limit, totalItems);
 
             if (offset >= totalPages && offset != 0) {
-                throw new IllegalArgumentException("No more file types available");
+                throw new IllegalArgumentException("No more content types available");
             }
 
             if (fromIndex >= totalItems) {
                 return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
             }
 
-            List<FileType> fileTypes = fileTypeList.subList(fromIndex, toIndex);
+            List<ContentType> contentTypes = contentTypeList.subList(fromIndex, toIndex);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("fileTypes", fileTypes);
+            response.put("contentTypes", contentTypes);
             response.put("totalItems", totalItems);
             response.put("totalPages", totalPages);
             response.put("currentPage", offset);
-            return ResponseService.generateSuccessResponse("File Type Retrieved Successfully", response, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Content Type Retrieved Successfully", response, HttpStatus.OK);
 
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
@@ -81,16 +81,16 @@ public class FileTypeController {
     }
 
     @Transactional
-    @GetMapping("/get-file-type-by-id/{fileTypeIdString}")
-    public ResponseEntity<?> retrieveFileTypeById(HttpServletRequest request, @PathVariable String fileTypeIdString) {
+    @GetMapping("/get-content-type-by-id/{contentTypeIdString}")
+    public ResponseEntity<?> retrieveContentTypeById(HttpServletRequest request, @PathVariable String contentTypeIdString) {
         try {
 
-            Long genderId = Long.parseLong(fileTypeIdString);
-            FileType fileType = fileTypeService.getFileTypeById(genderId);
-            if (fileType == null) {
+            Long genderId = Long.parseLong(contentTypeIdString);
+            ContentType contentType = contentTypeService.getContentTypeById(genderId);
+            if (contentType == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            return ResponseService.generateSuccessResponse("File Type Retrieved Successfully", fileType, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Content Type Retrieved Successfully", contentType, HttpStatus.OK);
 
         } catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
@@ -105,12 +105,12 @@ public class FileTypeController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addFileType(@RequestBody FileType fileType)
+    public ResponseEntity<?> addContentType(@RequestBody ContentType contentType)
     {
         try
         {
-            FileType fileTypeToSave=fileTypeService.addFileType(fileType);
-            return ResponseService.generateSuccessResponse("File type is successfully added",fileTypeToSave, HttpStatus.CREATED);
+            ContentType contentTypeToSave=contentTypeService.addContentType(contentType);
+            return ResponseService.generateSuccessResponse("Content type is successfully added",contentTypeToSave, HttpStatus.CREATED);
         }
         catch (IllegalArgumentException illegalArgumentException)
         {
@@ -123,18 +123,18 @@ public class FileTypeController {
         }
     }
 
-    @DeleteMapping("/delete/{fileTypeIdString}")
-    public ResponseEntity<?> deleteFileTpe (@PathVariable String fileTypeIdString)
+    @DeleteMapping("/delete/{contentTypeIdString}")
+    public ResponseEntity<?> deleteContentTpe (@PathVariable String contentTypeIdString)
     {
         try
         {
-            Long fileTypeId = Long.parseLong(fileTypeIdString);
-            FileType fileType = fileTypeService.getFileTypeById(fileTypeId);
-            if (fileType == null) {
+            Long contentTypeId = Long.parseLong(contentTypeIdString);
+            ContentType contentType = contentTypeService.getContentTypeById(contentTypeId);
+            if (contentType == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            FileType deletedFileType =fileTypeService.deleteFileTypeById(fileTypeId);
-            return ResponseService.generateSuccessResponse("File type is archived successfully",deletedFileType ,HttpStatus.OK);
+            ContentType deletedContentType =contentTypeService.deleteContentTypeById(contentTypeId);
+            return ResponseService.generateSuccessResponse("Content type is archived successfully",deletedContentType ,HttpStatus.OK);
         }
         catch (IllegalArgumentException illegalArgumentException)
         {
@@ -147,8 +147,8 @@ public class FileTypeController {
         }
     }
 
-    @GetMapping("/get-filter-file-types")
-    public ResponseEntity<?> getFilterFileTypes(
+    @GetMapping("/get-filter-content-types")
+    public ResponseEntity<?> getFilterContentTypes(
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int limit) {
 
@@ -160,40 +160,39 @@ public class FileTypeController {
                 throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
             }
 
-            List<FileType> fileTypes = fileTypeService.fileTypeFilter();
+            List<ContentType> contentTypes = contentTypeService.contentTypeFilter();
 
-            if (fileTypes.isEmpty()) {
-                return ResponseService.generateSuccessResponse("No file types found", new ArrayList<>(), HttpStatus.OK);
+            if (contentTypes.isEmpty()) {
+                return ResponseService.generateSuccessResponse("No content types found", new ArrayList<>(), HttpStatus.OK);
             }
 
             // Pagination logic
-            int totalItems = fileTypes.size();
+            int totalItems = contentTypes.size();
             int totalPages = (int) Math.ceil((double) totalItems / limit);
             int fromIndex = offset * limit;
             int toIndex = Math.min(fromIndex + limit, totalItems);
 
             if (offset >= totalPages && offset != 0) {
-                throw new IllegalArgumentException("No more file types available");
+                throw new IllegalArgumentException("No more content types available");
             }
             if (fromIndex >= totalItems) {
                 return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
             }
 
-            List<FileType> paginatedList = fileTypes.subList(fromIndex, toIndex);
+            List<ContentType> paginatedList = contentTypes.subList(fromIndex, toIndex);
 
             // Construct response
             Map<String, Object> response = new HashMap<>();
-            response.put("fileTypes", paginatedList);
+            response.put("contentTypes", paginatedList);
             response.put("totalItems", totalItems);
             response.put("totalPages", totalPages);
             response.put("currentPage", offset);
 
-            return ResponseService.generateSuccessResponse("File Types Retrieved Successfully", response, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Content Types Retrieved Successfully", response, HttpStatus.OK);
 
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             return ResponseService.generateErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-
 }

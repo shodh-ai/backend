@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -140,6 +141,30 @@ public class DoubtController {
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/delete/{doubtLevelIdString}")
+    public ResponseEntity<?> deleteFileTpe (@PathVariable String doubtLevelIdString)
+    {
+        try
+        {
+            Long doubtLevelId = Long.parseLong(doubtLevelIdString);
+            DoubtLevel doubtLevel = doubtService.getDoubtLevelById(doubtLevelId);
+            if (doubtLevel == null) {
+                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
+            }
+            DoubtLevel deletedDoubtLevel =doubtService.deleteDoubtLevelById(doubtLevelId);
+            return ResponseService.generateSuccessResponse("Doubt Level is archived successfully",deletedDoubtLevel ,HttpStatus.OK);
+        }
+        catch (IllegalArgumentException illegalArgumentException)
+        {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

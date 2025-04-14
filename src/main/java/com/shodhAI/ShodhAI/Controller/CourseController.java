@@ -15,6 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -191,5 +192,23 @@ public class CourseController {
             return ResponseService.generateErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-    
+
+    @DeleteMapping("/delete/{courseIdString}")
+    public ResponseEntity<?> deleteCourse(@PathVariable String courseIdString) {
+        try {
+            Long courseId = Long.parseLong(courseIdString);
+            Course courseToDelete = courseService.getCourseById(courseId);
+            if (courseToDelete == null) {
+                return ResponseService.generateErrorResponse("Course with id " + courseId + " not found", HttpStatus.BAD_REQUEST);
+            }
+            Course deletedCourse = courseService.deleteCourseById(courseId);
+            return ResponseService.generateSuccessResponse("Course is successfully deleted", deletedCourse, HttpStatus.OK);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
