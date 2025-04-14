@@ -460,21 +460,20 @@ public class CourseService {
     ) throws Exception {
         try {
             StringBuilder jpql = new StringBuilder(
-                    "SELECT DISTINCT c FROM Course c " +
-                            "LEFT JOIN c.courseSemesterDegrees csd " +
-                            "LEFT JOIN csd.academicDegree ad " +
-                            "WHERE c.archived = 'N' "
+                    "SELECT DISTINCT c FROM Course c WHERE 1=1 "
             );
 
+            // Prepare parameters map
             Map<String, Object> params = new HashMap<>();
 
+            // Add filters based on input parameters
             if (courseId != null) {
                 jpql.append("AND c.courseId = :courseId ");
                 params.put("courseId", courseId);
             }
 
             if (degreeId != null) {
-                jpql.append("AND ad.archived = 'N' AND ad.degreeId = :degreeId ");
+                jpql.append("AND c.academicDegree.degreeId = :degreeId ");
                 params.put("degreeId", degreeId);
             }
 
