@@ -15,6 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -146,6 +147,25 @@ public class ModuleController {
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             return ResponseService.generateErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping("/delete/{moduleIdString}")
+    public ResponseEntity<?> deleteModule(@PathVariable String moduleIdString) {
+        try {
+            Long moduleId = Long.parseLong(moduleIdString);
+            Module moduleToDelete = moduleService.getModuleById(moduleId);
+            if (moduleToDelete == null) {
+                return ResponseService.generateErrorResponse("Module with id " + moduleId + " not found", HttpStatus.BAD_REQUEST);
+            }
+            Module deletedModule = moduleService.deleteModuleById(moduleId);
+            return ResponseService.generateSuccessResponse("Module is successfully deleted", deletedModule, HttpStatus.OK);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

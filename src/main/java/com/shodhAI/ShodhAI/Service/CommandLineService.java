@@ -108,16 +108,16 @@ public class CommandLineService implements CommandLineRunner {
         }
 
         if (entityManager.createQuery("SELECT count(nt) FROM NotificationType nt", Long.class).getSingleResult() == 0) {
-            entityManager.merge(new NotificationType(1L, "EMAIL", "Email Notification", null));
-            entityManager.merge(new NotificationType(2L, "SMS", "SMS Notification", null));
-            entityManager.merge(new NotificationType(3L, "APP", "In-App Notification", null));
-            entityManager.merge(new NotificationType(4L, "ALL", "All Notification Channels", null));
+            entityManager.merge(new NotificationType(1L, "EMAIL", "Email Notification", 'N',null));
+            entityManager.merge(new NotificationType(2L, "SMS", "SMS Notification", 'N',null));
+            entityManager.merge(new NotificationType(3L, "APP", "In-App Notification",'N', null));
+            entityManager.merge(new NotificationType(4L, "ALL", "All Notification Channels", 'N',null));
         }
 
         if (entityManager.createQuery("SELECT count(ds) FROM DeliveryStatus ds", Long.class).getSingleResult() == 0) {
-            entityManager.merge(new DeliveryStatus(1L, "PENDING", "Notification is pending delivery", null));
-            entityManager.merge(new DeliveryStatus(2L, "DELIVERED", "Notification has been delivered", null));
-            entityManager.merge(new DeliveryStatus(3L, "FAILED", "Notification delivery failed", null));
+            entityManager.merge(new DeliveryStatus(1L, "PENDING", "Notification is pending delivery" ,'N',null));
+            entityManager.merge(new DeliveryStatus(2L, "DELIVERED", "Notification has been delivered",'N', null));
+            entityManager.merge(new DeliveryStatus(3L, "FAILED", "Notification delivery failed",'N', null));
         }
 
         if (entityManager.createQuery("SELECT count(ad) FROM AcademicDegree ad", Long.class).getSingleResult() == 0) {

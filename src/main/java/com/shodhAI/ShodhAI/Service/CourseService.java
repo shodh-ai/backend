@@ -448,8 +448,8 @@ public class CourseService {
         try {
             StringBuilder jpql = new StringBuilder(
                     "SELECT DISTINCT c FROM Course c " +
-                            "JOIN c.courseSemesterDegrees csd " +
-                            "WHERE 1=1 "
+                            "LEFT JOIN c.courseSemesterDegrees csd " +
+                            "WHERE c.archived = 'N' "
             );
 
             // Prepare parameters map
@@ -457,17 +457,17 @@ public class CourseService {
 
             // Add filters based on input parameters
             if (courseId != null) {
-                jpql.append("AND c.courseId = :courseId ");
+                jpql.append("AND c.courseId = :courseId AND c.archived = 'N'");
                 params.put("courseId", courseId);
             }
 
             if (semesterId != null) {
-                jpql.append("AND csd.semester.semesterId = :semesterId ");
+                jpql.append("AND csd.semester.archived = 'N' AND csd.semester.semesterId = :semesterId ");
                 params.put("semesterId", semesterId);
             }
 
             if (degreeId != null) {
-                jpql.append("AND csd.academicDegree.degreeId = :degreeId ");
+                jpql.append("AND csd.academicDegree.archived = 'N' AND csd.academicDegree.degreeId = :degreeId ");
                 params.put("degreeId", degreeId);
             }
 
@@ -521,6 +521,24 @@ public class CourseService {
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             throw new Exception("SOMETHING WENT WRONG: " + exception.getMessage());
+        }
+    }
+
+    @Transactional
+    public Course deleteCourseById(Long courseId) throws Exception {
+        try {
+            Course courseToDelete = entityManager.find(Course.class, courseId);
+            if (courseToDelete == null)
+            {
+                throw new IllegalArgumentException("Course with id " + courseId + " not found");
+            }
+            courseToDelete.setArchived('Y');
+            entityManager.merge(courseToDelete);
+            return courseToDelete;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
         }
     }
 

@@ -4,6 +4,7 @@ import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.DoubtDto;
 import com.shodhAI.ShodhAI.Entity.Doubt;
 import com.shodhAI.ShodhAI.Entity.DoubtLevel;
+import com.shodhAI.ShodhAI.Entity.FileType;
 import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.Topic;
 import com.shodhAI.ShodhAI.Entity.UserDoubt;
@@ -146,4 +147,36 @@ public class DoubtService {
         }
     }
 
+    @Transactional
+    public DoubtLevel deleteDoubtLevelById(Long doubtLevelId) throws Exception {
+        try {
+            DoubtLevel doubtLevelToDelete = entityManager.find(DoubtLevel.class, doubtLevelId);
+            if (doubtLevelToDelete == null)
+            {
+                throw new IllegalArgumentException("Doubt level with id " + doubtLevelId + " not found");
+            }
+            doubtLevelToDelete.setArchived('Y');
+            entityManager.merge(doubtLevelToDelete);
+            return doubtLevelToDelete;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    @Transactional
+    public List<FileType> fileTypeFilter() throws Exception {
+        try {
+            String jpql = "SELECT f FROM FileType f WHERE f.archived = 'N' ORDER BY f.fileTypeId ASC";
+            TypedQuery<FileType> query = entityManager.createQuery(jpql, FileType.class);
+            return query.getResultList();
+        } catch (PersistenceException persistenceException) {
+            exceptionHandlingService.handleException(persistenceException);
+            throw new PersistenceException(persistenceException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
 }

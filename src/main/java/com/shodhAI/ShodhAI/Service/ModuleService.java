@@ -4,7 +4,6 @@ import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Dto.ModuleDto;
 import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.Module;
-import com.shodhAI.ShodhAI.Entity.Semester;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
@@ -111,7 +110,9 @@ public class ModuleService {
     @Transactional
     public List<Module> moduleFilter(Long moduleId, Long userId, Long roleId, Long courseId, Long academicDegreeId) throws Exception {
         try {
-            StringBuilder jpql = new StringBuilder("SELECT DISTINCT s FROM Module s JOIN s.course.courseSemesterDegrees csd WHERE 1=1 ");
+            StringBuilder jpql = new StringBuilder(
+                    "SELECT s FROM Module s LEFT JOIN s.course.courseSemesterDegrees csd WHERE s.archived = 'N' "
+            );
 
             Map<String, Object> params = new HashMap<>();
 
@@ -121,16 +122,16 @@ public class ModuleService {
             }
 
             if (courseId != null) {
-                jpql.append("AND s.course.courseId = :courseId ");
+                jpql.append("AND s.course.courseId = :courseId AND s.course.archived = 'N' ");
                 params.put("courseId", courseId);
             }
 
             if (academicDegreeId != null) {
-                jpql.append("AND csd.academicDegree.degreeId = :academicDegreeId ");
+                jpql.append("AND csd.academicDegree.degreeId = :academicDegreeId AND csd.academicDegree.archived = 'N' ");
                 params.put("academicDegreeId", academicDegreeId);
             }
 
-            jpql.append("AND s.archived = 'N' ORDER BY s.moduleId ASC");
+            jpql.append("ORDER BY s.moduleId ASC");
 
             TypedQuery<Module> query = entityManager.createQuery(jpql.toString(), Module.class);
 
@@ -145,6 +146,25 @@ public class ModuleService {
         } catch (Exception exception) {
             exceptionHandlingService.handleException(exception);
             throw new Exception(exception.getMessage());
+        }
+    }
+
+
+    @Transactional
+    public Module deleteModuleById(Long moduleId) throws Exception {
+        try {
+            Module moduleToDelete = entityManager.find(Module.class, moduleId);
+            if (moduleToDelete == null)
+            {
+                throw new IllegalArgumentException("Module with id " + moduleId + " not found");
+            }
+            moduleToDelete.setArchived('Y');
+            entityManager.merge(moduleToDelete);
+            return moduleToDelete;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
         }
     }
 
