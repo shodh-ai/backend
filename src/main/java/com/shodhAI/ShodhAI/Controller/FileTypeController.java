@@ -152,7 +152,7 @@ public class FileTypeController {
 
     @PatchMapping("/update/{fileTypeIdString}")
     public ResponseEntity<?> updateFileType(@RequestBody FileType fileType, @PathVariable String fileTypeIdString) throws Exception, RuntimeException,DataIntegrityViolationException {
-//        try {
+        try {
             Long fileTypeId = Long.parseLong(fileTypeIdString);
             fileTypeService.getFileTypeById(fileTypeId);
             if (fileType == null) {
@@ -160,20 +160,20 @@ public class FileTypeController {
             }
             FileType updatedFile= fileTypeService.updateFileType(fileTypeId,fileType);
             return ResponseService.generateSuccessResponse("File type is updated successfully ", updatedFile,HttpStatus.OK);
-//        }
-//        catch (DataIntegrityViolationException e)
-//        {
-//            exceptionHandlingService.handleException(e);
-//            throw new DataIntegrityViolationException(e.getMessage());
-//        }
-//        catch (IllegalArgumentException e) {
-//            exceptionHandlingService.handleException(e);
-//            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.BAD_REQUEST);
-//        }
-//        catch (Exception e) {
-//            exceptionHandlingService.handleException(e);
-//            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
+        }
+        catch (DataIntegrityViolationException e)
+        {
+            exceptionHandlingService.handleException(e);
+            throw new DataIntegrityViolationException(e.getMessage());
+        }
+        catch (IllegalArgumentException e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/get-filter-file-types")
