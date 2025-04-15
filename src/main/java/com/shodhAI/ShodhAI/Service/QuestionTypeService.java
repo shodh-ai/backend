@@ -2,6 +2,7 @@ package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Entity.QuestionType;
+import com.shodhAI.ShodhAI.Entity.QuestionType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class QuestionTypeService {
@@ -100,6 +102,45 @@ public class QuestionTypeService {
             throw new IllegalArgumentException(e.getMessage());
         } catch (Exception e) {
             throw new Exception(e.getMessage());
+        }
+    }
+
+    @Transactional
+    public QuestionType updateQuestionType(Long questionTypeId, QuestionType questionType) throws Exception {
+        try
+        {
+            QuestionType questionTypeToUpdate= entityManager.find(QuestionType.class,questionTypeId);
+            if(questionTypeToUpdate==null)
+            {
+                throw new IllegalArgumentException("Question type with id "+ questionTypeId+ " not found");
+            }
+            if(questionType.getQuestionType()!=null)
+            {
+                if(questionType.getQuestionType().trim().isEmpty())
+                {
+                    throw new IllegalArgumentException("Question type name cannot be null or empty");
+                }
+                List<QuestionType> questionTypes= getAllQuestionTypes();
+                for(QuestionType questionTypeToGet : questionTypes)
+                {
+                    if (!Objects.equals(questionTypeToGet.getQuestionTypeId(), questionTypeId) && questionTypeToGet.getQuestionType().equalsIgnoreCase(questionType.getQuestionType().trim()))
+                    {
+                        throw new IllegalArgumentException("Question type already exists with name " + questionType.getQuestionType().trim());
+                    }
+                }
+                questionTypeToUpdate.setQuestionType(questionType.getQuestionType().trim());
+            }
+            questionTypeToUpdate.setUpdatedDate(new Date());
+            entityManager.merge(questionTypeToUpdate);
+            return questionTypeToUpdate;
+        }
+        catch (IllegalArgumentException illegalArgumentException)
+        {
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        }
+        catch (Exception exception)
+        {
+            throw new Exception(exception.getMessage());
         }
     }
 

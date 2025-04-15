@@ -2,6 +2,7 @@ package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Entity.TopicType;
+import com.shodhAI.ShodhAI.Entity.TopicType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TopicTypeService
@@ -95,6 +97,45 @@ public class TopicTypeService
             throw new IllegalArgumentException(e.getMessage());
         } catch (Exception e) {
             throw new Exception(e.getMessage());
+        }
+    }
+
+    @Transactional
+    public TopicType updateTopicType(Long topicTypeId, TopicType topicType) throws Exception {
+        try
+        {
+            TopicType topicTypeToUpdate= entityManager.find(TopicType.class,topicTypeId);
+            if(topicTypeToUpdate==null)
+            {
+                throw new IllegalArgumentException("Topic type with id "+ topicTypeId+ " not found");
+            }
+            if(topicType.getTopicTypeName()!=null)
+            {
+                if(topicType.getTopicTypeName().trim().isEmpty())
+                {
+                    throw new IllegalArgumentException("Topic type name cannot be null or empty");
+                }
+                List<TopicType> topicTypes= getAllTopicType();
+                for(TopicType topicTypeToGet : topicTypes)
+                {
+                    if (!Objects.equals(topicTypeToGet.getTopicTypeId(), topicTypeId) && topicTypeToGet.getTopicTypeName().equalsIgnoreCase(topicType.getTopicTypeName().trim()))
+                    {
+                        throw new IllegalArgumentException("Topic type already exists with name " + topicType.getTopicTypeName().trim());
+                    }
+                }
+                topicTypeToUpdate.setTopicTypeName(topicType.getTopicTypeName().trim());
+            }
+            topicTypeToUpdate.setUpdatedDate(new Date());
+            entityManager.merge(topicTypeToUpdate);
+            return topicTypeToUpdate;
+        }
+        catch (IllegalArgumentException illegalArgumentException)
+        {
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        }
+        catch (Exception exception)
+        {
+            throw new Exception(exception.getMessage());
         }
     }
 

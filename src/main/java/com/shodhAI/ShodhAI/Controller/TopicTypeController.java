@@ -1,6 +1,7 @@
 package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Entity.TopicType;
+import com.shodhAI.ShodhAI.Entity.TopicType;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.TopicTypeService;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -93,6 +95,28 @@ public class TopicTypeController
         {
             exceptionHandlingService.handleException(illegalArgumentException);
             return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PatchMapping("/update/{topicTypeIdString}")
+    public ResponseEntity<?> updateTopicType(@RequestBody TopicType topicType, @PathVariable String topicTypeIdString)
+    {
+        try {
+            Long topicTypeId = Long.parseLong(topicTypeIdString);
+            topicTypeService.getTopicTypeById(topicTypeId);
+            if (topicType == null) {
+                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
+            }
+            TopicType updatedTopic= topicTypeService.updateTopicType(topicTypeId,topicType);
+            return ResponseService.generateSuccessResponse("Topic type is updated successfully ", updatedTopic,HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
         catch (Exception e) {
             exceptionHandlingService.handleException(e);

@@ -78,6 +78,7 @@ public class Module {
 
     @JsonIgnore
     @ManyToOne
+    @JsonBackReference("course-modules")
     @JoinColumn(name = "course_id")
     @JsonProperty("course")
     private Course course;

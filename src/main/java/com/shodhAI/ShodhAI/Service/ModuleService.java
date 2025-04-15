@@ -165,4 +165,61 @@ public class ModuleService {
         }
     }
 
+    public void validateAndSaveModuleForUpdate(ModuleDto moduleDto, Module moduleToUpdate) throws Exception {
+        try {
+            if(moduleDto.getModuleTitle()!=null)
+            {
+                if (moduleDto.getModuleTitle().isEmpty()) {
+                    throw new IllegalArgumentException("Module title cannot be null or empty");
+                }
+                moduleDto.setModuleTitle(moduleDto.getModuleTitle().trim());
+                moduleToUpdate.setModuleTitle(moduleDto.getModuleTitle());
+            }
+
+            if (moduleDto.getModuleDescription() != null) {
+                if (moduleDto.getModuleDescription().isEmpty() || moduleDto.getModuleDescription().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Module Description cannot be empty");
+                }
+                moduleDto.setModuleDescription(moduleDto.getModuleDescription().trim());
+                moduleToUpdate.setModuleDescription(moduleDto.getModuleDescription());
+            }
+
+            if (moduleDto.getModuleDuration() != null) {
+                if (moduleDto.getModuleDuration().isEmpty()) {
+                    throw new IllegalArgumentException("Module Duration cannot be null or empty");
+                }
+                moduleDto.setModuleDuration(moduleDto.getModuleDuration().trim());
+                moduleToUpdate.setModuleDuration(moduleDto.getModuleDuration());
+            }
+
+            if (moduleDto.getCourseId() != null) {
+                Course course = entityManager.find(Course.class, moduleDto.getCourseId());
+                if (course == null) {
+                    throw new IllegalArgumentException("Course with id " + moduleDto.getCourseId() + " not found");
+                }
+                moduleToUpdate.setCourse(course);
+            }
+
+            moduleToUpdate.setUpdatedDate(new Date());
+
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
+
+    @Transactional
+    public Module updateModule(Long moduleId, ModuleDto moduleDto) throws Exception {
+        Module moduleToUpdate = entityManager.find(Module.class,moduleId);
+        if(moduleToUpdate ==null)
+        {
+            throw new IllegalArgumentException("Module with id " + moduleId+ " does not found");
+        }
+        validateAndSaveModuleForUpdate(moduleDto,moduleToUpdate);
+        return entityManager.merge(moduleToUpdate);
+    }
+
 }
