@@ -84,7 +84,6 @@ public class AcademicDegreeController {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
 
-            // Pagination logic
             int totalItems = academicDegreeList.size();
             int totalPages = (int) Math.ceil((double) totalItems / limit);
             int fromIndex = offset * limit;
