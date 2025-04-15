@@ -145,7 +145,7 @@ public class AcademicDegreeController {
         }
     }
 
-    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
+//    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PatchMapping("/update/{academicDegreeIdString}")
     public ResponseEntity<?> updateAcademicDegree(@RequestBody AcademicDegreeDto academicDegreeDto,@PathVariable String academicDegreeIdString)
     {

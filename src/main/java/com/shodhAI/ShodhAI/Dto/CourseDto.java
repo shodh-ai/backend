@@ -2,9 +2,6 @@ package com.shodhAI.ShodhAI.Dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.shodhAI.ShodhAI.Entity.Faculty;
-import com.shodhAI.ShodhAI.Entity.Semester;
-import com.shodhAI.ShodhAI.Entity.Student;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -49,6 +46,9 @@ public class CourseDto {
 
     @JsonProperty("course_semester_degree_associations")
     private List<CourseSemesterDegreeDto> courseSemesterDegreeAssociations;
+
+    @JsonProperty("module_ids")
+    private List<Long> moduleIds;
 
     @JsonProperty("academic_degree_id")
     private Long academicDegreeId;

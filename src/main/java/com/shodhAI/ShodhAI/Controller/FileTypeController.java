@@ -1,18 +1,21 @@
 package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Entity.FileType;
+import com.shodhAI.ShodhAI.Entity.FileType;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.FileTypeService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -145,6 +148,32 @@ public class FileTypeController {
             exceptionHandlingService.handleException(e);
             return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PatchMapping("/update/{fileTypeIdString}")
+    public ResponseEntity<?> updateFileType(@RequestBody FileType fileType, @PathVariable String fileTypeIdString) throws Exception, RuntimeException,DataIntegrityViolationException {
+//        try {
+            Long fileTypeId = Long.parseLong(fileTypeIdString);
+            fileTypeService.getFileTypeById(fileTypeId);
+            if (fileType == null) {
+                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
+            }
+            FileType updatedFile= fileTypeService.updateFileType(fileTypeId,fileType);
+            return ResponseService.generateSuccessResponse("File type is updated successfully ", updatedFile,HttpStatus.OK);
+//        }
+//        catch (DataIntegrityViolationException e)
+//        {
+//            exceptionHandlingService.handleException(e);
+//            throw new DataIntegrityViolationException(e.getMessage());
+//        }
+//        catch (IllegalArgumentException e) {
+//            exceptionHandlingService.handleException(e);
+//            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.BAD_REQUEST);
+//        }
+//        catch (Exception e) {
+//            exceptionHandlingService.handleException(e);
+//            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
     }
 
     @GetMapping("/get-filter-file-types")

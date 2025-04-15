@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ContentTypeService
@@ -48,7 +49,6 @@ public class ContentTypeService
         }
     }
 
-
     @Transactional
     public ContentType addContentType(ContentType contentType) throws Exception {
         try
@@ -79,6 +79,45 @@ public class ContentTypeService
         catch(Exception exception)
         {
             exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
+
+    @Transactional
+    public ContentType updateContentType(Long contentTypeId,ContentType contentType) throws Exception {
+        try
+        {
+            ContentType contentTypeToUpdate= entityManager.find(ContentType.class,contentTypeId);
+            if(contentTypeToUpdate==null)
+            {
+                throw new IllegalArgumentException("Content type with id "+ contentTypeId+ " not found");
+            }
+            if(contentType.getContentTypeName()!=null)
+            {
+                if(contentType.getContentTypeName().trim().isEmpty())
+                {
+                    throw new IllegalArgumentException("Content type name cannot be null or empty");
+                }
+                List<ContentType> contentTypes= getAllContentType();
+                for(ContentType contentTypeToGet : contentTypes)
+                {
+                    if (!Objects.equals(contentTypeToGet.getContentTypeId(), contentTypeId) && contentTypeToGet.getContentTypeName().equalsIgnoreCase(contentType.getContentTypeName().trim()))
+                    {
+                        throw new IllegalArgumentException("Content type already exists with name " + contentType.getContentTypeName().trim());
+                    }
+                }
+                contentTypeToUpdate.setContentTypeName(contentType.getContentTypeName().trim());
+            }
+            contentTypeToUpdate.setUpdatedDate(new Date());
+            entityManager.merge(contentTypeToUpdate);
+            return contentTypeToUpdate;
+        }
+        catch (IllegalArgumentException illegalArgumentException)
+        {
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        }
+        catch (Exception exception)
+        {
             throw new Exception(exception.getMessage());
         }
     }

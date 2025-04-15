@@ -130,8 +130,14 @@ public class Course {
 
     @ManyToOne
     @JoinColumn(name = "academic_degree_id")
+    @JsonBackReference("academic-degree-course")
     @JsonProperty("academic_degree")
     private AcademicDegree academicDegree;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "course-modules")
+    @JsonProperty("modules")
+    private List<Module> modules;
 
     public Course(Long courseId, String courseTitle, String courseDescription, @NonNull Character archived, Date createdDate, String courseDuration, Date startDate, Date endDate) {
         this.courseId = courseId;
