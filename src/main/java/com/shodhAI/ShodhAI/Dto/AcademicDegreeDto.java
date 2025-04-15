@@ -23,5 +23,9 @@ public class AcademicDegreeDto {
     private String institutionName;
 
     @JsonProperty("semester_ids")
-    List<Long> semesterIds= new ArrayList<>();
+    List<Long> semesterIds;
+
+    @JsonProperty("course_ids")
+    List<Long> courseIds;
+
 }

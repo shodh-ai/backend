@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -82,6 +83,11 @@ public class AcademicDegree {
     @ManyToMany(mappedBy = "degrees")
     @JsonManagedReference("institute-degree")
     private List<Institute> institutes;
+
+    @OneToMany(mappedBy = "academicDegree", cascade = CascadeType.ALL) // remove orphanRemoval
+    @JsonManagedReference(value = "academic-degree-course")
+    @JsonProperty("courses")
+    private List<Course> courses;
 
     public AcademicDegree(Long degreeId, @NonNull String degreeName, String programName, String institutionName, @NonNull Character archived, Date createdDate) {
         this.degreeId = degreeId;
