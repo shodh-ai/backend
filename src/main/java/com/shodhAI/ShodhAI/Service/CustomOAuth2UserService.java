@@ -66,7 +66,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     @Transactional
-    private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest, OAuth2User oAuth2User) {
+    private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest, OAuth2User oAuth2User) throws Exception {
         Map<String, Object> attributes = oAuth2User.getAttributes();
         GoogleUserInfo userInfo = new GoogleUserInfo(attributes);
         String email = userInfo.getEmail();

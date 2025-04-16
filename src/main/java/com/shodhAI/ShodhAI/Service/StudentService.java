@@ -387,90 +387,119 @@ public class StudentService {
 
     @Transactional
     public Student updateStudent(Long studentId, StudentDto studentDto) throws Exception {
-        Student studentToUpdate= entityManager.find(Student.class,studentId);
-        if(studentToUpdate==null)
+        try
         {
-            throw new IllegalArgumentException("Student with id "+ studentId+" not found");
+            Student studentToUpdate= entityManager.find(Student.class,studentId);
+            if(studentToUpdate==null)
+            {
+                throw new IllegalArgumentException("Student with id "+ studentId+" not found");
+            }
+            validateAndSaveStudentForUpdate(studentDto,studentToUpdate);
+            return entityManager.merge(studentToUpdate);
+        }catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
         }
-        validateAndSaveStudentForUpdate(studentDto,studentToUpdate);
-        return entityManager.merge(studentToUpdate);
+
     }
 
-    public List<Student> filterStudents(String username, Long studentId, String personalEmail) {
-        StringBuilder queryString = new StringBuilder("SELECT s FROM Student s WHERE 1 = 1");
+    public List<Student> filterStudents(String username, Long studentId, String personalEmail) throws Exception {
+        try
+        {
+            StringBuilder queryString = new StringBuilder("SELECT s FROM Student s WHERE 1 = 1");
 
-        if (username != null && !username.isEmpty()) {
-            queryString.append(" AND s.userName = :username");
-        }
-        if (studentId != null) {
-            queryString.append(" AND s.id = :studentId");
-        }
-        if (personalEmail != null && !personalEmail.isEmpty()) {
-            queryString.append(" AND s.personalEmail = :personalEmail");
-        }
+            if (username != null && !username.isEmpty()) {
+                queryString.append(" AND s.userName = :username");
+            }
+            if (studentId != null) {
+                queryString.append(" AND s.id = :studentId");
+            }
+            if (personalEmail != null && !personalEmail.isEmpty()) {
+                queryString.append(" AND s.personalEmail = :personalEmail");
+            }
 
-        TypedQuery<Student> query = entityManager.createQuery(queryString.toString(), Student.class);
+            TypedQuery<Student> query = entityManager.createQuery(queryString.toString(), Student.class);
 
-        if (username != null && !username.isEmpty()) {
-            query.setParameter("username", username);
-        }
-        if (studentId != null) {
-            query.setParameter("studentId", studentId);
-        }
-        if (personalEmail != null && !personalEmail.isEmpty()) {
-            query.setParameter("personalEmail", personalEmail);
-        }
+            if (username != null && !username.isEmpty()) {
+                query.setParameter("username", username);
+            }
+            if (studentId != null) {
+                query.setParameter("studentId", studentId);
+            }
+            if (personalEmail != null && !personalEmail.isEmpty()) {
+                query.setParameter("personalEmail", personalEmail);
+            }
 
-        List<Student> students = query.getResultList();
+            List<Student> students = query.getResultList();
         /*if (students.isEmpty()) {
             throw new UsernameNotFoundException("No students found matching the criteria");
         }*/
 
-        return students;
+            return students;
+        }catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
     }
 
     @Transactional
-    public StudentAssignment submitAssignment(Long assignmentId, Long studentId, String submissionText) {
-        // Retrieve the student assignment record
-        entityManager.clear();
-        Assignment assignment = entityManager.find(Assignment.class, assignmentId);
-        if (assignment == null) {
-            throw new IllegalArgumentException("Assignment with id " + studentId + " not found");
+    public StudentAssignment submitAssignment(Long assignmentId, Long studentId, String submissionText) throws Exception {
+        try
+        {
+            // Retrieve the student assignment record
+            entityManager.clear();
+            Assignment assignment = entityManager.find(Assignment.class, assignmentId);
+            if (assignment == null) {
+                throw new IllegalArgumentException("Assignment with id " + studentId + " not found");
+            }
+            Student student = entityManager.find(Student.class, studentId);
+            if (student == null) {
+                throw new IllegalArgumentException("Student with id " + studentId + " not found");
+            }
+            List<StudentAssignment> results = entityManager.createQuery(
+                            "SELECT sa FROM StudentAssignment sa " +
+                                    "WHERE sa.assignment.assignmentId = :assignmentId " +
+                                    "AND sa.student.id = :studentId", StudentAssignment.class)
+                    .setParameter("assignmentId", assignmentId)
+                    .setParameter("studentId", studentId)
+                    .getResultList();
+
+            StudentAssignment studentAssignment = results.isEmpty() ? null : results.get(0);
+
+            if (studentAssignment == null) {
+                throw new IllegalArgumentException("No assignment found for the given student.");
+            }
+
+            // Check if the assignment is already submitted
+            if (Boolean.TRUE.equals(studentAssignment.getCompletionStatus())) {
+                throw new IllegalArgumentException("Assignment has already been submitted.");
+            }
+
+            // Handle text submission if provided
+            if (submissionText != null && !submissionText.isEmpty()) {
+                studentAssignment.setSubmittedText(submissionText);
+            }
+
+            // Update submission details
+            studentAssignment.setCompletionStatus(true);
+            studentAssignment.setSubmissionDate(new Date());
+            studentAssignment.setUpdatedDate(new Date());
+
+            entityManager.merge(studentAssignment);
+            return studentAssignment;
+        }catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
         }
-        Student student = entityManager.find(Student.class, studentId);
-        if (student == null) {
-            throw new IllegalArgumentException("Student with id " + studentId + " not found");
-        }
-        List<StudentAssignment> results = entityManager.createQuery(
-                        "SELECT sa FROM StudentAssignment sa " +
-                                "WHERE sa.assignment.assignmentId = :assignmentId " +
-                                "AND sa.student.id = :studentId", StudentAssignment.class)
-                .setParameter("assignmentId", assignmentId)
-                .setParameter("studentId", studentId)
-                .getResultList();
-
-        StudentAssignment studentAssignment = results.isEmpty() ? null : results.get(0);
-
-        if (studentAssignment == null) {
-            throw new IllegalArgumentException("No assignment found for the given student.");
-        }
-
-        // Check if the assignment is already submitted
-        if (Boolean.TRUE.equals(studentAssignment.getCompletionStatus())) {
-            throw new IllegalArgumentException("Assignment has already been submitted.");
-        }
-
-        // Handle text submission if provided
-        if (submissionText != null && !submissionText.isEmpty()) {
-            studentAssignment.setSubmittedText(submissionText);
-        }
-
-        // Update submission details
-        studentAssignment.setCompletionStatus(true);
-        studentAssignment.setSubmissionDate(new Date());
-        studentAssignment.setUpdatedDate(new Date());
-
-        entityManager.merge(studentAssignment);
-        return studentAssignment;
     }
+
 }
