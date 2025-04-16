@@ -10,6 +10,7 @@ import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.CourseSemesterDegree;
 import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Entity.Gender;
+import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.Semester;
 import com.shodhAI.ShodhAI.Entity.Session;
 import com.shodhAI.ShodhAI.Entity.Student;
@@ -42,6 +43,9 @@ public class CourseService {
 
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
+
+    @Autowired
+    RoleService roleService;
 
     public void validateCourse(CourseDto courseDto) throws Exception {
         try {
@@ -496,24 +500,34 @@ public class CourseService {
             Long courseId,
             Long userId,
             Long roleId,
+            Long semesterId,
             Long degreeId
     ) throws Exception {
         try {
-            StringBuilder jpql = new StringBuilder(
-                    "SELECT DISTINCT c FROM Course c WHERE 1=1 "
-            );
+            Role role= roleService.getRoleById(roleId);
+            if(role.getRoleName().equals(Constant.ROLE_USER))
+            {
+                Student student= entityManager.find(Student.class,userId);
+                degreeId = student.getAcademicDegree().getDegreeId();
+            }
+            StringBuilder jpql = new StringBuilder("SELECT DISTINCT c FROM Course c LEFT JOIN c.courseSemesterDegrees csd WHERE c.archived = 'N' ");
 
             // Prepare parameters map
             Map<String, Object> params = new HashMap<>();
 
             // Add filters based on input parameters
             if (courseId != null) {
-                jpql.append("AND c.courseId = :courseId ");
+                jpql.append("AND c.archived= 'N' AND c.courseId = :courseId ");
                 params.put("courseId", courseId);
             }
 
+            if (semesterId != null) {
+                jpql.append("AND csd.semester.archived= 'N' AND csd.semester.semesterId = :semesterId ");
+                params.put("semesterId", semesterId);
+            }
+
             if (degreeId != null) {
-                jpql.append("AND c.academicDegree.degreeId = :degreeId ");
+                jpql.append("AND csd.academicDegree.archived= 'N' AND csd.academicDegree.degreeId = :degreeId ");
                 params.put("degreeId", degreeId);
             }
 

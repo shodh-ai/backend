@@ -119,12 +119,12 @@ public class ModuleService {
             }
 
             if (courseId != null) {
-                jpql.append("AND m.course.courseId = :courseId ");
+                jpql.append("AND m.course.archived='N' AND m.course.courseId = :courseId ");
                 params.put("courseId", courseId);
             }
 
             if (academicDegreeId != null) {
-                jpql.append("AND m.course.academicDegree.degreeId = :academicDegreeId ");
+                jpql.append("AND m.course.academicDegree.archived='N' AND m.course.academicDegree.degreeId = :academicDegreeId ");
                 params.put("academicDegreeId", academicDegreeId);
             }
 
