@@ -6,7 +6,9 @@ import com.shodhAI.ShodhAI.Dto.SemesterDto;
 import com.shodhAI.ShodhAI.Entity.AcademicDegree;
 import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Entity.CourseSemesterDegree;
+import com.shodhAI.ShodhAI.Entity.Role;
 import com.shodhAI.ShodhAI.Entity.Semester;
+import com.shodhAI.ShodhAI.Entity.Student;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -39,6 +41,9 @@ public class SemesterService {
     private ExceptionHandlingService exceptionHandlingService;
 
     String DATE_FORMAT = "dd-MM-yyyy";
+
+    @Autowired
+    RoleService roleService;
 
     public void validateSemester(SemesterDto semesterDto) throws Exception {
         try {
@@ -380,6 +385,12 @@ public class SemesterService {
     @Transactional
     public List<Semester> semesterFilter(Long semesterId, Long userId, Long roleId, Long academicDegreeId) throws Exception {
         try {
+            Role role= roleService.getRoleById(roleId);
+            if(role.getRoleName().equals(Constant.ROLE_USER))
+            {
+                Student student= entityManager.find(Student.class,userId);
+                academicDegreeId = student.getAcademicDegree().getDegreeId();
+            }
             StringBuilder jpql = new StringBuilder("SELECT DISTINCT s FROM Semester s ");
 
             // If filtering by academic degree, we need to join the academic_degrees
@@ -390,11 +401,11 @@ public class SemesterService {
             }
 
             if (semesterId != null) {
-                jpql.append("AND s.semesterId = :semesterId ");
+                jpql.append("AND s.archived='N' AND s.semesterId = :semesterId ");
             }
 
             if (academicDegreeId != null) {
-                jpql.append("AND ad.degreeId = :academicDegreeId ");
+                jpql.append("AND ad.archived='N' AND ad.degreeId = :academicDegreeId ");
             }
 
             // Add ORDER BY clause to sort by semesterId
