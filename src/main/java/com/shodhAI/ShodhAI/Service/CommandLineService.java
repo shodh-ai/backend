@@ -163,6 +163,53 @@ public class CommandLineService implements CommandLineRunner {
             entityManager.merge(new Course(22L, "Chemistry Basics", "Organic & Inorganic Chemistry", 'N', new Date(), "6 months", new Date(), new Date()));
             entityManager.merge(new Course(23L, "Advanced Data Science", "Machine Learning & AI", 'N', new Date(), "6 months", new Date(), new Date()));
             entityManager.merge(new Course(24L, "Doctoral Research Methods", "Quantitative & Qualitative Research", 'N', new Date(), "6 months", new Date(), new Date()));
+
+
+            entityManager.merge(new Course(39L, "Financial Tools", "Advanced Financial Modeling", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(40L, "Branding Essentials", "Brand Strategy & Development", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(41L, "Executive Communication", "Leadership Communication", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(42L, "Retail Business", "Retail & Channel Management", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(43L, "Process Optimization", "Business Process Re-engineering", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(44L, "HR Learning Programs", "Training & Development", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(45L, "HR Metrics & KPIs", "Workforce Analytics", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(46L, "Labor Laws & Unions", "Industrial Relations", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(47L, "PMP & Agile", "Advanced Project Management", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(48L, "Insurance Sector", "Insurance & Risk Planning", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(49L, "HR Roadmaps", "Strategic Human Resource Planning", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(50L, "Ethical Business", "Corporate Social Responsibility", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(51L, "Organizational Adaptation", "Change Management", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(52L, "Financial Services", "Investment Banking", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(53L, "Capital Markets", "Equity Research & Analysis", 'N', new Date(), "6 months", new Date(), new Date()));
+            entityManager.merge(new Course(54L, "CX Design", "Customer Experience Management", 'N', new Date(), "6 months", new Date(), new Date()));
+
+            entityManager.merge(new Course(55L, "DBMS Essentials", "Database Management Systems", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(56L, "Network Fundamentals", "Computer Networks", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(57L, "Software Development Processes", "Software Engineering", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(58L, "Algorithms & Data Structures", "Data Structures", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(59L, "Compiler Principles", "Compiler Design", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(60L, "Automata Theory", "Theory of Computation", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(61L, "AI Concepts & Techniques", "Artificial Intelligence", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(62L, "Information Security", "Cybersecurity Fundamentals", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(63L, "Frontend and Backend Web", "Web Development", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(64L, "Android & iOS Development", "Mobile App Development", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(65L, "AWS, Azure, GCP", "Cloud Computing", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(66L, "Hadoop & Spark", "Big Data Analytics", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(67L, "Distributed Ledger Tech", "Blockchain Fundamentals", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(68L, "Mechatronics Basics", "Robotics and Control Systems", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(69L, "Text & Speech Processing", "Natural Language Processing", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(70L, "Vision & Imaging", "Image Processing", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(71L, "Immersive Tech", "Virtual Reality & AR", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(72L, "Manual & Automated Testing", "Software Testing", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(73L, "Unity & Unreal", "Game Development", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(74L, "Python for Pros", "Advanced Programming in Python", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(75L, "Knowledge Discovery", "Data Mining", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(76L, "Secure Communications", "Network Security", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(77L, "Connected Devices", "Internet of Things (IoT)", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(78L, "Rendering & Modeling", "Computer Graphics", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(79L, "CI/CD & Automation", "DevOps Tools & Practices", 'N', new Date(), "4w", new Date(), new Date()));
+            entityManager.merge(new Course(80L, "Scrum, Kanban & Lean", "Agile Methodology", 'N', new Date(), "4w", new Date(), new Date()));
+
+
         }
 
         // Check if modules already exist
