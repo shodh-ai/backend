@@ -45,7 +45,7 @@ public class SemesterController
     @Autowired
     JwtUtil jwtTokenUtil;
 
-    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
+//    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping("/add")
     public ResponseEntity<?> createSemester(@RequestBody SemesterDto semesterDto) throws ParseException {
         try
