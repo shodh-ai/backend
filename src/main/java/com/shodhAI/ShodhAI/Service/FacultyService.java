@@ -335,48 +335,65 @@ public class FacultyService {
 
     @Transactional
     public Faculty updateFaculty(Long facultyId, FacultyDto facultyDto) throws Exception {
-        Faculty facultyToUpdate= entityManager.find(Faculty.class,facultyId);
-        if(facultyToUpdate==null)
+        try
         {
-            throw new IllegalArgumentException("Faculty with id "+ facultyId+" not found");
+            Faculty facultyToUpdate= entityManager.find(Faculty.class,facultyId);
+            if(facultyToUpdate==null)
+            {
+                throw new IllegalArgumentException("Faculty with id "+ facultyId+" not found");
+            }
+            validateAndSaveFacultyForUpdate(facultyDto,facultyToUpdate);
+            return entityManager.merge(facultyToUpdate);
+        }catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
         }
-        validateAndSaveFacultyForUpdate(facultyDto,facultyToUpdate);
-        return entityManager.merge(facultyToUpdate);
+
     }
 
-    public List<Faculty> filterFaculties(String username, Long facultyId, String personalEmail) {
-        StringBuilder queryString = new StringBuilder("SELECT f FROM Faculty f WHERE 1 = 1");
+    public List<Faculty> filterFaculties(String username, Long facultyId, String personalEmail) throws Exception {
+        try
+        {
+            StringBuilder queryString = new StringBuilder("SELECT f FROM Faculty f WHERE 1 = 1");
 
-        if (username != null && !username.isEmpty()) {
-            queryString.append(" AND f.userName = :username");
-        }
-        if (facultyId != null) {
-            queryString.append(" AND f.id = :facultyId");
-        }
-        if (personalEmail != null && !personalEmail.isEmpty()) {
-            queryString.append(" AND f.personalEmail = :personalEmail");
-        }
+            if (username != null && !username.isEmpty()) {
+                queryString.append(" AND f.userName = :username");
+            }
+            if (facultyId != null) {
+                queryString.append(" AND f.id = :facultyId");
+            }
+            if (personalEmail != null && !personalEmail.isEmpty()) {
+                queryString.append(" AND f.personalEmail = :personalEmail");
+            }
 
-        TypedQuery<Faculty> query = entityManager.createQuery(queryString.toString(), Faculty.class);
+            TypedQuery<Faculty> query = entityManager.createQuery(queryString.toString(), Faculty.class);
 
-        if (username != null && !username.isEmpty()) {
-            query.setParameter("username", username);
-        }
-        if (facultyId != null) {
-            query.setParameter("facultyId", facultyId);
-        }
-        if (personalEmail != null && !personalEmail.isEmpty()) {
-            query.setParameter("personalEmail", personalEmail);
-        }
+            if (username != null && !username.isEmpty()) {
+                query.setParameter("username", username);
+            }
+            if (facultyId != null) {
+                query.setParameter("facultyId", facultyId);
+            }
+            if (personalEmail != null && !personalEmail.isEmpty()) {
+                query.setParameter("personalEmail", personalEmail);
+            }
 
-        List<Faculty> faculties = query.getResultList();
+            List<Faculty> faculties = query.getResultList();
 
         /*if (faculties.isEmpty()) {
             throw new UsernameNotFoundException("No faculties found matching the criteria");
         }*/
 
-        return faculties;
+            return faculties;
+        }catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
     }
-
-
 }
