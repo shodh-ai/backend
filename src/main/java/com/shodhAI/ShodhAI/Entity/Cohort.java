@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -32,22 +34,22 @@ import java.util.List;
 public class Cohort {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cohort_id")
     private Long cohortId;
 
     @Column(name = "title", unique = true)
     @JsonProperty("title")
-    private String courseTitle;
+    private String cohortTitle;
 
     @Column(name = "description")
     @JsonProperty("description")
-    private String courseDescription;
+    private String cohortDescription;
 
     @NonNull
     @Column(name = "archived")
     @JsonProperty("archived")
     private Character archived = 'N';
-
 
     @Column(name = "created_date")
     @JsonProperty("created_date")
@@ -83,7 +85,7 @@ public class Cohort {
             joinColumns = @JoinColumn(name = "cohort_id"),
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
-    @JsonBackReference(value = "students-course")
+    @JsonBackReference(value = "cohort-student")
     @JsonProperty("students")
     private List<Student> students = new ArrayList<>();
 

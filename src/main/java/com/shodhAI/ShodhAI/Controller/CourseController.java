@@ -119,7 +119,7 @@ public class CourseController {
 
     @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PatchMapping("/update/{courseIdString}")
-    public ResponseEntity<?> updateFaculty( @PathVariable String courseIdString,@RequestBody CourseDto courseDto) {
+    public ResponseEntity<?> updateFaculty( @PathVariable String courseIdString, @RequestBody CourseDto courseDto) {
         try {
             Long courseId = Long.parseLong(courseIdString);
             Course course = courseService.updateCourse(courseId,courseDto);

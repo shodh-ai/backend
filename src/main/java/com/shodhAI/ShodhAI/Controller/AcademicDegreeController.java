@@ -102,7 +102,7 @@ public class AcademicDegreeController {
 
             // Construct paginated response
             Map<String, Object> response = new HashMap<>();
-            response.put("academicDegree", paginatedList);
+            response.put("academicDegrees", paginatedList);
             response.put("totalItems", totalItems);
             response.put("totalPages", totalPages);
             response.put("currentPage", offset);
