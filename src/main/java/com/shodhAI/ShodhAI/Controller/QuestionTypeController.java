@@ -1,6 +1,7 @@
 package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Entity.QuestionType;
+import com.shodhAI.ShodhAI.Entity.QuestionType;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.QuestionTypeService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -140,6 +142,28 @@ public class QuestionTypeController {
         {
             exceptionHandlingService.handleException(illegalArgumentException);
             return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PatchMapping("/update/{questionTypeIdString}")
+    public ResponseEntity<?> updateQuestionType(@RequestBody QuestionType questionType, @PathVariable String questionTypeIdString)
+    {
+        try {
+            Long questionTypeId = Long.parseLong(questionTypeIdString);
+            questionTypeService.getQuestionTypeById(questionTypeId);
+            if (questionType == null) {
+                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
+            }
+            QuestionType updatedQuestion= questionTypeService.updateQuestionType(questionTypeId,questionType);
+            return ResponseService.generateSuccessResponse("Question type is updated successfully ", updatedQuestion,HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
         catch (Exception e) {
             exceptionHandlingService.handleException(e);

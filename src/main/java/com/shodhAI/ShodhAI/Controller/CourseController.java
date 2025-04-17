@@ -117,9 +117,9 @@ public class CourseController {
         }
     }
 
-    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
+//    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PatchMapping("/update/{courseIdString}")
-    public ResponseEntity<?> updateFaculty( @PathVariable String courseIdString, @RequestBody CourseDto courseDto) {
+    public ResponseEntity<?> updateFaculty( @PathVariable String courseIdString,@RequestBody CourseDto courseDto) {
         try {
             Long courseId = Long.parseLong(courseIdString);
             Course course = courseService.updateCourse(courseId,courseDto);
@@ -139,6 +139,7 @@ public class CourseController {
     @GetMapping("/get-filter-course")
     public ResponseEntity<?> getFilterCourse(
             @RequestParam(required = false) Long courseId,
+            @RequestParam(required = false) Long semesterId,
             @RequestParam(required = false) Long degreeId,
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int limit,
@@ -156,7 +157,7 @@ public class CourseController {
             Long roleId = jwtTokenUtil.extractRoleId(jwtToken);
             Long userId = jwtTokenUtil.extractId(jwtToken);
 
-            List<Course> courses = courseService.courseFilter(courseId, userId, roleId, degreeId);
+            List<Course> courses = courseService.courseFilter(courseId, userId, roleId, semesterId, degreeId);
 
             if (courses.isEmpty()) {
                 return ResponseService.generateSuccessResponse("No courses found with the given criteria", new ArrayList<>(), HttpStatus.OK);

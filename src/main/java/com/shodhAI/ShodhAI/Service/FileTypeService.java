@@ -2,14 +2,18 @@ package com.shodhAI.ShodhAI.Service;
 
 import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Entity.FileType;
+import com.shodhAI.ShodhAI.Entity.FileType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class FileTypeService {
@@ -125,6 +129,51 @@ public class FileTypeService {
             exceptionHandlingService.handleException(persistenceException);
             throw new PersistenceException(persistenceException.getMessage());
         } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
+    }
+
+    @Transactional
+    public FileType updateFileType(Long fileTypeId, FileType fileType) throws Exception {
+        try
+        {
+            FileType fileTypeToUpdate= entityManager.find(FileType.class,fileTypeId);
+            if(fileTypeToUpdate==null)
+            {
+                throw new IllegalArgumentException("File type with id "+ fileTypeId+ " not found");
+            }
+            if(fileType.getFileTypeName()!=null)
+            {
+                if(fileType.getFileTypeName().trim().isEmpty())
+                {
+                    throw new IllegalArgumentException("File type name cannot be null or empty");
+                }
+                List<FileType> fileTypes= getAllFileType();
+                for(FileType fileTypeToGet : fileTypes)
+                {
+                    if (!Objects.equals(fileTypeToGet.getFileTypeId(), fileTypeId) && fileTypeToGet.getFileTypeName().equalsIgnoreCase(fileType.getFileTypeName().trim()))
+                    {
+                        throw new DataIntegrityViolationException("File type already exists with name " + fileType.getFileTypeName().trim());
+                    }
+                }
+                fileTypeToUpdate.setFileTypeName(fileType.getFileTypeName().trim());
+            }
+            entityManager.merge(fileTypeToUpdate);
+            return fileTypeToUpdate;
+        }
+        catch (DataIntegrityViolationException e)
+        {
+            exceptionHandlingService.handleException(e);
+            throw new DataIntegrityViolationException(e.getMessage());
+        }
+        catch (IllegalArgumentException illegalArgumentException)
+        {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        }
+        catch (Exception exception)
+        {
             exceptionHandlingService.handleException(exception);
             throw new Exception(exception.getMessage());
         }

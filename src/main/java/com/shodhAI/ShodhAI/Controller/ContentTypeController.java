@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -140,6 +141,28 @@ public class ContentTypeController {
         {
             exceptionHandlingService.handleException(illegalArgumentException);
             return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PatchMapping("/update/{contentTypeIdString}")
+    public ResponseEntity<?> updateContentType(@RequestBody ContentType contentType,@PathVariable String contentTypeIdString)
+    {
+        try {
+            Long contentTypeId = Long.parseLong(contentTypeIdString);
+            contentTypeService.getContentTypeById(contentTypeId);
+            if (contentType == null) {
+                return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
+            }
+            ContentType updatedContent= contentTypeService.updateContentType(contentTypeId,contentType);
+            return ResponseService.generateSuccessResponse("Content type is updated successfully ", updatedContent,HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            exceptionHandlingService.handleException(e);
+            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
         catch (Exception e) {
             exceptionHandlingService.handleException(e);
