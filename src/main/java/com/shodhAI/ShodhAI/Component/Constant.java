@@ -90,4 +90,7 @@ public class Constant {
 
     public static String GET_INSTITUTE_BY_ID = "SELECT i FROM Institute i WHERE i.instituteId = :instituteId AND i.archived = 'N'";
 
+    public static String GET_ALL_COHORTS = "SELECT c FROM Cohort c WHERE c.archived = 'N'";
+    public static String GET_COHORT_BY_ID = "SELECT c FROM Cohort c WHERE c.cohortId = :cohortId";
+
 }

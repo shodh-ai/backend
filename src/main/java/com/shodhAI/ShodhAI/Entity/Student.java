@@ -3,7 +3,6 @@ package com.shodhAI.ShodhAI.Entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
@@ -212,5 +211,8 @@ public class Student {
     @Column(name = "auth_provider")
     private String authProvider;
 
+    @ManyToMany(mappedBy = "students")
+    @JsonManagedReference("cohort-student")
+    private List<Cohort> cohorts;
 
 }

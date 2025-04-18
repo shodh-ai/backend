@@ -97,13 +97,39 @@ public class UserController {
             userSubComponentProgressService.validateUserSubComponentProgress(subTopicId, subComponentName);
             Topic subTopic = topicService.getTopicById(subTopicId);
 
-            List<UserSubTopicProgress> userSubTopicProgressList = userSubTopicProgressService.getUserSubTopicProgressFilter(userSubTopicProgressId, userId, roleId, null);
-            UserSubTopicProgress userSubTopicProgress = null;
-            if(!userSubTopicProgressList.isEmpty()) {
-                userSubTopicProgress = userSubTopicProgressList.get(0);
+            Course course = subTopic.getCourse();
+            List<UserCourseProgress> userCourseProgressList = userCourseProgressService.getUserCourseProgressFilter(null, userId, roleId, course.getCourseId());
+            UserCourseProgress userCourseProgress = null;
+            if(userCourseProgressList.isEmpty()) {
+                userCourseProgress = userCourseProgressService.saveUserCourseProgress(userId, roleId, course.getCourseId(), null);
             } else {
-                // For now handling all the validation through this logic
-                throw new IllegalArgumentException("User Sub Topic Progress Does not exists");
+                userCourseProgress = userCourseProgressList.get(0);
+            }
+
+            Module module = subTopic.getModule();
+            List<UserModuleProgress> userModuleProgressList = userModuleProgressService.getUserModuleProgressFilter(null, userId, roleId, module.getModuleId());
+            UserModuleProgress userModuleProgress = null;
+            if(userModuleProgressList.isEmpty()) {
+                userModuleProgress = userModuleProgressService.saveUserModuleProgress(userId, roleId, module.getModuleId(), userCourseProgress);
+            }  else {
+                userModuleProgress = userModuleProgressList.get(0);
+            }
+
+            Topic parentTopic = subTopic.getDefaultParentTopic();
+            List<UserTopicProgress> userTopicProgressList = userTopicProgressService.getUserTopicProgressFilter(null, userId, roleId, parentTopic.getTopicId());
+            UserTopicProgress userTopicProgress = null;
+            if(userTopicProgressList.isEmpty()) {
+                userTopicProgress = userTopicProgressService.saveUserTopicProgress(userId, roleId, module.getModuleId(), userModuleProgress);
+            } else {
+                userTopicProgress = userTopicProgressList.get(0);
+            }
+
+            List<UserSubTopicProgress> userSubTopicProgressList = userSubTopicProgressService.getUserSubTopicProgressFilter(userSubTopicProgressId, userId, roleId, subTopic.getTopicId());
+            UserSubTopicProgress userSubTopicProgress = null;
+            if(userSubTopicProgressList.isEmpty()) {
+                userSubTopicProgress = userSubTopicProgressService.saveUserSubTopicProgress(userId, roleId, subTopic.getTopicId(), userTopicProgress);
+            } else {
+                userSubTopicProgress = userSubTopicProgressList.get(0);
             }
             UserSubComponentProgress userSubComponentProgress = userSubComponentProgressService.saveUserSubComponentProgress(userId, roleId, userSubTopicProgress, subTopic, subComponentName);
 

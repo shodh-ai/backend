@@ -51,6 +51,10 @@ public class UserSubComponentProgressService {
     public UserSubComponentProgress saveUserSubComponentProgress(Long userId, Long roleId, UserSubTopicProgress userSubTopicProgress, Topic subTopic, String subComponentName) throws Exception {
         try {
 
+            List<UserSubComponentProgress> userSubComponentProgressList = getUserSubComponentProgressFilter(null, userId, roleId, subTopic.getTopicId(), subComponentName);
+            if(!userSubComponentProgressList.isEmpty()) {
+                return userSubComponentProgressList.get(0);
+            }
             UserSubComponentProgress userSubComponentProgress = new UserSubComponentProgress();
             userSubComponentProgress.setUserId(userId);
             userSubComponentProgress.setSubComponentName(subComponentName);
