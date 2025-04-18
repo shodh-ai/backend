@@ -1,5 +1,6 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;
@@ -55,6 +56,7 @@ public class UserSubTopicProgress {
 
     @OneToMany(mappedBy = "userSubTopicProgress", cascade = CascadeType.ALL)
     @JsonProperty("subcomponent_progress")
+    @JsonBackReference
     private List<UserSubComponentProgress> subComponentProgress;
 
     @Column(name = "created_date")
