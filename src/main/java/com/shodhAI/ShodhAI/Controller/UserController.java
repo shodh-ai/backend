@@ -228,16 +228,16 @@ public class UserController {
 
     @PatchMapping("/update-user-sub-component-progress")
     public ResponseEntity<?> updateUserSubComponentProgress (
-            @RequestParam(value = "topic_id", required = false) String topicIdString,
+            @RequestParam(value = "sub_topic_id", required = false) String subTopicIdString,
             @RequestParam("sub_component_name") String subComponentName,
             @RequestParam("is_completed") Boolean isCompleted,
-            @RequestParam("user_sub_topic_progress_id") String userSubComponentProgressIdString,
+            @RequestParam(value = "user_sub_topic_progress_id", required = false) String userSubComponentProgressIdString,
             @RequestHeader(value = "Authorization") String authHeader) {
 
         try {
-            Long topicId = null, userSubComponentProgressId = null;
-            if(topicIdString != null) {
-                topicId = Long.parseLong(topicIdString);
+            Long subTopicId = null, userSubComponentProgressId = null;
+            if(subTopicIdString != null) {
+                subTopicId = Long.parseLong(subTopicIdString);
             }
             if(userSubComponentProgressIdString != null) {
                 userSubComponentProgressId = Long.parseLong(userSubComponentProgressIdString);
@@ -248,7 +248,7 @@ public class UserController {
             Long userId = jwtTokenUtil.extractId(jwtToken);
 
             // Fetch filtered products
-            List<UserSubComponentProgress> userSubComponentProgressList = userSubComponentProgressService.getUserSubComponentProgressFilter(userSubComponentProgressId, userId, roleId, topicId, subComponentName);
+            List<UserSubComponentProgress> userSubComponentProgressList = userSubComponentProgressService.getUserSubComponentProgressFilter(userSubComponentProgressId, userId, roleId, subTopicId, subComponentName);
 
             if (userSubComponentProgressList.isEmpty()) {
                 return ResponseService.generateSuccessResponse("No User Sub Component found with the given criteria", new ArrayList<>(), HttpStatus.OK);
