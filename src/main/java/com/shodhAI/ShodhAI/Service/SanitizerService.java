@@ -1,7 +1,11 @@
 package com.shodhAI.ShodhAI.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -10,6 +14,12 @@ import java.util.regex.Pattern;
 @Slf4j
 @Service
 public class SanitizerService {
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @Autowired
+    ExceptionHandlingService exceptionHandlingService;
 
     private static final Pattern SQL_INJECTION_PATTERN = Pattern.compile(
             ".*(select|insert|update|delete|union|drop|exec|create|alter|truncate|--|\\b'or\\b|\\b1=1\\b|\\b'\\s*or\\b|\\b'\\s*and\\b).*",
@@ -42,51 +52,79 @@ public class SanitizerService {
             Pattern.CASE_INSENSITIVE
     );
 
-    public Map<String, Object> sanitizeInputMap(Map<String, Object> inputMap) {
-        inputMap=removeKeyValuePair(inputMap);
-        Map<String, Object> sanitizedDataMap = new HashMap<>();
+    public void sanitizeInputMap(Object input) throws Exception {
+        try {
+            Map<String, Object> inputMap = objectMapper.convertValue(input, new TypeReference<Map<String, Object>>() {
+            });
+            inputMap = removeKeyValuePair(inputMap);
+            Map<String, Object> sanitizedDataMap = new HashMap<>();
 
-        for (Map.Entry<String, Object> entry : inputMap.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            Object sanitizedValue = sanitizeValue(key, value); // new method to handle logic
-            sanitizedDataMap.put(key, sanitizedValue);
+            for (Map.Entry<String, Object> entry : inputMap.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                sanitizeValue(key, value); // new method to handle logic
+//                sanitizedDataMap.put(key, sanitizedValue);
+            }
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
         }
-        return sanitizedDataMap;
     }
 
-    private Object sanitizeValue(String key, Object value) {
-        if (value instanceof String strVal) {
-            // If the key indicates it's sensitive (like password, token, etc.), mask it
-            if (key.matches("(?i).*password.*|.*secret.*|.*token.*|.*key.*")) {
-                return "******"; // masked
+    private Object sanitizeValue(String key, Object value) throws Exception {
+        try {
+            if (value instanceof String strVal) {
+                // If the key indicates it's sensitive (like password, token, etc.), mask it
+                if (key.matches("(?i).*password.*|.*secret.*|.*token.*|.*key.*")) {
+                    return "******"; // masked
+                }
+
+                // Otherwise, clean the string
+                return strVal
+                        .replaceAll("<[^>]*>", "") // remove HTML tags
+                        .replaceAll("[\\n\\r\\t]", "") // remove line breaks and tabs
+                        .trim();
             }
 
-            // Otherwise, clean the string
-            return strVal
-                    .replaceAll("<[^>]*>", "") // remove HTML tags
-                    .replaceAll("[\\n\\r\\t]", "") // remove line breaks and tabs
-                    .trim();
-        }
+            // If it's not a string, just return the original
+            return value;
 
-        // If it's not a string, just return the original
-        return value;
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException("Unable to sanitize the input");
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
+        }
     }
 
-    public Map<String, Object> removeKeyValuePair(Map<String, Object> inputData) {
-        Map<String, Object> cleanedData = new HashMap<>(inputData);
-        Iterator<Map.Entry<String, Object>> iterator = cleanedData.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Object> entry = iterator.next();
-            String key = entry.getKey();
-            Object value = entry.getValue();
+    public Map<String, Object> removeKeyValuePair(Map<String, Object> inputData) throws Exception {
+        try {
+            Map<String, Object> cleanedData = new HashMap<>(inputData);
+            Iterator<Map.Entry<String, Object>> iterator = cleanedData.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, Object> entry = iterator.next();
+                String key = entry.getKey();
+                Object value = entry.getValue();
 
-            if (value != null && isMalicious(value.toString())) {
-                iterator.remove();
+                if (value != null && isMalicious(value.toString())) {
+                    iterator.remove();
+                    throw new IllegalArgumentException("Suspicious data found");
+                }
             }
+
+            return cleanedData;
+        } catch (IllegalArgumentException illegalArgumentException) {
+            exceptionHandlingService.handleException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            throw new Exception(exception.getMessage());
         }
 
-        return cleanedData;
     }
 
     public boolean isMalicious(String value) {

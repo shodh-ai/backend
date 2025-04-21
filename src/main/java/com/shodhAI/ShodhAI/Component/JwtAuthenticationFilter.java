@@ -37,6 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = Constant.BEARER;
     private static final int BEARER_PREFIX_LENGTH = BEARER_PREFIX.length();
+    // TODO needs to check this and resolve
     private static final Pattern UNSECURED_URI_PATTERN = Pattern.compile(
             "^/api/v1/(account|otp|test|files/avisoftdocument/[^/]+/[^/]+|files/[^/]+|avisoftdocument/[^/]+|swagger-ui.html|swagger-resources|v2/api-docs|images|webjars).*"
     );
