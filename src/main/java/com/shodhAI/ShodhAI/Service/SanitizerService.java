@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -52,19 +53,22 @@ public class SanitizerService {
             Pattern.CASE_INSENSITIVE
     );
 
-    public void sanitizeInputMap(Object input) throws Exception {
+    public void sanitizeInputMap(List<Object> inputList) throws Exception {
         try {
-            Map<String, Object> inputMap = objectMapper.convertValue(input, new TypeReference<Map<String, Object>>() {
-            });
-            inputMap = removeKeyValuePair(inputMap);
-            Map<String, Object> sanitizedDataMap = new HashMap<>();
+            for(Object input: inputList) {
+                Map<String, Object> inputMap = objectMapper.convertValue(input, new TypeReference<Map<String, Object>>() {
+                });
+                inputMap = removeKeyValuePair(inputMap);
+                Map<String, Object> sanitizedDataMap = new HashMap<>();
 
-            for (Map.Entry<String, Object> entry : inputMap.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                sanitizeValue(key, value); // new method to handle logic
+                for (Map.Entry<String, Object> entry : inputMap.entrySet()) {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+                    sanitizeValue(key, value); // new method to handle logic
 //                sanitizedDataMap.put(key, sanitizedValue);
+                }
             }
+
         } catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
             throw new IllegalArgumentException(illegalArgumentException.getMessage());

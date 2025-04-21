@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -24,15 +26,16 @@ public class TestController {
     @Autowired
     private ExceptionHandlingService exceptionHandlingService;
 
-
     @PostMapping("/sanitizer")
     public ResponseEntity<?> testSanitizer(@RequestBody Map<String,Object> map, HttpSession session, HttpServletRequest request) throws Exception {
         try {
             Student student = new Student();
-            student.setFirstName("rama");
-
-            sanitizerService.sanitizeInputMap(student);
-            return ResponseService.generateSuccessResponse("Sanitized map", "student", HttpStatus.OK);
+            student.setFirstName("raman");
+            List<Object> data = new ArrayList<>();
+            data.add(student);
+            data.add(map);
+            sanitizerService.sanitizeInputMap(data);
+            return ResponseService.generateSuccessResponse("Sanitized map", "successfully validated", HttpStatus.OK);
         } catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
             return ResponseService.generateErrorResponse("Illegal Exception Caught: " + illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);

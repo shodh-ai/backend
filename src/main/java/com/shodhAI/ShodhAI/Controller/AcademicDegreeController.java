@@ -6,6 +6,7 @@ import com.shodhAI.ShodhAI.Entity.AcademicDegree;
 import com.shodhAI.ShodhAI.Service.AcademicDegreeService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import com.shodhAI.ShodhAI.annotation.Authorize;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
@@ -41,11 +42,15 @@ public class AcademicDegreeController {
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
-//    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
+    @Autowired
+    SanitizerService sanitizerService;
+
+    //    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping("/add")
     public ResponseEntity<?> addAcademicDegree(@RequestBody AcademicDegreeDto academicDegreeDto) {
         try {
 
+            sanitizerService.sanitizeInputMap(List.of(academicDegreeDto));
             academicDegreeService.validateAcademicDegree(academicDegreeDto);
             AcademicDegree academicDegree = academicDegreeService.saveAcademicDegree(academicDegreeDto);
 
@@ -68,8 +73,8 @@ public class AcademicDegreeController {
 
     @GetMapping("/get-all")
     public ResponseEntity<?> retrieveAllAcademicDegree(HttpServletRequest request,
-                                                        @RequestParam(defaultValue = "0") int offset,
-                                                        @RequestParam(defaultValue = "10") int limit) {
+                                                       @RequestParam(defaultValue = "0") int offset,
+                                                       @RequestParam(defaultValue = "10") int limit) {
         try {
 
             if (offset < 0) {
@@ -144,18 +149,19 @@ public class AcademicDegreeController {
         }
     }
 
-//    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
+    //    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PatchMapping("/update/{academicDegreeIdString}")
-    public ResponseEntity<?> updateAcademicDegree(@RequestBody AcademicDegreeDto academicDegreeDto,@PathVariable String academicDegreeIdString)
-    {
+    public ResponseEntity<?> updateAcademicDegree(@RequestBody AcademicDegreeDto academicDegreeDto, @PathVariable String academicDegreeIdString) {
         try {
+
+            sanitizerService.sanitizeInputMap(List.of(academicDegreeDto));
             Long academicDegreeId = Long.parseLong(academicDegreeIdString);
             AcademicDegree academicDegree = academicDegreeService.getAcademicDegreeById(academicDegreeId);
             if (academicDegree == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            AcademicDegree updatedAcademicDegree=  academicDegreeService.updateAcademicDegree(academicDegreeId,academicDegreeDto);
-            return ResponseService.generateSuccessResponse("Academic Degree is updated successfully", updatedAcademicDegree,HttpStatus.OK);
+            AcademicDegree updatedAcademicDegree = academicDegreeService.updateAcademicDegree(academicDegreeId, academicDegreeDto);
+            return ResponseService.generateSuccessResponse("Academic Degree is updated successfully", updatedAcademicDegree, HttpStatus.OK);
 
         } catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
@@ -167,26 +173,21 @@ public class AcademicDegreeController {
     }
 
     @DeleteMapping("/delete/{academicDegreeIdString}")
-    public ResponseEntity<?> deleteAcademicDegree(@PathVariable String academicDegreeIdString)
-    {
-        try
-        {
+    public ResponseEntity<?> deleteAcademicDegree(@PathVariable String academicDegreeIdString) {
+        try {
             Long academicDegreeId = Long.parseLong(academicDegreeIdString);
             AcademicDegree academicDegree = academicDegreeService.getAcademicDegreeById(academicDegreeId);
             if (academicDegree == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            AcademicDegree deletedAcademicDegree=academicDegreeService.deleteAcademicDegreeById(academicDegreeId);
-            return ResponseService.generateSuccessResponse("Academic degree is archived successfully",deletedAcademicDegree,HttpStatus.OK);
-        }
-        catch (IllegalArgumentException illegalArgumentException)
-        {
+            AcademicDegree deletedAcademicDegree = academicDegreeService.deleteAcademicDegreeById(academicDegreeId);
+            return ResponseService.generateSuccessResponse("Academic degree is archived successfully", deletedAcademicDegree, HttpStatus.OK);
+        } catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
-            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
-        }
-        catch (Exception e) {
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
             exceptionHandlingService.handleException(e);
-            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseService.generateErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

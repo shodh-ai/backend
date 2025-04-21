@@ -8,6 +8,7 @@ import com.shodhAI.ShodhAI.Entity.Faculty;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.FacultyService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +44,14 @@ public class FacultyController {
     @Autowired
     private Cloudinary cloudinary;
 
+    @Autowired
+    SanitizerService sanitizerService;
+
     @PostMapping(value = "/add")
     public ResponseEntity<?> addFaculty(HttpServletRequest request, @RequestBody FacultyDto facultyDto) {
         try {
 
+            sanitizerService.sanitizeInputMap(List.of(facultyDto));
             facultyService.validateFaculty(facultyDto);
             Faculty faculty = facultyService.saveFaculty(facultyDto, null, 'N');
 
@@ -203,10 +208,12 @@ public class FacultyController {
     }
 
     @PatchMapping("/update/{facultyIdString}")
-    public ResponseEntity<?> updateFaculty( @PathVariable String facultyIdString,@RequestBody FacultyDto facultyDto) {
+    public ResponseEntity<?> updateFaculty(@PathVariable String facultyIdString, @RequestBody FacultyDto facultyDto) {
         try {
+
+            sanitizerService.sanitizeInputMap(List.of(facultyDto));
             Long facultyId = Long.parseLong(facultyIdString);
-            Faculty faculty = facultyService.updateFaculty(facultyId,facultyDto);
+            Faculty faculty = facultyService.updateFaculty(facultyId, facultyDto);
 
             FacultyWrapper facultyWrapper = new FacultyWrapper();
             facultyWrapper.wrapDetails(faculty);
