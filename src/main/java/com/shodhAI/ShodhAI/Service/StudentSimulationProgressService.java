@@ -49,7 +49,7 @@ public class StudentSimulationProgressService {
         }
     }
 
-
+    @Transactional(readOnly = true)
     public StudentSimulationProgress getStudentSimulationProgress(Long studentId, Long topicId) throws Exception {
         try {
 

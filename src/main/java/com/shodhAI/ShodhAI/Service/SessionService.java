@@ -84,7 +84,7 @@ public class SessionService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Session> sessionFilter(Long sessionId, Long userId, Long roleId, Long topicId, Long questionTypeId) throws Exception {
         try {
 

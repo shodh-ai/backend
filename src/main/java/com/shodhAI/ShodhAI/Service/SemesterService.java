@@ -97,7 +97,7 @@ public class SemesterService {
         return dateFormat.parse(dateStr);
     }
 
-
+    @Transactional(readOnly = true)
     public List<Semester> getAllSemesters() throws Exception {
         try {
 
@@ -110,6 +110,7 @@ public class SemesterService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Semester getSemesterById(Long semesterId) throws Exception {
         try {
 
@@ -382,7 +383,7 @@ public class SemesterService {
 
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Semester> semesterFilter(Long semesterId, Long userId, Long roleId, Long academicDegreeId) throws Exception {
         try {
             Role role= roleService.getRoleById(roleId);
@@ -434,6 +435,7 @@ public class SemesterService {
         }
     }
 
+    @Transactional(readOnly = true)
     public long findCourseDegreeSemesterCount() throws Exception {
         try {
             String queryString = "SELECT MAX(c.id) FROM CourseSemesterDegree c";
@@ -450,6 +452,7 @@ public class SemesterService {
         }
     }
 
+    @Transactional(readOnly = true)
     public long findSemesterCount() throws Exception {
         try {
             String queryString = "SELECT MAX(c.id) FROM Semester c";
@@ -465,4 +468,5 @@ public class SemesterService {
             throw new Exception("SOMETHING WENT WRONG: " + exception.getMessage());
         }
     }
+
 }

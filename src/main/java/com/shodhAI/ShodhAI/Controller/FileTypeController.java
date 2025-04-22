@@ -46,7 +46,6 @@ public class FileTypeController {
     @Autowired
     SanitizerService sanitizerService;
 
-    @Transactional
     @GetMapping("/get-all")
     public ResponseEntity<?> retrieveAllFileType(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit, HttpServletRequest request) {
         try {
@@ -88,7 +87,6 @@ public class FileTypeController {
         }
     }
 
-    @Transactional
     @GetMapping("/get-file-type-by-id/{fileTypeIdString}")
     public ResponseEntity<?> retrieveFileTypeById(HttpServletRequest request, @PathVariable String fileTypeIdString) {
         try {

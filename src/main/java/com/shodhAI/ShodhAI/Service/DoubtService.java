@@ -100,6 +100,7 @@ public class DoubtService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<DoubtLevel> getAllDoubtLevels() throws Exception {
         try {
 
@@ -115,6 +116,7 @@ public class DoubtService {
         }
     }
 
+    @Transactional(readOnly = true)
     public DoubtLevel getDoubtLevelById(Long doubtLevelId) throws Exception {
         try {
 
@@ -131,6 +133,7 @@ public class DoubtService {
         }
     }
 
+    @Transactional(readOnly = true)
     public DoubtLevel getDoubtLevelByDoubtLevel(String doubtLevel) throws Exception {
         try {
 
@@ -165,7 +168,7 @@ public class DoubtService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<FileType> fileTypeFilter() throws Exception {
         try {
             String jpql = "SELECT f FROM FileType f WHERE f.archived = 'N' ORDER BY f.fileTypeId ASC";

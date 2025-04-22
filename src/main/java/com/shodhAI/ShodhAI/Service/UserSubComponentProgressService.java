@@ -79,7 +79,7 @@ public class UserSubComponentProgressService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<UserSubComponentProgress> getUserSubComponentProgressFilter(Long userSubComponentProgressId, Long userId, Long roleId, Long subTopicId, String subComponentName) throws Exception {
         try {
 

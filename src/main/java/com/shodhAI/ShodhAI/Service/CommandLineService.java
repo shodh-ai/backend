@@ -209,7 +209,6 @@ public class CommandLineService implements CommandLineRunner {
             entityManager.merge(new Course(79L, "CI/CD & Automation", "DevOps Tools & Practices", 'N', new Date(), "4w", new Date(), new Date()));
             entityManager.merge(new Course(80L, "Scrum, Kanban & Lean", "Agile Methodology", 'N', new Date(), "4w", new Date(), new Date()));
 
-
         }
 
         // Check if modules already exist

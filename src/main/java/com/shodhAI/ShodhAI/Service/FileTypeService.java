@@ -24,6 +24,7 @@ public class FileTypeService {
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
+    @Transactional(readOnly = true)
     public List<FileType> getAllFileType() throws Exception {
         try {
 
@@ -36,6 +37,7 @@ public class FileTypeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public FileType getFileTypeById(Long fileTypeId) throws Exception {
         try {
 
@@ -52,6 +54,7 @@ public class FileTypeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public FileType getFileTypeByType(String fileType) throws Exception {
         try {
 
@@ -119,7 +122,7 @@ public class FileTypeService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<FileType> fileTypeFilter() throws Exception {
         try {
             String jpql = "SELECT f FROM FileType f WHERE f.archived = 'N' ORDER BY f.fileTypeId ASC";

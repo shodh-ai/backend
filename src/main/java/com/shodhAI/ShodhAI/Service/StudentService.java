@@ -70,7 +70,6 @@ public class StudentService {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-
     public void validateStudent(StudentDto studentDto) throws Exception {
         try {
             if (studentDto.getFirstName() == null || studentDto.getFirstName().isEmpty()) {
@@ -209,6 +208,7 @@ public class StudentService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Student> getAllStudent() throws Exception {
         try {
 
@@ -221,6 +221,7 @@ public class StudentService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Student getStudentById(Long studentId) throws Exception {
         try {
 
@@ -237,6 +238,7 @@ public class StudentService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Student> getStudentLeaderboard() throws Exception {
         try {
 
@@ -249,6 +251,7 @@ public class StudentService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Student retrieveStudentByUsername(String username) {
 
         // Execute the query using JdbcTemplate
@@ -406,6 +409,7 @@ public class StudentService {
 
     }
 
+    @Transactional(readOnly = true)
     public List<Student> filterStudents(String username, Long studentId, String personalEmail) throws Exception {
         try
         {
