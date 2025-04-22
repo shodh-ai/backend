@@ -154,8 +154,8 @@ public class QuestionTypeController {
     {
         try {
             Long questionTypeId = Long.parseLong(questionTypeIdString);
-            questionTypeService.getQuestionTypeById(questionTypeId);
-            if (questionType == null) {
+            QuestionType questionTypeToUpdate=questionTypeService.getQuestionTypeById(questionTypeId);
+            if (questionTypeToUpdate == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
             QuestionType updatedQuestion= questionTypeService.updateQuestionType(questionTypeId,questionType);
