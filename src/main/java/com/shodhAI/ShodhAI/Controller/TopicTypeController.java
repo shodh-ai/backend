@@ -107,8 +107,8 @@ public class TopicTypeController
     {
         try {
             Long topicTypeId = Long.parseLong(topicTypeIdString);
-            topicTypeService.getTopicTypeById(topicTypeId);
-            if (topicType == null) {
+            TopicType topicTypeToUpdate=topicTypeService.getTopicTypeById(topicTypeId);
+            if (topicTypeToUpdate == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
             TopicType updatedTopic= topicTypeService.updateTopicType(topicTypeId,topicType);
