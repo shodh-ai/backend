@@ -9,6 +9,7 @@ import com.shodhAI.ShodhAI.Entity.Module;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ModuleService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import com.shodhAI.ShodhAI.annotation.Authorize;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,11 +49,15 @@ public class ModuleController {
     @Autowired
     ModuleService moduleService;
 
+    @Autowired
+    SanitizerService sanitizerService;
+
 //    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping(value = "/add")
     public ResponseEntity<?> addModule(@RequestBody ModuleDto moduleDto) {
         try {
 
+            sanitizerService.sanitizeInputMap(List.of(moduleDto));
             moduleService.validateModule(moduleDto);
             Module module = moduleService.saveModule(moduleDto);
 
@@ -105,6 +110,8 @@ public class ModuleController {
     @PatchMapping("/update/{moduleIdString}")
     public ResponseEntity<?> updateModule( @PathVariable String moduleIdString,@RequestBody ModuleDto moduleDto) {
         try {
+
+            sanitizerService.sanitizeInputMap(List.of(moduleDto));
             Long moduleId = Long.parseLong(moduleIdString);
             Module module = moduleService.updateModule(moduleId,moduleDto);
             return ResponseService.generateSuccessResponse("Module updated Successfully", module, HttpStatus.OK);

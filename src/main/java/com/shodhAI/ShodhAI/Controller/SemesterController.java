@@ -6,6 +6,7 @@ import com.shodhAI.ShodhAI.Dto.SemesterDto;
 import com.shodhAI.ShodhAI.Entity.Semester;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import com.shodhAI.ShodhAI.Service.SemesterService;
 import com.shodhAI.ShodhAI.annotation.Authorize;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,17 +40,23 @@ public class SemesterController
 
     @Autowired
     private SemesterService semesterService;
+
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
     @Autowired
     JwtUtil jwtTokenUtil;
 
+    @Autowired
+    SanitizerService sanitizerService;
+
 //    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping("/add")
     public ResponseEntity<?> createSemester(@RequestBody SemesterDto semesterDto) throws ParseException {
         try
         {
+
+            sanitizerService.sanitizeInputMap(List.of(semesterDto));
             semesterService.validateSemester(semesterDto);
             Semester semesterToAdd=semesterService.saveSemester(semesterDto);
             return ResponseService.generateSuccessResponse("Semester is created successfully",semesterToAdd,HttpStatus.CREATED);
@@ -112,6 +119,7 @@ public class SemesterController
     {
         try
         {
+            sanitizerService.sanitizeInputMap(List.of(semesterDto));
             Long semesterId= Long.parseLong(semesterIdString);
 
             Semester semesterToFind = semesterService.getSemesterById(semesterId);

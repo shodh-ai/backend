@@ -14,6 +14,7 @@ import com.shodhAI.ShodhAI.Service.CourseService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ModuleService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import com.shodhAI.ShodhAI.Service.TopicService;
 import com.shodhAI.ShodhAI.Service.UserCourseProgressService;
 import com.shodhAI.ShodhAI.Service.UserModuleProgressService;
@@ -22,6 +23,7 @@ import com.shodhAI.ShodhAI.Service.UserSubComponentProgressService;
 import com.shodhAI.ShodhAI.Service.UserSubTopicProgressService;
 import com.shodhAI.ShodhAI.Service.UserTopicProgressService;
 import jakarta.persistence.PersistenceException;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -77,6 +79,9 @@ public class UserController {
     @Autowired
     CourseService courseService;
 
+    @Autowired
+    SanitizerService sanitizerService;
+
     @PostMapping(value = "/add-sub-component-progress")
     public ResponseEntity<?> addSubComponentProgress(@RequestParam(value = "sub_component_name") String subComponentName,
                                                      @RequestParam("sub_topic_id") String subtopicIdString,
@@ -84,6 +89,7 @@ public class UserController {
                                                      @RequestHeader(value = "Authorization") String authHeader) {
         try {
 
+            sanitizerService.sanitizeInputMap(List.of(subComponentName));
             Long subTopicId = Long.parseLong(subtopicIdString);
             Long userSubTopicProgressId = null;
             if(userSubTopicProgressIdString != null) {
@@ -163,6 +169,8 @@ public class UserController {
             @RequestHeader(value = "Authorization") String authHeader) {
 
         try {
+
+            sanitizerService.sanitizeInputMap(List.of(subComponentName));
             Long topicId = null, userSubComponentProgressId = null;
             if(topicIdString != null) {
                 topicId = Long.parseLong(topicIdString);
@@ -228,16 +236,18 @@ public class UserController {
 
     @PatchMapping("/update-user-sub-component-progress")
     public ResponseEntity<?> updateUserSubComponentProgress (
-            @RequestParam(value = "topic_id", required = false) String topicIdString,
+            @RequestParam(value = "sub_topic_id", required = false) String subTopicIdString,
             @RequestParam("sub_component_name") String subComponentName,
             @RequestParam("is_completed") Boolean isCompleted,
-            @RequestParam("user_sub_topic_progress_id") String userSubComponentProgressIdString,
+            @RequestParam(value = "user_sub_topic_progress_id", required = false) String userSubComponentProgressIdString,
             @RequestHeader(value = "Authorization") String authHeader) {
 
         try {
-            Long topicId = null, userSubComponentProgressId = null;
-            if(topicIdString != null) {
-                topicId = Long.parseLong(topicIdString);
+
+            sanitizerService.sanitizeInputMap(List.of(subComponentName));
+            Long subTopicId = null, userSubComponentProgressId = null;
+            if(subTopicIdString != null) {
+                subTopicId = Long.parseLong(subTopicIdString);
             }
             if(userSubComponentProgressIdString != null) {
                 userSubComponentProgressId = Long.parseLong(userSubComponentProgressIdString);
@@ -248,7 +258,7 @@ public class UserController {
             Long userId = jwtTokenUtil.extractId(jwtToken);
 
             // Fetch filtered products
-            List<UserSubComponentProgress> userSubComponentProgressList = userSubComponentProgressService.getUserSubComponentProgressFilter(userSubComponentProgressId, userId, roleId, topicId, subComponentName);
+            List<UserSubComponentProgress> userSubComponentProgressList = userSubComponentProgressService.getUserSubComponentProgressFilter(userSubComponentProgressId, userId, roleId, subTopicId, subComponentName);
 
             if (userSubComponentProgressList.isEmpty()) {
                 return ResponseService.generateSuccessResponse("No User Sub Component found with the given criteria", new ArrayList<>(), HttpStatus.OK);

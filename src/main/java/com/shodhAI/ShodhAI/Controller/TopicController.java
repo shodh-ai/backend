@@ -15,11 +15,13 @@ import com.shodhAI.ShodhAI.Service.ConversationService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.QuestionService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import com.shodhAI.ShodhAI.Service.SessionService;
 import com.shodhAI.ShodhAI.Service.TopicService;
 import com.shodhAI.ShodhAI.annotation.Authorize;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -62,11 +64,15 @@ public class TopicController {
     @Autowired
     ConversationService conversationService;
 
+    @Autowired
+    SanitizerService sanitizerService;
+
 //    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping(value = "/add")
     public ResponseEntity<?> addTopic(@RequestBody TopicDto topicDto) {
         try {
 
+            sanitizerService.sanitizeInputMap(List.of(topicDto));
             topicService.validateTopic(topicDto);
             Topic topic = topicService.saveTopic(topicDto);
 

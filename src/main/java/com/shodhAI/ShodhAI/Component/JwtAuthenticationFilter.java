@@ -37,15 +37,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = Constant.BEARER;
     private static final int BEARER_PREFIX_LENGTH = BEARER_PREFIX.length();
-    private static final Pattern UNSECURED_URI_PATTERN = Pattern.compile(
-            "^/api/v1/(account|otp|test|files/avisoftdocument/[^/]+/[^/]+|files/[^/]+|avisoftdocument/[^/]+|swagger-ui.html|swagger-resources|v2/api-docs|images|webjars).*"
-    );
+    // TODO needs to check this and resolve
     private String apiKey = "IaJGL98yHnKjnlhKshiWiy1IhZ+uFsKnktaqFX3Dvfg=";
 
     @Autowired
     private JwtUtil jwtUtil;
+
     @Autowired
     private StudentService studentService;
+
     @Autowired
     private RoleService roleService;
 
@@ -73,7 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
 
             String requestURI = request.getRequestURI();
-            if (isUnsecuredUri(requestURI) || bypassimages(requestURI)) {
+            if (isUnsecuredUri(requestURI)) {
                 chain.doFilter(request, response);
                 return;
             }
@@ -81,13 +81,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 chain.doFilter(request, response);
                 return;
             }
-            /*if((checkRole(requestURI,request)).equals(false))
-                throw new AccessDeniedException("Access not granted");*/
             boolean responseHandled = authenticateUser(request, response);
             if (!responseHandled) {
                 chain.doFilter(request, response);
-            } else {
-                return;
             }
 
         } catch (AccessDeniedException accessDeniedException) {
@@ -106,22 +102,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    private boolean bypassimages(String requestURI) {
-        return UNSECURED_URI_PATTERN.matcher(requestURI).matches();
-    }
-
     private boolean isApiKeyRequiredUri(HttpServletRequest request) {
 
         String requestURI = request.getRequestURI();
         String path = requestURI.split("\\?")[0].trim();
 
         List<Pattern> bypassPatterns = Arrays.asList(
-                Pattern.compile("^/api/v1/category-custom/get-products-by-category-id/\\d+$"),
-                Pattern.compile("^/api/v1/category-custom/get-all-categories$")
+                // add your endpoints which needs x-api key
+                /*Pattern.compile("^/api/v1/category-custom/get-products-by-category-id/\\d+$"),
+                Pattern.compile("^/api/v1/category-custom/get-all-categories$")*/
         );
 
-        boolean isBypassed = bypassPatterns.stream().anyMatch(pattern -> pattern.matcher(path).matches());
-        return isBypassed;
+        return bypassPatterns.stream().anyMatch(pattern -> pattern.matcher(path).matches());
     }
 
     private boolean validateApiKey(HttpServletRequest request) {

@@ -4,6 +4,7 @@ import com.shodhAI.ShodhAI.Entity.TopicType;
 import com.shodhAI.ShodhAI.Entity.TopicType;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import com.shodhAI.ShodhAI.Service.TopicTypeService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +36,15 @@ public class TopicTypeController
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
+    @Autowired
+    SanitizerService sanitizerService;
+
     @PostMapping("/add")
     public ResponseEntity<?> addTopicType(@RequestBody TopicType topicType) throws Exception {
         try
         {
+
+            sanitizerService.sanitizeInputMap(List.of(topicType));
             TopicType topicTypeToAdd=topicTypeService.addTopicType(topicType);
             return ResponseService.generateSuccessResponse("Topic Type is successfully added",topicTypeToAdd, HttpStatus.CREATED);
         }
@@ -106,6 +112,8 @@ public class TopicTypeController
     public ResponseEntity<?> updateTopicType(@RequestBody TopicType topicType, @PathVariable String topicTypeIdString)
     {
         try {
+
+            sanitizerService.sanitizeInputMap(List.of(topicType));
             Long topicTypeId = Long.parseLong(topicTypeIdString);
             topicTypeService.getTopicTypeById(topicTypeId);
             if (topicType == null) {
