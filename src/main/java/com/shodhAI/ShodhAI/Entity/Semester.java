@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -15,7 +16,7 @@ import lombok.NonNull;
 import java.util.List;
 import java.util.Date;
 import java.util.Set;
-
+@Builder
 @Entity
 @Table(name = "semester")
 @Data

@@ -12,12 +12,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import java.util.List;
-
+@Builder
 @Entity
 @Table(name = "file_type")
 @AllArgsConstructor
