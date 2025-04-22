@@ -5,6 +5,7 @@ import com.shodhAI.ShodhAI.Entity.Institute;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.InstituteService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +36,15 @@ public class InstituteController {
     @Autowired
     InstituteService instituteService;
 
-//    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
+    @Autowired
+    SanitizerService sanitizerService;
+
+    //    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping("/add")
     public ResponseEntity<?> addInstitute(@RequestBody InstituteDto instituteDto) {
         try {
 
+            sanitizerService.sanitizeInputMap(List.of(instituteDto));
             instituteService.validateInstitute(instituteDto);
             Institute institute = instituteService.saveInstitute(instituteDto);
 
@@ -62,8 +67,8 @@ public class InstituteController {
 
     @GetMapping("/filter-institute")
     public ResponseEntity<?> retrieveAllInstitute(HttpServletRequest request,
-                                                       @RequestParam(defaultValue = "0") int offset,
-                                                       @RequestParam(defaultValue = "10") int limit) {
+                                                  @RequestParam(defaultValue = "0") int offset,
+                                                  @RequestParam(defaultValue = "10") int limit) {
         try {
 
             if (offset < 0) {
@@ -168,6 +173,7 @@ public class InstituteController {
     public ResponseEntity<?> updateInstituteById(HttpServletRequest request, @RequestBody InstituteDto instituteDto, @PathVariable String instituteIdString) {
         try {
 
+            sanitizerService.sanitizeInputMap(List.of(instituteDto));
             Long instituteId = Long.parseLong(instituteIdString);
             Institute institute = instituteService.getInstituteById(instituteId);
 

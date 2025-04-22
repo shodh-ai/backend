@@ -5,8 +5,10 @@ import com.shodhAI.ShodhAI.Entity.FileType;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.FileTypeService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -40,6 +42,9 @@ public class FileTypeController {
 
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
+
+    @Autowired
+    SanitizerService sanitizerService;
 
     @Transactional
     @GetMapping("/get-all")
@@ -112,6 +117,7 @@ public class FileTypeController {
     {
         try
         {
+            sanitizerService.sanitizeInputMap(List.of(fileType));
             FileType fileTypeToSave=fileTypeService.addFileType(fileType);
             return ResponseService.generateSuccessResponse("File type is successfully added",fileTypeToSave, HttpStatus.CREATED);
         }
@@ -153,6 +159,8 @@ public class FileTypeController {
     @PatchMapping("/update/{fileTypeIdString}")
     public ResponseEntity<?> updateFileType(@RequestBody FileType fileType, @PathVariable String fileTypeIdString) throws Exception, RuntimeException,DataIntegrityViolationException {
         try {
+
+            sanitizerService.sanitizeInputMap(List.of(fileType));
             Long fileTypeId = Long.parseLong(fileTypeIdString);
             fileTypeService.getFileTypeById(fileTypeId);
             if (fileType == null) {

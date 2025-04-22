@@ -16,6 +16,7 @@ import com.shodhAI.ShodhAI.Service.FacultyService;
 import com.shodhAI.ShodhAI.Service.OtpService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.RoleService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import com.shodhAI.ShodhAI.Service.StudentService;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.Cookie;
@@ -82,6 +83,9 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    SanitizerService sanitizerService;
 
     @Value("${app.oauth2.authorized-redirect-uri}")
     public String authorizedRedirectUri;
@@ -210,6 +214,7 @@ public class AuthController {
     public ResponseEntity<?> sentOtp(@RequestBody SignUpDto signUp) {
         try {
 
+            sanitizerService.sanitizeInputMap(List.of(signUp));
             authenticationService.validateSignUp(signUp);
             Role role = roleService.getRoleById(signUp.getRoleId());
 
@@ -229,6 +234,7 @@ public class AuthController {
     public ResponseEntity<?> verifyOtp(@RequestBody VerifyOtpDto verifyOtpDto, HttpSession session, HttpServletRequest request) {
         try {
 
+            sanitizerService.sanitizeInputMap(List.of(verifyOtpDto));
             authenticationService.validateVerifyOtp(verifyOtpDto);
 
             Role role = roleService.getRoleById(verifyOtpDto.getRoleId());
@@ -327,6 +333,7 @@ public class AuthController {
                                             @RequestHeader(value = "Authorization") String authHeader) {
         try {
 
+            sanitizerService.sanitizeInputMap(List.of(changePasswordDto));
             authenticationService.validateChangePasswordDto(changePasswordDto);
             String jwtToken = authHeader.substring(7);
             Long roleId = jwtTokenUtil.extractRoleId(jwtToken);
