@@ -5,17 +5,20 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+@Builder
 @Entity
 @Table(name = "student_assignment")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentAssignment {
+public class
+StudentAssignment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

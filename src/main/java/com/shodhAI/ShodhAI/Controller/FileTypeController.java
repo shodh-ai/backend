@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -162,8 +163,8 @@ public class FileTypeController {
 
             sanitizerService.sanitizeInputMap(List.of(fileType));
             Long fileTypeId = Long.parseLong(fileTypeIdString);
-            fileTypeService.getFileTypeById(fileTypeId);
-            if (fileType == null) {
+            FileType fileTypeToFound=fileTypeService.getFileTypeById(fileTypeId);
+            if (fileTypeToFound == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
             FileType updatedFile= fileTypeService.updateFileType(fileTypeId,fileType);
