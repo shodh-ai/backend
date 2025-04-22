@@ -4,7 +4,7 @@ import com.shodhAI.ShodhAI.Entity.ContentType;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ContentTypeService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
-import jakarta.persistence.EntityManager;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,13 +31,13 @@ import java.util.Map;
 public class ContentTypeController {
 
     @Autowired
-    EntityManager entityManager;
-
-    @Autowired
     ContentTypeService contentTypeService;
 
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
+
+    @Autowired
+    SanitizerService sanitizerService;
 
     @Transactional
     @GetMapping("/get-all")
@@ -106,67 +106,58 @@ public class ContentTypeController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addContentType(@RequestBody ContentType contentType)
-    {
-        try
-        {
-            ContentType contentTypeToSave=contentTypeService.addContentType(contentType);
-            return ResponseService.generateSuccessResponse("Content type is successfully added",contentTypeToSave, HttpStatus.CREATED);
-        }
-        catch (IllegalArgumentException illegalArgumentException)
-        {
+    public ResponseEntity<?> addContentType(@RequestBody ContentType contentType) {
+        try {
+
+            sanitizerService.sanitizeInputMap(List.of(contentType));
+            ContentType contentTypeToSave = contentTypeService.addContentType(contentType);
+            return ResponseService.generateSuccessResponse("Content type is successfully added", contentTypeToSave, HttpStatus.CREATED);
+        } catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
-            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
-        }
-        catch (Exception e) {
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
             exceptionHandlingService.handleException(e);
-            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseService.generateErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/delete/{contentTypeIdString}")
-    public ResponseEntity<?> deleteContentTpe (@PathVariable String contentTypeIdString)
-    {
-        try
-        {
+    public ResponseEntity<?> deleteContentTpe(@PathVariable String contentTypeIdString) {
+        try {
             Long contentTypeId = Long.parseLong(contentTypeIdString);
             ContentType contentType = contentTypeService.getContentTypeById(contentTypeId);
             if (contentType == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            ContentType deletedContentType =contentTypeService.deleteContentTypeById(contentTypeId);
-            return ResponseService.generateSuccessResponse("Content type is archived successfully",deletedContentType ,HttpStatus.OK);
-        }
-        catch (IllegalArgumentException illegalArgumentException)
-        {
+            ContentType deletedContentType = contentTypeService.deleteContentTypeById(contentTypeId);
+            return ResponseService.generateSuccessResponse("Content type is archived successfully", deletedContentType, HttpStatus.OK);
+        } catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
-            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
-        }
-        catch (Exception e) {
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
             exceptionHandlingService.handleException(e);
-            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseService.generateErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PatchMapping("/update/{contentTypeIdString}")
-    public ResponseEntity<?> updateContentType(@RequestBody ContentType contentType,@PathVariable String contentTypeIdString)
-    {
+    public ResponseEntity<?> updateContentType(@RequestBody ContentType contentType, @PathVariable String contentTypeIdString) {
         try {
+
+            sanitizerService.sanitizeInputMap(List.of(contentType));
             Long contentTypeId = Long.parseLong(contentTypeIdString);
             contentTypeService.getContentTypeById(contentTypeId);
             if (contentType == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            ContentType updatedContent= contentTypeService.updateContentType(contentTypeId,contentType);
-            return ResponseService.generateSuccessResponse("Content type is updated successfully ", updatedContent,HttpStatus.OK);
-        }
-        catch (IllegalArgumentException e) {
+            ContentType updatedContent = contentTypeService.updateContentType(contentTypeId, contentType);
+            return ResponseService.generateSuccessResponse("Content type is updated successfully ", updatedContent, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
             exceptionHandlingService.handleException(e);
-            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.BAD_REQUEST);
-        }
-        catch (Exception e) {
+            return ResponseService.generateErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
             exceptionHandlingService.handleException(e);
-            return ResponseService.generateErrorResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseService.generateErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

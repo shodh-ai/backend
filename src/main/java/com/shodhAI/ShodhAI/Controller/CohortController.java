@@ -6,6 +6,7 @@ import com.shodhAI.ShodhAI.Entity.Cohort;
 import com.shodhAI.ShodhAI.Service.CohortService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +42,15 @@ public class CohortController {
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
+    @Autowired
+    SanitizerService sanitizerService;
+
     //    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping("/add")
     public ResponseEntity<?> addCohort(@RequestBody CohortDto cohortDto, @RequestHeader(value = "Authorization") String authHeader) {
         try {
 
+            sanitizerService.sanitizeInputMap(List.of(cohortDto));
             String jwtToken = authHeader.substring(7);
             Long roleId = jwtTokenUtil.extractRoleId(jwtToken);
             Long userId = jwtTokenUtil.extractId(jwtToken);

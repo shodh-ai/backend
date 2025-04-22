@@ -5,7 +5,6 @@ import com.shodhAI.ShodhAI.Component.OAuth2AuthenticationSuccessHandler;
 import com.shodhAI.ShodhAI.Service.CustomOAuth2UserService;
 import com.shodhAI.ShodhAI.Service.OAuth2AuthenticationFailureHandler;
 import com.shodhAI.ShodhAI.Service.StudentService;
-import jakarta.servlet.Filter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -59,7 +58,6 @@ public class SecurityConfig {
     public void setJwtAuthenticationFilter(@Lazy JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -152,7 +150,6 @@ public class SecurityConfig {
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter();
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {

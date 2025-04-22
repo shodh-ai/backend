@@ -13,6 +13,7 @@ import com.shodhAI.ShodhAI.Entity.StudentAssignment;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.S3StorageService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import com.shodhAI.ShodhAI.Service.StudentService;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,10 +55,14 @@ public class StudentController {
     @Autowired
     private S3StorageService s3StorageService;
 
+    @Autowired
+    SanitizerService sanitizerService;
+
     @PostMapping(value = "/add")
     public ResponseEntity<?> addStudent(HttpServletRequest request, @RequestBody StudentDto studentDto) {
         try {
 
+            sanitizerService.sanitizeInputMap(List.of(studentDto));
             studentService.validateStudent(studentDto);
             Student student = studentService.saveStudent(studentDto, null, 'N');
 
@@ -284,6 +289,8 @@ public class StudentController {
     @PatchMapping("/update/{studentIdString}")
     public ResponseEntity<?> updateStudent( @PathVariable String studentIdString,@RequestBody StudentDto studentDto) {
         try {
+
+            sanitizerService.sanitizeInputMap(List.of(studentDto));
             Long studentId = Long.parseLong(studentIdString);
             Student student = studentService.updateStudent(studentId,studentDto);
 
