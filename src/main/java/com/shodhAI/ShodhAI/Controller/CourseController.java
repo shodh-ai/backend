@@ -1,11 +1,14 @@
 package com.shodhAI.ShodhAI.Controller;
 
+import com.shodhAI.ShodhAI.Component.Constant;
 import com.shodhAI.ShodhAI.Component.JwtUtil;
 import com.shodhAI.ShodhAI.Dto.CourseDto;
 import com.shodhAI.ShodhAI.Entity.Course;
 import com.shodhAI.ShodhAI.Service.CourseService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
+import com.shodhAI.ShodhAI.annotation.Authorize;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,11 +45,15 @@ public class CourseController {
     @Autowired
     JwtUtil jwtTokenUtil;
 
-//    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
+    @Autowired
+    SanitizerService sanitizerService;
+
+    //    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping(value = "/add")
     public ResponseEntity<?> addCourse(@RequestBody CourseDto courseDto) {
         try {
 
+            sanitizerService.sanitizeInputMap(List.of(courseDto));
             courseService.validateCourse(courseDto);
             Course course = courseService.saveCourse(courseDto);
 
@@ -115,12 +122,14 @@ public class CourseController {
         }
     }
 
-//    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
+    //    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PatchMapping("/update/{courseIdString}")
-    public ResponseEntity<?> updateCourse(@PathVariable String courseIdString, @RequestBody CourseDto courseDto) {
+    public ResponseEntity<?> updateFaculty(@PathVariable String courseIdString, @RequestBody CourseDto courseDto) {
         try {
+
+            sanitizerService.sanitizeInputMap(List.of(courseDto));
             Long courseId = Long.parseLong(courseIdString);
-            Course course = courseService.updateCourse(courseId,courseDto);
+            Course course = courseService.updateCourse(courseId, courseDto);
             return ResponseService.generateSuccessResponse("Course updated Successfully", course, HttpStatus.OK);
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
@@ -204,7 +213,7 @@ public class CourseController {
             return ResponseService.generateSuccessResponse("Course is successfully deleted", deletedCourse, HttpStatus.OK);
         } catch (IllegalArgumentException illegalArgumentException) {
             exceptionHandlingService.handleException(illegalArgumentException);
-            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(),HttpStatus.BAD_REQUEST);
+            return ResponseService.generateErrorResponse(illegalArgumentException.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             exceptionHandlingService.handleException(e);
             return ResponseService.generateErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

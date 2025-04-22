@@ -1,5 +1,6 @@
 package com.shodhAI.ShodhAI.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;
@@ -56,6 +57,7 @@ public class UserCourseProgress {
 
     @OneToMany(mappedBy = "userCourseProgress", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonProperty("module_progress")
+    @JsonBackReference
     private List<UserModuleProgress> moduleProgress;
 
     @Column(name = "created_date", nullable = false, updatable = false)

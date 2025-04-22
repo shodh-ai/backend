@@ -1,9 +1,10 @@
 package com.shodhAI.ShodhAI.Controller;
 
-import com.shodhAI.ShodhAI.Dto.InstituteDto;
-import com.shodhAI.ShodhAI.Entity.Institute;
+import com.shodhAI.ShodhAI.Component.JwtUtil;
+import com.shodhAI.ShodhAI.Dto.CohortDto;
+import com.shodhAI.ShodhAI.Entity.Cohort;
+import com.shodhAI.ShodhAI.Service.CohortService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
-import com.shodhAI.ShodhAI.Service.InstituteService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
 import com.shodhAI.ShodhAI.Service.SanitizerService;
 import jakarta.persistence.PersistenceException;
@@ -14,41 +15,50 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/institute", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-public class InstituteController {
+@RequestMapping(value = "/cohort", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+public class CohortController {
+
+    @Autowired
+    CohortService cohortService;
+
+    @Autowired
+    JwtUtil jwtTokenUtil;
 
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
-
-    @Autowired
-    InstituteService instituteService;
 
     @Autowired
     SanitizerService sanitizerService;
 
     //    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
     @PostMapping("/add")
-    public ResponseEntity<?> addInstitute(@RequestBody InstituteDto instituteDto) {
+    public ResponseEntity<?> addCohort(@RequestBody CohortDto cohortDto, @RequestHeader(value = "Authorization") String authHeader) {
         try {
 
-            sanitizerService.sanitizeInputMap(List.of(instituteDto));
-            instituteService.validateInstitute(instituteDto);
-            Institute institute = instituteService.saveInstitute(instituteDto);
+            sanitizerService.sanitizeInputMap(List.of(cohortDto));
+            String jwtToken = authHeader.substring(7);
+            Long roleId = jwtTokenUtil.extractRoleId(jwtToken);
+            Long userId = jwtTokenUtil.extractId(jwtToken);
 
-            return ResponseService.generateSuccessResponse("Institute Created Successfully", institute, HttpStatus.OK);
+            cohortService.validateCohort(cohortDto);
+            Cohort cohort = cohortService.saveCohort(cohortDto, userId, roleId);
+
+            return ResponseService.generateSuccessResponse("Cohort Created Successfully", cohort, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
@@ -65,10 +75,10 @@ public class InstituteController {
         }
     }
 
-    @GetMapping("/filter-institute")
-    public ResponseEntity<?> retrieveAllInstitute(HttpServletRequest request,
-                                                  @RequestParam(defaultValue = "0") int offset,
-                                                  @RequestParam(defaultValue = "10") int limit) {
+    @GetMapping("/get-all")
+    public ResponseEntity<?> retrieveAllCohort(HttpServletRequest request,
+                                                       @RequestParam(defaultValue = "0") int offset,
+                                                       @RequestParam(defaultValue = "10") int limit) {
         try {
 
             if (offset < 0) {
@@ -78,19 +88,18 @@ public class InstituteController {
                 throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
             }
 
-            List<Institute> instituteList = instituteService.filterInstitute(null, null);
-            if (instituteList.isEmpty()) {
+            List<Cohort> cohortList = cohortService.getAllCohort();
+            if (cohortList.isEmpty()) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
 
-            // Pagination logic
-            int totalItems = instituteList.size();
+            int totalItems = cohortList.size();
             int totalPages = (int) Math.ceil((double) totalItems / limit);
             int fromIndex = offset * limit;
             int toIndex = Math.min(fromIndex + limit, totalItems);
 
             if (offset >= totalPages && offset != 0) {
-                throw new IllegalArgumentException("No more Institute available");
+                throw new IllegalArgumentException("No more Cohort available");
             }
 
             // Validate offset request
@@ -98,16 +107,16 @@ public class InstituteController {
                 return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
             }
 
-            List<Institute> paginatedList = instituteList.subList(fromIndex, toIndex);
+            List<Cohort> paginatedList = cohortList.subList(fromIndex, toIndex);
 
             // Construct paginated response
             Map<String, Object> response = new HashMap<>();
-            response.put("institute", paginatedList);
+            response.put("cohorts", paginatedList);
             response.put("totalItems", totalItems);
             response.put("totalPages", totalPages);
             response.put("currentPage", offset);
 
-            return ResponseService.generateSuccessResponse("Institute Retrieved Successfully", response, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Cohort Retrieved Successfully", response, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
@@ -121,16 +130,16 @@ public class InstituteController {
         }
     }
 
-    @GetMapping("/get-institute-by-id/{instituteIdString}")
-    public ResponseEntity<?> retrieveInstituteById(HttpServletRequest request, @PathVariable String instituteIdString) {
+    @GetMapping("/get-by-id/{cohortIdString}")
+    public ResponseEntity<?> retrieveCohortById(HttpServletRequest request, @PathVariable String cohortIdString) {
         try {
 
-            Long instituteId = Long.parseLong(instituteIdString);
-            Institute institute = instituteService.getInstituteById(instituteId);
-            if (institute == null) {
+            Long cohortId = Long.parseLong(cohortIdString);
+            Cohort cohort = cohortService.getCohortById(cohortId);
+            if (cohort == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            return ResponseService.generateSuccessResponse("Institute Retrieved Successfully", institute, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Cohort Retrieved Successfully", cohort, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
@@ -144,19 +153,74 @@ public class InstituteController {
         }
     }
 
-    @DeleteMapping("/delete-institute-by-id/{instituteIdString}")
-    public ResponseEntity<?> removeInstituteById(HttpServletRequest request, @PathVariable String instituteIdString) {
+    @GetMapping("/filter")
+    public ResponseEntity<?> getFilterCourse(
+            @RequestParam(value = "course_id", required = false) Long courseId,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestHeader(value = "Authorization") String authHeader) {
+
         try {
+            if (offset < 0) {
+                throw new IllegalArgumentException("Offset for pagination cannot be a negative number");
+            }
+            if (limit <= 0) {
+                throw new IllegalArgumentException("Limit for pagination cannot be a negative number or 0");
+            }
 
-            Long instituteId = Long.parseLong(instituteIdString);
-            Institute institute = instituteService.getInstituteById(instituteId);
+            List<Cohort> cohorts = cohortService.filterCohorts(courseId);
 
-            institute = instituteService.removeInstituteById(institute);
-            if (institute == null) {
+            if (cohorts.isEmpty()) {
+                return ResponseService.generateSuccessResponse("No cohorts found with the given criteria", new ArrayList<>(), HttpStatus.OK);
+            }
+
+            // Pagination logic
+            int totalItems = cohorts.size();
+            int totalPages = (int) Math.ceil((double) totalItems / limit);
+            int fromIndex = offset * limit;
+            int toIndex = Math.min(fromIndex + limit, totalItems);
+
+            if (offset >= totalPages && offset != 0) {
+                throw new IllegalArgumentException("No more cohorts available");
+            }
+            // Validate offset request
+            if (fromIndex >= totalItems) {
+                return ResponseService.generateErrorResponse("Page index out of range", HttpStatus.BAD_REQUEST);
+            }
+
+            List<Cohort> paginatedList = cohorts.subList(fromIndex, toIndex);
+
+            // Construct paginated response
+            Map<String, Object> response = new HashMap<>();
+            response.put("cohorts", paginatedList);
+            response.put("totalItems", totalItems);
+            response.put("totalPages", totalPages);
+            response.put("currentPage", offset);
+
+            return ResponseService.generateSuccessResponse("Cohorts Retrieved Successfully", response, HttpStatus.OK);
+
+        } catch (Exception exception) {
+            exceptionHandlingService.handleException(exception);
+            return ResponseService.generateErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+//    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
+    @PatchMapping("/update/{cohortIdString}")
+    public ResponseEntity<?> updateCohort( @PathVariable String cohortIdString, @RequestBody CohortDto cohortDto, @RequestHeader(value = "Authorization") String authHeader) {
+        try {
+            String jwtToken = authHeader.substring(7);
+            Long roleId = jwtTokenUtil.extractRoleId(jwtToken);
+            Long userId = jwtTokenUtil.extractId(jwtToken);
+
+            Long cohortId = Long.parseLong(cohortIdString);
+            Cohort cohort = cohortService.getCohortById(cohortId);
+
+            if (cohort == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            return ResponseService.generateSuccessResponse("Institute Archived Successfully", institute, HttpStatus.OK);
-
+            cohort = cohortService.updateCohort(cohort, cohortDto, userId, roleId);
+            return ResponseService.generateSuccessResponse("Cohort updated Successfully", cohort, HttpStatus.OK);
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
             return ResponseService.generateErrorResponse("Index Out of Bound Exception Caught: " + indexOutOfBoundsException.getMessage(), HttpStatus.BAD_REQUEST);
@@ -169,20 +233,19 @@ public class InstituteController {
         }
     }
 
-    @PutMapping("/update-institute-by-id/{instituteIdString}")
-    public ResponseEntity<?> updateInstituteById(HttpServletRequest request, @RequestBody InstituteDto instituteDto, @PathVariable String instituteIdString) {
+//    @Authorize(value = {Constant.ROLE_SUPER_ADMIN,Constant.ROLE_ADMIN})
+    @DeleteMapping("/remove/{cohortIdString}")
+    public ResponseEntity<?> removeInstituteById(HttpServletRequest request, @PathVariable String cohortIdString) {
         try {
 
-            sanitizerService.sanitizeInputMap(List.of(instituteDto));
-            Long instituteId = Long.parseLong(instituteIdString);
-            Institute institute = instituteService.getInstituteById(instituteId);
+            Long cohortId = Long.parseLong(cohortIdString);
+            Cohort cohort = cohortService.getCohortById(cohortId);
 
-            instituteService.validateUpdateInstitute(instituteDto);
-            institute = instituteService.updateInstituteById(institute, instituteDto);
-            if (institute == null) {
+            cohort = cohortService.removeCohortById(cohort);
+            if (cohort == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
-            return ResponseService.generateSuccessResponse("Institute Archived Successfully", institute, HttpStatus.OK);
+            return ResponseService.generateSuccessResponse("Cohort Archived Successfully", cohort, HttpStatus.OK);
 
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             exceptionHandlingService.handleException(indexOutOfBoundsException);
