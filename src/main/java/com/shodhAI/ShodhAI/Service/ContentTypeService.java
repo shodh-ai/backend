@@ -22,6 +22,7 @@ public class ContentTypeService
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
+    @Transactional(readOnly = true)
     public List<ContentType> getAllContentType() throws Exception {
         try {
 
@@ -33,6 +34,8 @@ public class ContentTypeService
             throw new Exception(exception.getMessage());
         }
     }
+
+    @Transactional(readOnly = true)
     public ContentType getContentTypeById(Long contentTypeId) throws Exception {
         try {
 
@@ -140,7 +143,7 @@ public class ContentTypeService
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ContentType> contentTypeFilter() throws Exception {
         try {
             String jpql = "SELECT f FROM ContentType f WHERE f.archived = 'N' ORDER BY f.contentTypeId ASC";

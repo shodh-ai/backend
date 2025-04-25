@@ -57,6 +57,7 @@ public class TopicTypeService
         }
     }
 
+    @Transactional(readOnly = true)
     public TopicType getTopicTypeById(Long topicTypeId) throws Exception {
         try {
             TypedQuery<TopicType> query = entityManager.createQuery(Constant.GET_TOPIC_TYPE_BY_ID, TopicType.class);
@@ -72,6 +73,7 @@ public class TopicTypeService
         }
     }
 
+    @Transactional(readOnly = true)
     public List<TopicType> getAllTopicType() throws Exception {
         try {
             TypedQuery<TopicType> query = entityManager.createQuery(Constant.GET_ALL_TOPIC_TYPE, TopicType.class);
@@ -139,7 +141,7 @@ public class TopicTypeService
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<TopicType> topicTypeFilter() throws Exception {
         try {
             String jpql = "SELECT f FROM TopicType f WHERE f.archived = 'N' ORDER BY f.topicTypeId ASC";
@@ -153,4 +155,5 @@ public class TopicTypeService
             throw new Exception(exception.getMessage());
         }
     }
+
 }

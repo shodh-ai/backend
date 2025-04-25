@@ -30,7 +30,6 @@ public class RoleController {
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
-    @Transactional
     @GetMapping("/get-all")
     public ResponseEntity<?> retrieveAllRoles(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit, HttpServletRequest request) {
         try {
@@ -72,7 +71,6 @@ public class RoleController {
         }
     }
 
-    @Transactional
     @GetMapping("/get-role-by-id/{roleIdString}")
     public ResponseEntity<?> retrieveGenderById(HttpServletRequest request, @PathVariable String roleIdString) {
         try {
@@ -95,4 +93,5 @@ public class RoleController {
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

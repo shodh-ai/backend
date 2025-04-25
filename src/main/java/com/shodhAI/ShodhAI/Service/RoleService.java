@@ -19,7 +19,7 @@ public class RoleService {
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Role> getAllRole() throws Exception {
         try {
 
@@ -32,7 +32,7 @@ public class RoleService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Role getRoleByName(String roleName) throws Exception {
         try {
             TypedQuery<Role> query = entityManager.createQuery(Constant.GET_ROLE_BY_NAME, Role.class);
@@ -45,7 +45,7 @@ public class RoleService {
     }
 
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Role getRoleById(Long roleId) throws Exception {
         try {
 
@@ -62,7 +62,7 @@ public class RoleService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public String findRoleNameById(Long roleId) throws Exception {
         try {
             String response = entityManager.createQuery(Constant.FETCH_ROLE_NAME_BY_ID, String.class)
@@ -81,7 +81,6 @@ public class RoleService {
             exceptionHandlingService.handleException(exception);
             throw new Exception(exception);
         }
-
     }
 
 }

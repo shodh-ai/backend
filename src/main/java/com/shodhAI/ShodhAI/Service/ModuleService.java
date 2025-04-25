@@ -91,6 +91,7 @@ public class ModuleService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Module getModuleById(Long moduleId) throws Exception {
         try {
 
@@ -107,7 +108,7 @@ public class ModuleService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Module> moduleFilter(Long moduleId, Long userId, Long roleId, Long courseId, Long academicDegreeId) throws Exception {
         try {
             StringBuilder jpql = new StringBuilder("SELECT DISTINCT m FROM Module m WHERE 1=1 ");

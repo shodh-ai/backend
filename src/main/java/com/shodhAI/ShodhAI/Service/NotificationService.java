@@ -1,10 +1,15 @@
 package com.shodhAI.ShodhAI.Service;
 
-import com.shodhAI.ShodhAI.Entity.*;
+import com.shodhAI.ShodhAI.Entity.Course;
+import com.shodhAI.ShodhAI.Entity.DeliveryStatus;
+import com.shodhAI.ShodhAI.Entity.Faculty;
+import com.shodhAI.ShodhAI.Entity.Notification;
+import com.shodhAI.ShodhAI.Entity.NotificationRecipient;
+import com.shodhAI.ShodhAI.Entity.NotificationType;
+import com.shodhAI.ShodhAI.Entity.Student;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -161,7 +168,7 @@ public class NotificationService {
     }
 
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Notification getNotificationWithRecipients(Long notificationId) {
         TypedQuery<Notification> query = entityManager.createQuery(
                 "SELECT n FROM Notification n LEFT JOIN FETCH n.recipients WHERE n.id = :id",
@@ -295,7 +302,7 @@ public class NotificationService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Map<String, Object> getNotificationsBySender(Long facultyId, int offset, int limit) {
         if (offset < 0) {
             throw new IllegalArgumentException("Offset cannot be a negative number");
@@ -342,7 +349,7 @@ public class NotificationService {
     }
 
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Map<String, Object> getNotificationsForStudent(Long studentId, int offset, int limit) {
         if (offset < 0) {
             throw new IllegalArgumentException("Offset cannot be a negative number");

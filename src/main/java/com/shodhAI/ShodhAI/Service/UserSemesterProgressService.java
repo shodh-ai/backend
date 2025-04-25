@@ -75,7 +75,7 @@ public class UserSemesterProgressService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<UserSemesterProgress> getUserSemesterProgressFilter(Long userSemesterProgressId, Long userId, Long roleId, Long semesterId) throws Exception {
         try {
 

@@ -60,7 +60,6 @@ public class TopicTypeController
         }
     }
 
-    @Transactional
     @GetMapping("/get-topic-type-by-id/{topicTypeIdString}")
     public ResponseEntity<?> retrieveTopicTypeById(HttpServletRequest request, @PathVariable String topicTypeIdString) {
         try {
@@ -180,4 +179,5 @@ public class TopicTypeController
             return ResponseService.generateErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
 }
