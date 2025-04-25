@@ -19,6 +19,7 @@ public class PriorityLevelService {
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
+    @Transactional(readOnly = true)
     public List<PriorityLevel> getAllPriorityLevels() throws Exception {
         try {
 
@@ -34,6 +35,7 @@ public class PriorityLevelService {
         }
     }
 
+    @Transactional(readOnly = true)
     public PriorityLevel getPriorityLevelById(Long priorityLevelId) throws Exception {
         try {
 

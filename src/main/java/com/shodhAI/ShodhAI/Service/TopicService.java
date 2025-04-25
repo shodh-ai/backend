@@ -113,6 +113,7 @@ public class TopicService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Topic getTopicById(Long topicId) throws Exception {
         try {
 
@@ -129,6 +130,7 @@ public class TopicService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<TopicType> getAllTopicTypes() throws Exception {
         try {
 
@@ -144,6 +146,7 @@ public class TopicService {
         }
     }
 
+    @Transactional(readOnly = true)
     public TopicType getTopicTypeById(Long topicTypeId) throws Exception {
         try {
 
@@ -160,6 +163,7 @@ public class TopicService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Topic> getParentTopicListByModuleId(Long moduleId) throws Exception {
         try {
 
@@ -178,6 +182,7 @@ public class TopicService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Topic> getSubTopic(Topic defaultParentTopic) throws Exception {
         try {
 

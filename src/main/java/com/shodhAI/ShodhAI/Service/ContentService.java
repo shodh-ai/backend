@@ -96,7 +96,7 @@ public class ContentService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Content> getContentByTopic(Topic topic) throws Exception {
         try {
 
@@ -113,6 +113,7 @@ public class ContentService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Content getContentById(Long contentId) throws Exception {
         try {
 
@@ -129,6 +130,7 @@ public class ContentService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Content> getContentByTopicId(Long topicId) throws Exception {
         try {
 
@@ -147,6 +149,7 @@ public class ContentService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ContentType> getAllContentTypes() throws Exception {
         try {
 
@@ -162,6 +165,7 @@ public class ContentService {
         }
     }
 
+    @Transactional(readOnly = true)
     public ContentType getContentTypeById(Long contentTypeId) throws Exception {
         try {
 

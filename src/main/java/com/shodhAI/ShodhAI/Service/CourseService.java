@@ -123,6 +123,7 @@ public class CourseService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Course> getAllCourse() throws Exception {
         try {
 
@@ -135,6 +136,7 @@ public class CourseService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Course getCourseById(Long courseId) throws Exception {
         try {
 
@@ -495,7 +497,7 @@ public class CourseService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Course> courseFilter(
             Long courseId,
             Long userId,
@@ -553,6 +555,7 @@ public class CourseService {
         }
     }
 
+    @Transactional(readOnly = true)
     public long findCourseDegreeSemesterCount() throws Exception {
         try {
             String queryString = "SELECT MAX(c.id) FROM CourseSemesterDegree c";
@@ -568,6 +571,8 @@ public class CourseService {
             throw new Exception("SOMETHING WENT WRONG: " + exception.getMessage());
         }
     }
+
+    @Transactional(readOnly = true)
     public long findCourseCount() throws Exception {
         try {
             String queryString = "SELECT MAX(c.id) FROM Course c";

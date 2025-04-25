@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class GenderService {
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
+    @Transactional(readOnly = true)
     public List<Gender> getAllGender() throws Exception {
         try {
 
@@ -30,6 +32,7 @@ public class GenderService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Gender getGenderById(Long genderId) throws Exception {
         try {
 
@@ -50,4 +53,5 @@ public class GenderService {
             throw new Exception(exception);
         }
     }
+
 }

@@ -75,7 +75,7 @@ public class UserSubTopicProgressService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<UserSubTopicProgress> getUserSubTopicProgressFilter(Long userSubTopicProgressId, Long userId, Long roleId, Long subTopicId) throws Exception {
         try {
 

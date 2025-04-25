@@ -92,6 +92,7 @@ public class CohortService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Cohort> getAllCohort() throws Exception {
         try {
 
@@ -104,6 +105,7 @@ public class CohortService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Cohort> filterCohorts(Long courseId) throws Exception {
         try{
             StringBuilder queryString = new StringBuilder("SELECT c FROM Cohort c WHERE 1 = 1 AND c.archived != 'Y'");
@@ -130,6 +132,7 @@ public class CohortService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Cohort getCohortById(Long cohortId) throws Exception {
         try {
 

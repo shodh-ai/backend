@@ -22,6 +22,7 @@ public class NotificationTypeService
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
+    @Transactional(readOnly = true)
     public NotificationType getNotificationTypeById(Long notificationTypeId) throws Exception {
         try {
 
@@ -139,7 +140,7 @@ public class NotificationTypeService
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<NotificationType> notificationTypeFilter() throws Exception {
         try {
             String jpql = "SELECT f FROM NotificationType f WHERE f.archived = 'N' ORDER BY f.id ASC";

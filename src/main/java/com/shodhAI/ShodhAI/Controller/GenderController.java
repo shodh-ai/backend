@@ -30,7 +30,6 @@ public class GenderController {
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
-    @Transactional
     @GetMapping("/get-all")
     public ResponseEntity<?> retrieveAllGenders(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit, HttpServletRequest request) {
         try {
@@ -73,7 +72,6 @@ public class GenderController {
         }
     }
 
-    @Transactional
     @GetMapping("/get-gender-by-id/{genderIdString}")
     public ResponseEntity<?> retrieveGenderById(HttpServletRequest request, @PathVariable String genderIdString) {
         try {
@@ -96,4 +94,5 @@ public class GenderController {
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

@@ -84,7 +84,7 @@ public class ConversationService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Conversation> conversationFilter(Long sessionId, Long userId, Long roleId) throws Exception {
         try {
 
