@@ -84,6 +84,7 @@ public class AcademicDegreeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<AcademicDegree> getAllAcademicDegree() throws Exception {
         try {
 
@@ -96,6 +97,7 @@ public class AcademicDegreeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public AcademicDegree getAcademicDegreeById(Long degreeId) throws Exception {
         try {
 
@@ -186,7 +188,7 @@ public class AcademicDegreeService {
 
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<AcademicDegree> academicDegreeFilter(Long academicDegreeId, Long userId, Long roleId) throws Exception {
         try {
             StringBuilder jpql = new StringBuilder("SELECT DISTINCT s FROM AcademicDegree s ");

@@ -23,6 +23,7 @@ public class QuestionTypeService {
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
+    @Transactional(readOnly = true)
     public List<QuestionType> getAllQuestionTypes() throws Exception {
         try {
 
@@ -38,6 +39,7 @@ public class QuestionTypeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public QuestionType getQuestionTypeById(Long questionTypeId) throws Exception {
         try {
 
@@ -53,6 +55,7 @@ public class QuestionTypeService {
             throw new Exception(exception);
         }
     }
+
     @Transactional
     public QuestionType addQuestionType(QuestionType questionType) throws Exception {
         try
@@ -144,7 +147,7 @@ public class QuestionTypeService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<QuestionType> questionTypeFilter() throws Exception {
         try {
             String jpql = "SELECT f FROM QuestionType f WHERE f.archived = 'N' ORDER BY f.questionTypeId ASC";
@@ -158,6 +161,5 @@ public class QuestionTypeService {
             throw new Exception(exception.getMessage());
         }
     }
-
 
 }

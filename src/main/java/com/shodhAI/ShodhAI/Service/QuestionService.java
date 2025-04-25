@@ -122,7 +122,7 @@ public class QuestionService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Question> getQuestionByTopic(Topic topic) throws Exception {
         try {
 
@@ -138,7 +138,6 @@ public class QuestionService {
             throw new Exception(exception);
         }
     }
-
 
     public void validateAssignmentQuestionByTopic(Topic topic) throws Exception {
         try {
@@ -223,7 +222,7 @@ public class QuestionService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Question> questionFilter(Topic topic, Long questionTypeId) throws Exception {
         try {
 

@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -39,7 +38,6 @@ public class ContentTypeController {
     @Autowired
     SanitizerService sanitizerService;
 
-    @Transactional
     @GetMapping("/get-all")
     public ResponseEntity<?> retrieveAllContentType(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit, HttpServletRequest request) {
         try {
@@ -81,7 +79,6 @@ public class ContentTypeController {
         }
     }
 
-    @Transactional
     @GetMapping("/get-content-type-by-id/{contentTypeIdString}")
     public ResponseEntity<?> retrieveContentTypeById(HttpServletRequest request, @PathVariable String contentTypeIdString) {
         try {
@@ -210,4 +207,5 @@ public class ContentTypeController {
             return ResponseService.generateErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
 }

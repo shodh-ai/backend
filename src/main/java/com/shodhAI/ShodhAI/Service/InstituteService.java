@@ -134,6 +134,7 @@ public class InstituteService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Institute getInstituteById(Long instituteId) throws Exception {
         try {
 
@@ -150,7 +151,7 @@ public class InstituteService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Institute> filterInstitute(Long instituteId, String institutionName) throws Exception {
         try {
             StringBuilder jpql = new StringBuilder("SELECT DISTINCT i FROM Institute i WHERE 1=1 ");

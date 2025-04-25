@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DeliveryStatusService
@@ -16,6 +17,7 @@ public class DeliveryStatusService
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
+    @Transactional(readOnly = true)
     public DeliveryStatus getDeliveryStatusById(Long deliveryStatusId) throws Exception {
         try {
 

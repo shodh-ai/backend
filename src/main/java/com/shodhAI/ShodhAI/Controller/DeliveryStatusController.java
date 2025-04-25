@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +27,6 @@ public class DeliveryStatusController
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
-    @Transactional
     @GetMapping("/get-delivery-status-by-id/{deliveryStatusIdString}")
     public ResponseEntity<?> retrieveDeliveryStatusById(HttpServletRequest request, @PathVariable String deliveryStatusIdString) {
         try {
@@ -51,5 +49,6 @@ public class DeliveryStatusController
             return ResponseService.generateErrorResponse("Exception Caught: " + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }
 

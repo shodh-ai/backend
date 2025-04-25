@@ -1,7 +1,6 @@
 package com.shodhAI.ShodhAI.Controller;
 
 import com.shodhAI.ShodhAI.Entity.NotificationType;
-import com.shodhAI.ShodhAI.Entity.NotificationType;
 import com.shodhAI.ShodhAI.Service.NotificationTypeService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ResponseService;
@@ -10,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -39,7 +37,6 @@ public class NotificationTypeController
     @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
-    @Transactional
     @GetMapping("/get-notification-type-by-id/{notificationTypeIdString}")
     public ResponseEntity<?> retrieveNotificationTypeById(HttpServletRequest request, @PathVariable String notificationTypeIdString) {
         try {
@@ -176,4 +173,5 @@ public class NotificationTypeController
             return ResponseService.generateErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
 }

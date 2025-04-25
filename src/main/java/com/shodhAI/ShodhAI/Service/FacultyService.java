@@ -17,8 +17,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,25 +35,9 @@ public class FacultyService {
     RoleService roleService;
 
     @Autowired
-    CourseService courseService;
-
-    @Autowired
-    AcademicDegreeService academicDegreeService;
-
-    @Autowired
     ExceptionHandlingService exceptionHandlingService;
 
-    @Autowired
-    AccuracyService accuracyService;
-
-    @Autowired
-    CriticalThinkingService criticalThinkingService;
-
-    @Autowired
-    TimeSpentService timeSpentService;
-
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
 
     public void validateFaculty(FacultyDto facultyDto) throws Exception {
         try {
@@ -174,6 +156,7 @@ public class FacultyService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Faculty> getAllFaculty() throws Exception {
         try {
 
@@ -186,6 +169,7 @@ public class FacultyService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Faculty getFacultyById(Long studentId) throws Exception {
         try {
 
@@ -202,6 +186,7 @@ public class FacultyService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Faculty retrieveFacultyByUsername(String username) {
 
         // Execute the query using JdbcTemplate
@@ -351,9 +336,9 @@ public class FacultyService {
             exceptionHandlingService.handleException(exception);
             throw new Exception(exception.getMessage());
         }
-
     }
 
+    @Transactional(readOnly = true)
     public List<Faculty> filterFaculties(String username, Long facultyId, String personalEmail) throws Exception {
         try
         {
@@ -396,4 +381,5 @@ public class FacultyService {
             throw new Exception(exception.getMessage());
         }
     }
+
 }
