@@ -114,8 +114,8 @@ public class TopicTypeController
 
             sanitizerService.sanitizeInputMap(List.of(topicType));
             Long topicTypeId = Long.parseLong(topicTypeIdString);
-            topicTypeService.getTopicTypeById(topicTypeId);
-            if (topicType == null) {
+            TopicType topicTypeToUpdate=topicTypeService.getTopicTypeById(topicTypeId);
+            if (topicTypeToUpdate == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
             TopicType updatedTopic= topicTypeService.updateTopicType(topicTypeId,topicType);

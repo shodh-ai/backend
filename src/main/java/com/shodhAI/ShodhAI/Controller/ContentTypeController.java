@@ -143,8 +143,9 @@ public class ContentTypeController {
 
             sanitizerService.sanitizeInputMap(List.of(contentType));
             Long contentTypeId = Long.parseLong(contentTypeIdString);
-            contentTypeService.getContentTypeById(contentTypeId);
-            if (contentType == null) {
+            ContentType existingContentType = contentTypeService.getContentTypeById(contentTypeId);
+
+            if (existingContentType == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
             ContentType updatedContent = contentTypeService.updateContentType(contentTypeId, contentType);

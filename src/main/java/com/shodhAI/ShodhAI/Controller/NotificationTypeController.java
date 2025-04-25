@@ -108,8 +108,8 @@ public class NotificationTypeController
     {
         try {
             Long notificationTypeId = Long.parseLong(notificationTypeIdString);
-            notificationTypeService.getNotificationTypeById(notificationTypeId);
-            if (notificationType == null) {
+            NotificationType notificationTypeToUpdate=notificationTypeService.getNotificationTypeById(notificationTypeId);
+            if (notificationTypeToUpdate == null) {
                 return ResponseService.generateErrorResponse("Data not present in the DB", HttpStatus.OK);
             }
             NotificationType updatedNotification= notificationTypeService.updateNotificationType(notificationTypeId,notificationType);
