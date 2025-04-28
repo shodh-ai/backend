@@ -13,7 +13,6 @@ import com.shodhAI.ShodhAI.Service.StudentService;
 import com.shodhAI.ShodhAI.Service.TimeSpentService;
 import com.shodhAI.ShodhAI.Service.UnderstandingService;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,9 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.*;
 
@@ -132,9 +129,9 @@ public class StudentServiceTest {
         understanding.setUnderstandingImprovementFlag(true);
 
         memory = new Memory();
-        memory.setCriticalThinking(1D);
-        memory.setCriticalThinkingImprovement(1D);
-        memory.setCriticalThinkingImprovementFlag(true);
+        memory.setMemory(1D);
+        memory.setMemoryImprovement(1D);
+        memory.setMemoryImprovementFlag(true);
 
         student = new Student();
         student.setId(1L);

@@ -3,6 +3,7 @@ package com.shodhAI.ShodhAI.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shodhAI.ShodhAI.Controller.TopicTypeController;
 import com.shodhAI.ShodhAI.Entity.TopicType;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import com.shodhAI.ShodhAI.Service.TopicTypeService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.RoleService;
@@ -45,6 +46,9 @@ public class TopicTypeControllerTests {
 
     @MockBean
     private TopicTypeService topicTypeService;
+
+    @MockBean
+    private SanitizerService sanitizerService;
 
     @MockBean
     private EntityManager entityManager;

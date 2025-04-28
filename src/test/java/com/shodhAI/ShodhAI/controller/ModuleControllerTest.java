@@ -8,6 +8,7 @@ import com.shodhAI.ShodhAI.Entity.Module;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.ModuleService;
 import com.shodhAI.ShodhAI.Service.RoleService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import com.shodhAI.ShodhAI.Service.StudentService;
 import com.shodhAI.ShodhAI.configuration.TestJwtConfig;
 import com.shodhAI.ShodhAI.configuration.TestSecurityConfig;
@@ -46,6 +47,9 @@ public class ModuleControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private SanitizerService sanitizerService;
 
     @MockBean
     private ModuleService moduleService;

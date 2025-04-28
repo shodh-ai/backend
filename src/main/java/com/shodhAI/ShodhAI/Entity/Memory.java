@@ -11,11 +11,13 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+@Builder
 @Entity
 @Table(name = "memory")
 @Data
@@ -33,15 +35,15 @@ public class Memory {
     @JsonProperty("memory")
     @Min(value = 0, message = "Memory must be at least 0.0")
     @Max(value = 100, message = "Memory must not exceed 100.0")
-    private Double criticalThinking = 100.0;
+    private Double memory = 100.0;
 
     @Column(name = "memory_improvement_flag")
     @JsonProperty("memory_improvement_flag")
-    private Boolean criticalThinkingImprovementFlag;
+    private Boolean memoryImprovementFlag;
 
     @Column(name = "memory_improvement")
     @JsonProperty("memory_improvement")
-    private Double criticalThinkingImprovement = 0.0;
+    private Double memoryImprovement = 0.0;
 
     @Column(name = "created_date")
     @JsonProperty("created_date")
