@@ -6,6 +6,7 @@ import com.shodhAI.ShodhAI.Entity.FileType;
 import com.shodhAI.ShodhAI.Service.FileTypeService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.RoleService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import com.shodhAI.ShodhAI.Service.StudentService;
 import com.shodhAI.ShodhAI.configuration.TestJwtConfig;
 import com.shodhAI.ShodhAI.configuration.TestSecurityConfig;
@@ -42,6 +43,9 @@ public class FileTypeControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private SanitizerService sanitizerService;
 
     @MockBean
     private FileTypeService fileTypeService;
