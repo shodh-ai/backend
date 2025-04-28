@@ -6,6 +6,7 @@ import com.shodhAI.ShodhAI.Entity.PriorityLevel;
 import com.shodhAI.ShodhAI.Service.PriorityLevelService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.RoleService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import com.shodhAI.ShodhAI.Service.StudentService;
 import com.shodhAI.ShodhAI.configuration.TestJwtConfig;
 import com.shodhAI.ShodhAI.configuration.TestSecurityConfig;
@@ -42,6 +43,9 @@ public class PriorityLevelControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private SanitizerService sanitizerService;
 
     @MockBean
     private PriorityLevelService priorityLevelService;

@@ -6,6 +6,7 @@ import com.shodhAI.ShodhAI.Entity.NotificationType;
 import com.shodhAI.ShodhAI.Service.NotificationTypeService;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.RoleService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import com.shodhAI.ShodhAI.Service.StudentService;
 import com.shodhAI.ShodhAI.configuration.TestJwtConfig;
 import com.shodhAI.ShodhAI.configuration.TestSecurityConfig;
@@ -42,6 +43,9 @@ public class NotificationTypeControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private SanitizerService sanitizerService;
 
     @MockBean
     private NotificationTypeService notificationTypeService;
