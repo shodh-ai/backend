@@ -7,6 +7,7 @@ import com.shodhAI.ShodhAI.Dto.SemesterDto;
 import com.shodhAI.ShodhAI.Entity.Semester;
 import com.shodhAI.ShodhAI.Service.ExceptionHandlingService;
 import com.shodhAI.ShodhAI.Service.RoleService;
+import com.shodhAI.ShodhAI.Service.SanitizerService;
 import com.shodhAI.ShodhAI.Service.SemesterService;
 import com.shodhAI.ShodhAI.Service.StudentService;
 import com.shodhAI.ShodhAI.configuration.TestJwtConfig;
@@ -48,6 +49,8 @@ public class SemesterControllerTest {
     private MockMvc mockMvc;
     @MockBean
     private RoleService roleService;
+    @MockBean
+    private SanitizerService sanitizerService;
 
     @MockBean
     private StudentService studentService;
